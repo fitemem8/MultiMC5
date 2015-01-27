@@ -21,8 +21,6 @@
 
 #include "logic/forge/ForgeVersionList.h"
 
-#include "logic/news/NewsChecker.h"
-
 #include "logic/status/StatusChecker.h"
 
 #include "logic/net/HttpMetaCache.h"
@@ -200,9 +198,6 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 
 	// initialize the notification checker
 	m_notificationChecker.reset(new NotificationChecker());
-
-	// initialize the news checker
-	m_newsChecker.reset(new NewsChecker(BuildConfig.NEWS_RSS_URL));
 
 	// initialize the status checker
 	m_statusChecker.reset(new StatusChecker());

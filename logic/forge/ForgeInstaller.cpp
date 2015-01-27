@@ -21,7 +21,6 @@
 #include "logic/OneSixInstance.h"
 #include "logic/forge/ForgeVersionList.h"
 #include "logic/minecraft/VersionFilterData.h"
-#include "gui/dialogs/ProgressDialog.h"
 
 #include <quazip.h>
 #include <quazipfile.h>

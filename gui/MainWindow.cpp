@@ -403,6 +403,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 
+	// initialize the news checker
+	m_newsChecker.reset(new NewsChecker(BuildConfig.NEWS_RSS_URL));
+
 	QString winTitle =
 		QString("MultiMC 5 - Version %1").arg(BuildConfig.printableVersionString());
 	if (!BuildConfig.BUILD_PLATFORM.isEmpty())
@@ -443,7 +446,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		ui->newsToolBar->insertWidget(ui->actionMoreNews, newsLabel);
 		QObject::connect(newsLabel, &QAbstractButton::clicked, this,
 						 &MainWindow::newsButtonClicked);
-		QObject::connect(MMC->newsChecker().get(), &NewsChecker::newsLoaded, this,
+		QObject::connect(m_newsChecker.get(), &NewsChecker::newsLoaded, this,
 						 &MainWindow::updateNewsLabel);
 		updateNewsLabel();
 	}
@@ -606,7 +609,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 			MMC->lwjgllist()->loadList();
 		}
 
-		MMC->newsChecker()->reloadNews();
+		m_newsChecker->reloadNews();
 		updateNewsLabel();
 
 		// set up the updater object.
@@ -888,15 +891,14 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
 
 void MainWindow::updateNewsLabel()
 {
-	auto newsChecker = MMC->newsChecker();
-	if (newsChecker->isLoadingNews())
+	if (m_newsChecker->isLoadingNews())
 	{
 		newsLabel->setText(tr("Loading news..."));
 		newsLabel->setEnabled(false);
 	}
 	else
 	{
-		QList<NewsEntryPtr> entries = newsChecker->getNewsEntries();
+		QList<NewsEntryPtr> entries = m_newsChecker->getNewsEntries();
 		if (entries.length() > 0)
 		{
 			newsLabel->setText(entries[0]->title);
@@ -1423,7 +1425,7 @@ void MainWindow::on_actionMoreNews_triggered()
 
 void MainWindow::newsButtonClicked()
 {
-	QList<NewsEntryPtr> entries = MMC->newsChecker()->getNewsEntries();
+	QList<NewsEntryPtr> entries = m_newsChecker->getNewsEntries();
 	if (entries.count() > 0)
 		openWebPage(QUrl(entries[0]->link));
 	else

@@ -19,7 +19,6 @@
 #include <QAbstractListModel>
 #include <QSet>
 #include <gui/groupview/GroupedProxyModel.h>
-#include <QIcon>
 
 #include "logic/BaseInstance.h"
 

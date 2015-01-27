@@ -24,6 +24,7 @@
 #include "logic/auth/MojangAccount.h"
 #include "logic/net/NetJob.h"
 
+class NewsChecker;
 class QToolButton;
 class LabeledToolButton;
 class QLabel;
@@ -199,6 +200,7 @@ private:
 	QToolButton *newsLabel;
 
 	std::shared_ptr<GenericPageProvider> m_globalSettingsProvider;
+	std::shared_ptr<NewsChecker> m_newsChecker;
 
 	InstancePtr m_selectedInstance;
 	QString m_currentInstIcon;
