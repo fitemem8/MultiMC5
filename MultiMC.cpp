@@ -243,6 +243,7 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 	// init proxy settings
 	updateProxySettings();
 
+	//FIXME: what to do with these?
 	m_profilers.insert("jprofiler",
 					   std::shared_ptr<BaseProfilerFactory>(new JProfilerFactory()));
 	m_profilers.insert("jvisualvm",
@@ -251,6 +252,8 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 	{
 		profiler->registerSettings(m_settings);
 	}
+
+	//FIXME: what to do with these?
 	m_tools.insert("mcedit", std::shared_ptr<BaseDetachedToolFactory>(new MCEditFactory()));
 	for (auto tool : m_tools.values())
 	{

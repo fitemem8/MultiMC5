@@ -55,7 +55,7 @@ private:
 	QSet<FTBRecord> discoverFTBInstances();
 	void loadFTBInstances(QMap<QString, QString> &groupMap, QList<InstancePtr> & tempList);
 
-private
+public
 slots:
 	void saveGroupList();
 

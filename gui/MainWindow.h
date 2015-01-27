@@ -182,6 +182,11 @@ protected:
 
 	void setSelectedInstanceById(const QString &id);
 
+	void waitForMinecraftVersions();
+	void instanceFromVersion(QString instName, QString instGroup, QString instIcon, BaseVersionPtr version);
+	void instanceFromZipPack(QString instName, QString instGroup, QString instIcon, QUrl url);
+	void finalizeInstance(InstancePtr inst);
+
 private:
 	Ui::MainWindow *ui;
 	class GroupView *view;
