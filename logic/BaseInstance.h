@@ -130,7 +130,7 @@ public:
 	 * \brief Gets a pointer to this instance's version list.
 	 * \return A pointer to the available version list for this instance.
 	 */
-	virtual std::shared_ptr<BaseVersionList> versionList() const;
+	virtual std::shared_ptr<BaseVersionList> versionList() const = 0;
 
 	/*!
 	 * \brief Gets this instance's settings object.

@@ -605,8 +605,6 @@ SET(MULTIMC_SOURCES
 	logic/java/JavaCheckerJob.cpp
 
 	# Assets
-	logic/assets/AssetsMigrateTask.h
-	logic/assets/AssetsMigrateTask.cpp
 	logic/assets/AssetsUtils.h
 	logic/assets/AssetsUtils.cpp
 

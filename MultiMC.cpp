@@ -208,7 +208,7 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 	auto InstDirSetting = m_settings->getSetting("InstanceDir");
 	// instance path: check for problems with '!' in instance path and warn the user in the log
 	// and rememer that we have to show him a dialog when the gui starts (if it does so)
-	QString instDir = MMC->settings()->get("InstanceDir").toString();
+	QString instDir = m_settings->get("InstanceDir").toString();
 	QLOG_INFO() << "Instance path              : " << instDir;
 	if (checkProblemticPathJava(QDir(instDir)))
 	{
@@ -294,8 +294,7 @@ void MultiMC::initTranslations()
 	}
 
 	m_mmc_translator.reset(new QTranslator());
-	if (m_mmc_translator->load("mmc_" + locale.bcp47Name(),
-							   MMC->staticData() + "/translations"))
+	if (m_mmc_translator->load("mmc_" + locale.bcp47Name(), staticData() + "/translations"))
 	{
 		QLOG_DEBUG() << "Loading MMC Language File for"
 					 << locale.bcp47Name().toLocal8Bit().constData() << "...";
@@ -699,13 +698,13 @@ void MultiMC::installUpdates(const QString updateFilesDir, UpdateFlags flags)
 	}
 	QLOG_INFO() << "Installing updates.";
 #ifdef WINDOWS
-	QString finishCmd = MMC->applicationFilePath();
+	QString finishCmd = applicationFilePath();
 	QString updaterBinary = PathCombine(bin(), "updater.exe");
 #elif LINUX
 	QString finishCmd = PathCombine(root(), "MultiMC");
 	QString updaterBinary = PathCombine(bin(), "updater");
 #elif OSX
-	QString finishCmd = MMC->applicationFilePath();
+	QString finishCmd = applicationFilePath();
 	QString updaterBinary = PathCombine(bin(), "updater");
 #else
 #error Unsupported operating system.
@@ -717,7 +716,7 @@ void MultiMC::installUpdates(const QString updateFilesDir, UpdateFlags flags)
 	args << "--install-dir" << root();
 	args << "--package-dir" << updateFilesDir;
 	args << "--script" << PathCombine(updateFilesDir, "file_list.xml");
-	args << "--wait" << QString::number(MMC->applicationPid());
+	args << "--wait" << QString::number(applicationPid());
 	if (flags & DryRun)
 		args << "--dry-run";
 	if (flags & RestartOnFinish)
@@ -735,7 +734,7 @@ void MultiMC::installUpdates(const QString updateFilesDir, UpdateFlags flags)
 	}
 
 	// Now that we've started the updater, quit MultiMC.
-	MMC->quit();
+	quit();
 }
 
 void MultiMC::setIconTheme(const QString& name)

@@ -1869,32 +1869,6 @@ void MainWindow::instanceEnded()
 	this->show();
 }
 
-void MainWindow::checkMigrateLegacyAssets()
-{
-	int legacyAssets = AssetsUtils::findLegacyAssets();
-	if (legacyAssets > 0)
-	{
-		ProgressDialog migrateDlg(this);
-		AssetsMigrateTask migrateTask(legacyAssets, &migrateDlg);
-		{
-			ThreadTask threadTask(&migrateTask);
-
-			if (migrateDlg.exec(&threadTask))
-			{
-				QLOG_INFO() << "Assets migration task completed successfully";
-			}
-			else
-			{
-				QLOG_INFO() << "Assets migration task reported failure";
-			}
-		}
-	}
-	else
-	{
-		QLOG_INFO() << "Didn't find any legacy assets to migrate";
-	}
-}
-
 void MainWindow::checkSetDefaultJava()
 {
 	const QString javaHack = "IntelHack";

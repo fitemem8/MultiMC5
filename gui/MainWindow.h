@@ -52,7 +52,6 @@ public:
 	void openWebPage(QUrl url);
 
 	void checkSetDefaultJava();
-	void checkMigrateLegacyAssets();
 	void checkInstancePathForProblems();
 
 private

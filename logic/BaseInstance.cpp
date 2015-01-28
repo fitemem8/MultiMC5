@@ -119,11 +119,6 @@ InstancePtr BaseInstance::getSharedPtr()
 	return shared_from_this();
 }
 
-std::shared_ptr<BaseVersionList> BaseInstance::versionList() const
-{
-	return MMC->minecraftlist();
-}
-
 SettingsObject &BaseInstance::settings() const
 {
 	return *m_settings;

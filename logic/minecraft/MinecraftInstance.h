@@ -24,7 +24,7 @@ public:
 	{
 		return QList<Mod>();
 	}
-
+	virtual std::shared_ptr< BaseVersionList > versionList() const;
 };
 
 typedef std::shared_ptr<MinecraftInstance> MinecraftInstancePtr;

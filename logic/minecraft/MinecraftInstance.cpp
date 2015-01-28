@@ -2,6 +2,7 @@
 #include "MultiMC.h"
 #include "logic/settings/SettingsObject.h"
 #include <pathutils.h>
+#include "logic/minecraft/MinecraftVersionList.h"
 
 MinecraftInstance::MinecraftInstance(const QString &rootDir, SettingsObject *settings, QObject *parent)
 	: BaseInstance(rootDir, settings, parent)
@@ -48,5 +49,10 @@ QString MinecraftInstance::minecraftRoot() const
 		return dotMCDir.filePath();
 	else
 		return mcDir.filePath();
+}
+
+std::shared_ptr< BaseVersionList > MinecraftInstance::versionList() const
+{
+	return std::dynamic_pointer_cast<BaseVersionList>(MMC->minecraftlist());
 }
 
