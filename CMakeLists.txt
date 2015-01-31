@@ -556,12 +556,6 @@ SET(MULTIMC_SOURCES
 	logic/LwjglVersionList.h
 	logic/LwjglVersionList.cpp
 
-	# FTB
-	logic/ftb/OneSixFTBInstance.h
-	logic/ftb/OneSixFTBInstance.cpp
-	logic/ftb/LegacyFTBInstance.h
-	logic/ftb/LegacyFTBInstance.cpp
-
 	# the screenshots feature
 	logic/screenshots/Screenshot.h
 	logic/screenshots/ImgurUpload.h
