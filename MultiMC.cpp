@@ -29,10 +29,6 @@
 
 #include "logic/updater/UpdateChecker.h"
 
-#include "logic/tools/JProfiler.h"
-#include "logic/tools/JVisualVM.h"
-#include "logic/tools/MCEditTool.h"
-
 #include "pathutils.h"
 #include "cmdutils.h"
 #include <xdgicon.h>
@@ -233,23 +229,6 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 
 	m_translationChecker->downloadTranslations();
 
-	//FIXME: what to do with these?
-	m_profilers.insert("jprofiler",
-					   std::shared_ptr<BaseProfilerFactory>(new JProfilerFactory()));
-	m_profilers.insert("jvisualvm",
-					   std::shared_ptr<BaseProfilerFactory>(new JVisualVMFactory()));
-	for (auto profiler : m_profilers.values())
-	{
-		profiler->registerSettings(m_settings);
-	}
-
-	//FIXME: what to do with these?
-	m_tools.insert("mcedit", std::shared_ptr<BaseDetachedToolFactory>(new MCEditFactory()));
-	for (auto tool : m_tools.values())
-	{
-		tool->registerSettings(m_settings);
-	}
-
 	connect(this, SIGNAL(aboutToQuit()), SLOT(onExit()));
 	m_status = MultiMC::Initialized;
 }
@@ -381,9 +360,6 @@ void MultiMC::initGlobalSettings(bool test_mode)
 	m_settings->registerSetting({"CentralModsDir", "ModsDir"}, "mods");
 	m_settings->registerSetting({"LWJGLDir", "LwjglDir"}, "lwjgl");
 	m_settings->registerSetting("IconsDir", "icons");
-
-	// Editors
-	m_settings->registerSetting("JsonEditor", QString());
 
 	// Language
 	m_settings->registerSetting("Language", QLocale(QLocale::system().language()).bcp47Name());
@@ -578,20 +554,6 @@ void MultiMC::onExit()
 		installUpdates(m_updateOnExitPath, m_updateOnExitFlags);
 	}
 	ENV.destroy();
-}
-
-bool MultiMC::openJsonEditor(const QString &filename)
-{
-	const QString file = QDir::current().absoluteFilePath(filename);
-	if (m_settings->get("JsonEditor").toString().isEmpty())
-	{
-		return QDesktopServices::openUrl(QUrl::fromLocalFile(file));
-	}
-	else
-	{
-		return QProcess::startDetached(m_settings->get("JsonEditor").toString(), QStringList()
-																					 << file);
-	}
 }
 
 #include "MultiMC.moc"

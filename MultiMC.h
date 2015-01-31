@@ -19,8 +19,6 @@ class ForgeVersionList;
 class LiteLoaderVersionList;
 class JavaVersionList;
 class UpdateChecker;
-class BaseProfilerFactory;
-class BaseDetachedToolFactory;
 class TranslationDownloader;
 
 #if defined(MMC)
@@ -108,25 +106,7 @@ public:
 	}
 
 	// APPLICATION ONLY
-	QMap<QString, std::shared_ptr<BaseProfilerFactory>> profilers()
-	{
-		return m_profilers;
-	}
-
-	// APPLICATION ONLY
-	QMap<QString, std::shared_ptr<BaseDetachedToolFactory>> tools()
-	{
-		return m_tools;
-	}
-
-	// APPLICATION ONLY
 	void installUpdates(const QString updateFilesDir, UpdateFlags flags = None);
-
-	/*!
-	 * Opens a json file using either a system default editor, or, if note empty, the editor
-	 * specified in the settings
-	 */
-	bool openJsonEditor(const QString &filename);
 
 protected: /* to be removed! */
 	// FIXME: remove. used by MultiMCPage to enumerate translations.
@@ -173,9 +153,6 @@ private:
 	std::shared_ptr<MinecraftVersionList> m_minecraftlist;
 	std::shared_ptr<JavaVersionList> m_javalist;
 	std::shared_ptr<TranslationDownloader> m_translationChecker;
-
-	QMap<QString, std::shared_ptr<BaseProfilerFactory>> m_profilers;
-	QMap<QString, std::shared_ptr<BaseDetachedToolFactory>> m_tools;
 
 	QsLogging::DestinationPtr m_fileDestination;
 	QsLogging::DestinationPtr m_debugDestination;

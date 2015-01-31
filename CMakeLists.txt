@@ -316,8 +316,6 @@ SET(MULTIMC_SOURCES
 	# GUI - global settings pages
 	gui/pages/global/AccountListPage.cpp
 	gui/pages/global/AccountListPage.h
-	gui/pages/global/ExternalToolsPage.cpp
-	gui/pages/global/ExternalToolsPage.h
 	gui/pages/global/JavaPage.cpp
 	gui/pages/global/JavaPage.h
 	gui/pages/global/MinecraftPage.cpp
@@ -604,18 +602,6 @@ SET(MULTIMC_SOURCES
 	logic/assets/AssetsUtils.h
 	logic/assets/AssetsUtils.cpp
 
-	# Tools
-	logic/tools/BaseExternalTool.h
-	logic/tools/BaseExternalTool.cpp
-	logic/tools/MCEditTool.h
-	logic/tools/MCEditTool.cpp
-	logic/tools/BaseProfiler.h
-	logic/tools/BaseProfiler.cpp
-	logic/tools/JProfiler.h
-	logic/tools/JProfiler.cpp
-	logic/tools/JVisualVM.h
-	logic/tools/JVisualVM.cpp
-
 	# Forge and all things forge related
 	logic/forge/ForgeVersion.h
 	logic/forge/ForgeVersion.cpp
@@ -658,7 +644,6 @@ SET(MULTIMC_UIS
 
 	# Global settings pages
 	gui/pages/global/AccountListPage.ui
-	gui/pages/global/ExternalToolsPage.ui
 	gui/pages/global/JavaPage.ui
 	gui/pages/global/MinecraftPage.ui
 	gui/pages/global/MultiMCPage.ui

@@ -31,7 +31,6 @@ class LabeledToolButton;
 class QLabel;
 class MinecraftProcess;
 class ConsoleWindow;
-class BaseProfilerFactory;
 class GenericPageProvider;
 
 namespace Ui
@@ -119,18 +118,18 @@ slots:
 	 * Launches the currently selected instance with the default account.
 	 * If no default account is selected, prompts the user to pick an account.
 	 */
-	void doLaunch(bool online = true, BaseProfilerFactory *profiler = 0);
+	void doLaunch(bool online = true);
 
 	/*!
 	 * Launches the given instance with the given account.
 	 * This function assumes that the given account has a valid, usable access token.
 	 */
-	void launchInstance(InstancePtr instance, AuthSessionPtr session, BaseProfilerFactory *profiler = 0);
+	void launchInstance(InstancePtr instance, AuthSessionPtr session);
 
 	/*!
 	 * Prepares the given instance for launch with the given account.
 	 */
-	void updateInstance(InstancePtr instance, AuthSessionPtr account, BaseProfilerFactory *profiler = 0);
+	void updateInstance(InstancePtr instance, AuthSessionPtr account);
 
 	void onGameUpdateError(QString error);
 
@@ -143,8 +142,6 @@ slots:
 	void iconUpdated(QString);
 
 	void showInstanceContextMenu(const QPoint &);
-
-	void updateToolsMenu();
 
     void skinJobFinished();
 public
