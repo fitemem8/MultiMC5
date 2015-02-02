@@ -1,5 +1,4 @@
 #include "AssetsMigrateTask.h"
-#include "MultiMC.h"
 #include "logger/QsLog.h"
 #include <QJsonObject>
 #include <QJsonDocument>

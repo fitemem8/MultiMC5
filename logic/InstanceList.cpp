@@ -26,7 +26,6 @@
 #include <QRegularExpression>
 #include <pathutils.h>
 
-#include "MultiMC.h"
 #include "logic/InstanceList.h"
 #include "logic/icons/IconList.h"
 #include "logic/minecraft/MinecraftVersionList.h"
