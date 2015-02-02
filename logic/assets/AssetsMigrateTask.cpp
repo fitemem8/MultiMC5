@@ -1,5 +1,5 @@
 #include "AssetsMigrateTask.h"
-#include "logger/QsLog.h"
+#include <QDebug>
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QDirIterator>
@@ -58,7 +58,7 @@ void AssetsMigrateTask::executeTask()
 					.constData();
 
 			QString object_name = filename.remove(0, base_length + 1);
-			QLOG_DEBUG() << "Processing" << object_name << ":" << sha1sum << input.size();
+			qDebug() << "Processing" << object_name << ":" << sha1sum << input.size();
 
 			QString object_tlk = sha1sum.left(2);
 			QString object_tlk_dir = objects_dir.path() + "/" + object_tlk;
@@ -72,7 +72,7 @@ void AssetsMigrateTask::executeTask()
 			if (!new_object.exists())
 			{
 				bool rename_success = input.rename(new_filename);
-				QLOG_DEBUG() << " Doesn't exist, copying to" << new_filename << ":"
+				qDebug() << " Doesn't exist, copying to" << new_filename << ":"
 							 << QString::number(rename_success);
 				if (rename_success)
 					successes++;
@@ -82,7 +82,7 @@ void AssetsMigrateTask::executeTask()
 			else
 			{
 				input.remove();
-				QLOG_DEBUG() << " Already exists, deleting original and not copying.";
+				qDebug() << " Already exists, deleting original and not copying.";
 			}
 
 			this->setProgress(100 * ((successes + failures) / (float) this->m_expected));
@@ -92,11 +92,11 @@ void AssetsMigrateTask::executeTask()
 	if (successes + failures == 0)
 	{
 		this->setProgress(100);
-		QLOG_DEBUG() << "No legacy assets needed importing.";
+		qDebug() << "No legacy assets needed importing.";
 	}
 	else
 	{
-		QLOG_DEBUG() << "Finished copying legacy assets:" << successes << "successes and"
+		qDebug() << "Finished copying legacy assets:" << successes << "successes and"
 					 << failures << "failures.";
 
 		this->setStatus("Cleaning up legacy assets...");
@@ -121,7 +121,7 @@ void AssetsMigrateTask::executeTask()
 				QString path = cleanup_iterator.filePath();
 				QDir folder(path);
 
-				QLOG_DEBUG() << "Cleaning up legacy assets folder:" << path;
+				qDebug() << "Cleaning up legacy assets folder:" << path;
 
 				folder.removeRecursively();
 			}

@@ -2,11 +2,12 @@
 
 #include <QApplication>
 #include <memory>
-#include "logger/QsLog.h"
-#include "logger/QsLogDest.h"
+#include <QDebug>
 #include <QFlag>
 #include <QIcon>
+#include <QDateTime>
 
+class QFile;
 class MinecraftVersionList;
 class LWJGLVersionList;
 class HttpMetaCache;
@@ -60,7 +61,10 @@ public:
 		return m_settings;
 	}
 
-
+	qint64 timeSinceStart() const
+	{
+		return startTime.msecsTo(QDateTime::currentDateTime());
+	}
 
 	QIcon getThemedIcon(const QString& name);
 
@@ -133,6 +137,8 @@ private:
 	friend class UpdateCheckerTest;
 	friend class DownloadUpdateTaskTest;
 
+	QDateTime startTime;
+
 	std::shared_ptr<QTranslator> m_qt_translator;
 	std::shared_ptr<QTranslator> m_mmc_translator;
 	std::shared_ptr<SettingsObject> m_settings;
@@ -146,9 +152,6 @@ private:
 	std::shared_ptr<JavaVersionList> m_javalist;
 	std::shared_ptr<TranslationDownloader> m_translationChecker;
 
-	QsLogging::DestinationPtr m_fileDestination;
-	QsLogging::DestinationPtr m_debugDestination;
-
 	QString m_updateOnExitPath;
 	UpdateFlags m_updateOnExitFlags = None;
 
@@ -157,4 +160,6 @@ private:
 	QString dataPath;
 
 	Status m_status = MultiMC::Failed;
+public:
+	std::shared_ptr<QFile> logFile;
 };
