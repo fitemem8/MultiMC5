@@ -387,7 +387,6 @@ namespace Ui {
 #include "logic/LegacyInstance.h"
 
 #include "logic/assets/AssetsUtils.h"
-#include "logic/assets/AssetsMigrateTask.h"
 #include <logic/updater/UpdateChecker.h>
 #include <logic/updater/NotificationChecker.h>
 #include <logic/tasks/ThreadTask.h>
