@@ -16,7 +16,6 @@
 #include "logic/InstanceList.h"
 #include "logic/auth/MojangAccountList.h"
 #include "logic/icons/IconList.h"
-#include "logic/minecraft/LwjglVersionList.h"
 #include "logic/minecraft/MinecraftVersionList.h"
 #include "logic/liteloader/LiteLoaderVersionList.h"
 
@@ -391,7 +390,6 @@ void MultiMC::initGlobalSettings(bool test_mode)
 	// Folders
 	m_settings->registerSetting("InstanceDir", "instances");
 	m_settings->registerSetting({"CentralModsDir", "ModsDir"}, "mods");
-	m_settings->registerSetting({"LWJGLDir", "LwjglDir"}, "lwjgl");
 	m_settings->registerSetting("IconsDir", "icons");
 
 	// Language
@@ -451,16 +449,6 @@ void MultiMC::initGlobalSettings(bool test_mode)
 	m_settings->registerSetting("SettingsGeometry", "");
 
 	m_settings->registerSetting("PagedGeometry", "");
-}
-
-std::shared_ptr<LWJGLVersionList> MultiMC::lwjgllist()
-{
-	if (!m_lwjgllist)
-	{
-		m_lwjgllist.reset(new LWJGLVersionList());
-		ENV.registerVersionList("org.lwjgl.legacy", m_lwjgllist);
-	}
-	return m_lwjgllist;
 }
 
 std::shared_ptr<ForgeVersionList> MultiMC::forgelist()
