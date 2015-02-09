@@ -29,6 +29,11 @@ set(MultiMC_UPDATER false CACHE BOOL "Whether or not the update system is enable
 # Notification URL
 set(MultiMC_NOTIFICATION_URL "" CACHE STRING "URL for checking for notifications.")
 
+#### Check the current Git commit
+include(GitFunctions)
+git_run(COMMAND rev-parse HEAD DEFAULT "Unknown" OUTPUT_VAR MultiMC_GIT_COMMIT)
+message(STATUS "Git commit: ${MultiMC_GIT_COMMIT}")
+
 set(MultiMC_RELEASE_VERSION_NAME "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}")
 if(MultiMC_VERSION_HOTFIX GREATER 0)
 	set(MultiMC_RELEASE_VERSION_NAME "${MultiMC_RELEASE_VERSION_NAME}.${MultiMC_VERSION_HOTFIX}")
