@@ -27,12 +27,12 @@
 #include <pathutils.h>
 #include <QDebug>
 
-#include "logic/InstanceList.h"
-#include "logic/icons/IconList.h"
-#include "logic/BaseInstance.h"
+#include "InstanceList.h"
+#include "icons/IconList.h"
+#include "BaseInstance.h"
 
 //FIXME: this really doesn't belong *here*
-#include "logic/minecraft/OneSixInstance.h"
+#include "minecraft/OneSixInstance.h"
 #include "minecraft/MinecraftVersion.h"
 #include "settings/INISettingsObject.h"
 

@@ -19,11 +19,11 @@
 #include <QDateTime>
 #include <QSet>
 
-#include "logic/settings/SettingsObject.h"
+#include "settings/SettingsObject.h"
 
-#include "logic/settings/INIFile.h"
-#include "logic/BaseVersionList.h"
-#include "logic/auth/MojangAccount.h"
+#include "settings/INIFile.h"
+#include "BaseVersionList.h"
+#include "auth/MojangAccount.h"
 
 class QDir;
 class Task;
