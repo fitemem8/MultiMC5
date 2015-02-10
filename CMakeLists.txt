@@ -90,14 +90,6 @@ set(QUAZIP_LIBRARIES -L"${CMAKE_BINARY_DIR}/External/Install/QuaZIP/lib" quazip)
 add_subdirectory(depends/launcher)
 add_subdirectory(depends/javacheck)
 
-# Add xz decompression
-add_subdirectory(depends/xz-embedded)
-include_directories(${XZ_INCLUDE_DIR})
-
-# Add pack200 decompression
-add_subdirectory(depends/pack200)
-include_directories(${PACK200_INCLUDE_DIR})
-
 ######## MultiMC Libs ########
 
 # Add the util library.

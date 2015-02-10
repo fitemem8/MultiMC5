@@ -37,11 +37,9 @@
 #include <QString>
 #include <QUrl>
 
+#include "tasks/Task.h"
+
 #include "minecraft/MinecraftProfile.h"
-#include "forge/ForgeVersionList.h"
-#include "forge/ForgeInstaller.h"
-#include "liteloader/LiteLoaderVersionList.h"
-#include "liteloader/LiteLoaderInstaller.h"
 #include "minecraft/VersionBuilder.h"
 #include "auth/MojangAccountList.h"
 #include "minecraft/Mod.h"
@@ -267,6 +265,7 @@ void VersionPage::on_changeMCVersionBtn_clicked()
 
 void VersionPage::on_forgeBtn_clicked()
 {
+	/*
 	VersionSelectDialog vselect(MMC->forgelist().get(), tr("Select Forge version"), this);
 	vselect.setExactFilter(1, m_inst->currentVersionId());
 	vselect.setEmptyString(tr("No Forge versions are currently available for Minecraft ") +
@@ -277,10 +276,12 @@ void VersionPage::on_forgeBtn_clicked()
 		dialog.exec(
 			ForgeInstaller().createInstallTask(m_inst, vselect.selectedVersion(), this));
 	}
+	*/
 }
 
 void VersionPage::on_liteloaderBtn_clicked()
 {
+	/*
 	VersionSelectDialog vselect(MMC->liteloaderlist().get(), tr("Select LiteLoader version"),
 								this);
 	vselect.setExactFilter(1, m_inst->currentVersionId());
@@ -292,6 +293,7 @@ void VersionPage::on_liteloaderBtn_clicked()
 		dialog.exec(
 			LiteLoaderInstaller().createInstallTask(m_inst, vselect.selectedVersion(), this));
 	}
+	*/
 }
 
 void VersionPage::versionCurrent(const QModelIndex &current, const QModelIndex &previous)
