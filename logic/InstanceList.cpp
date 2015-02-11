@@ -35,6 +35,7 @@
 #include "minecraft/OneSixInstance.h"
 #include "minecraft/MinecraftVersion.h"
 #include "settings/INISettingsObject.h"
+#include "NullInstance.h"
 
 const static int GROUP_FILE_FORMAT_VERSION = 1;
 
@@ -445,7 +446,7 @@ InstanceList::loadInstance(InstancePtr &inst, const QString &instDir)
 	}
 	else
 	{
-		return InstanceList::UnknownLoadError;
+		inst.reset(new NullInstance(m_globalSettings, instanceSettings, instDir));
 	}
 	inst->init();
 	return NoLoadError;
