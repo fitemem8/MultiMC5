@@ -24,8 +24,8 @@
 #include "minecraft/VersionFilterData.h"
 #include <quazip.h>
 
-class MinecraftVersion;
 class OneSixInstance;
+class SequentialTask;
 
 class OneSixUpdate : public Task
 {
@@ -57,10 +57,8 @@ private:
 	NetJobPtr jarlibDownloadJob;
 	NetJobPtr legacyDownloadJob;
 
-	/// target version, determined during this task
-	std::shared_ptr<MinecraftVersion> targetVersion;
 	/// the task that is spawned for version updates
-	std::shared_ptr<Task> versionUpdateTask;
+	std::shared_ptr<SequentialTask> versionUpdateTask;
 
 	OneSixInstance *m_inst = nullptr;
 	QString jarHashOnEntry;

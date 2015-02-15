@@ -26,13 +26,14 @@
 #include <JlCompress.h>
 
 #include "BaseInstance.h"
-#include "minecraft/MinecraftVersionList.h"
+#include "CachedVersionList.h"
 #include "minecraft/MinecraftProfile.h"
 #include "minecraft/OneSixLibrary.h"
 #include "minecraft/OneSixInstance.h"
 #include "net/URLConstants.h"
 #include "minecraft/AssetsUtils.h"
 #include "minecraft/JarUtils.h"
+#include <tasks/SequentialTask.h>
 
 OneSixUpdate::OneSixUpdate(OneSixInstance *inst, QObject *parent) : Task(parent), m_inst(inst)
 {
@@ -49,21 +50,31 @@ void OneSixUpdate::executeTask()
 	}
 
 	// Get a pointer to the version object that corresponds to the instance's version.
-	targetVersion = std::dynamic_pointer_cast<MinecraftVersion>(
-		ENV.getVersion("net.minecraft", m_inst->intendedVersionId()));
+	auto targetVersion = ENV.getVersion("net.minecraft", m_inst->intendedVersionId());
 	if (targetVersion == nullptr)
 	{
 		// don't do anything if it was invalid
 		emitFailed(tr("The specified Minecraft version is invalid. Choose a different one."));
 		return;
 	}
-	if (m_inst->providesVersionFile() || !targetVersion->needsUpdate())
+	if (m_inst->providesVersionFile())
 	{
-		qDebug() << "Instance either provides a version file or doesn't need an update.";
+		qDebug() << "Instance provides a version file and doesn't need an update.";
 		jarlibStart();
 		return;
 	}
-	versionUpdateTask = std::dynamic_pointer_cast<MinecraftVersionList>(ENV.getVersionList("net.minecraft"))->createUpdateTask(m_inst->intendedVersionId());
+	versionUpdateTask = std::make_shared<SequentialTask>();
+	{
+		auto list = std::dynamic_pointer_cast<CachedVersionList>(ENV.getVersionList("net.minecraft"));
+		versionUpdateTask->addTask(std::shared_ptr<Task>(list->getLoadTask()));
+		versionUpdateTask->addTask(list->createUpdateTask(m_inst->intendedVersionId()));
+	}
+	// FIXME: fake.
+	{
+		auto list = std::dynamic_pointer_cast<CachedVersionList>(ENV.getVersionList("org.lwjgl"));
+		versionUpdateTask->addTask(std::shared_ptr<Task>(list->getLoadTask()));
+		versionUpdateTask->addTask(list->createUpdateTask("2.9.1"));
+	}
 	if (!versionUpdateTask)
 	{
 		qDebug() << "Didn't spawn an update task.";

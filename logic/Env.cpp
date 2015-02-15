@@ -8,6 +8,7 @@
 #include <QNetworkAccessManager>
 #include <QDebug>
 #include "tasks/Task.h"
+#include "FileStore.h"
 #include <QDebug>
 
 /*
@@ -22,6 +23,7 @@ Env::Env()
 void Env::destroy()
 {
 	m_metacache.reset();
+	m_filestore.reset();
 	m_qnam.reset();
 	m_icons.reset();
 	m_versionLists.clear();
@@ -37,6 +39,12 @@ std::shared_ptr< HttpMetaCache > Env::metacache()
 {
 	Q_ASSERT(m_metacache != nullptr);
 	return m_metacache;
+}
+
+std::shared_ptr< FileStore > Env::filestore()
+{
+	Q_ASSERT(m_filestore != nullptr);
+	return m_filestore;
 }
 
 std::shared_ptr< QNetworkAccessManager > Env::qnam()
@@ -136,7 +144,10 @@ void Env::registerVersionList(QString name, std::shared_ptr< BaseVersionList > v
 
 void Env::initHttpMetaCache(QString rootPath, QString staticDataPath)
 {
+	m_filestore.reset(new FileStore(QDir("cache").absolutePath()));
 	m_metacache.reset(new HttpMetaCache("metacache"));
+	m_metacache->addBase("cache", QDir("cache").absolutePath());
+
 	m_metacache->addBase("asset_indexes", QDir("assets/indexes").absolutePath());
 	m_metacache->addBase("asset_objects", QDir("assets/objects").absolutePath());
 	m_metacache->addBase("versions", QDir("versions").absolutePath());

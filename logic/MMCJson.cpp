@@ -53,7 +53,7 @@ double MMCJson::ensureDouble(const QJsonValue val, const QString what)
 	return val.toDouble();
 }
 
-int MMCJson::ensureInteger(const QJsonValue val, const QString what)
+qint64 MMCJson::ensureInteger(const QJsonValue val, const QString what)
 {
 	double ret = ensureDouble(val, what);
 	if (fmod(ret, 1) != 0)
@@ -102,7 +102,7 @@ QJsonDocument MMCJson::parseFile(const QString &filename, const QString &what)
 	return parseDocument(f.readAll(), what);
 }
 
-int MMCJson::ensureInteger(const QJsonValue val, QString what, const int def)
+qint64 MMCJson::ensureInteger(const QJsonValue val, QString what, const qint64 def)
 {
 	if (val.isUndefined())
 		return def;

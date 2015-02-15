@@ -114,28 +114,11 @@ public: /* only use in ProfileStrategy */
 	void appendPatch(ProfilePatchPtr patch);
 
 public: /* data */
-	/// the ID - determines which jar to use! ACTUALLY IMPORTANT!
+	/// the ID - determines which jar to use!
 	QString id;
 
-	/// the time this version was actually released by Mojang, as string and as QDateTime
-	QString m_releaseTimeString;
-	QDateTime m_releaseTime;
-
-	/// the time this version was last updated by Mojang, as string and as QDateTime
-	QString m_updateTimeString;
-	QDateTime m_updateTime;
-
-	/// Release type - "release" or "snapshot"
-	QString type;
 	/// Assets type - "legacy" or a version ID
 	QString assets;
-	/**
-	 * DEPRECATED: Old versions of the new vanilla launcher used this
-	 * ex: "username_session_version"
-	 */
-	QString processArguments;
-	/// Same as above, but only for vanilla
-	QString vanillaProcessArguments;
 	/**
 	 * arguments that should be used for launching minecraft
 	 *
@@ -143,13 +126,6 @@ public: /* data */
 	 *      --version ${version_name} --gameDir ${game_directory} --assetsDir ${game_assets}"
 	 */
 	QString minecraftArguments;
-	/// Same as above, but only for vanilla
-	QString vanillaMinecraftArguments;
-	/**
-	 * the minimum launcher version required by this version ... current is 4 (at point of
-	 * writing)
-	 */
-	int minimumLauncherVersion = 0xDEADBEEF;
 	/**
 	 * A list of all tweaker classes
 	 */
@@ -166,35 +142,12 @@ public: /* data */
 	/// the list of libs - both active and inactive, native and java
 	QList<OneSixLibraryPtr> libraries;
 
-	/// same, but only vanilla.
-	QList<OneSixLibraryPtr> vanillaLibraries;
-
 	/// traits, collected from all the version files (version files can only add)
 	QSet<QString> traits;
 
 	/// A list of jar mods. version files can add those.
 	QList<JarmodPtr> jarMods;
 
-	/*
-	FIXME: add support for those rules here? Looks like a pile of quick hacks to me though.
-
-	"rules": [
-		{
-		"action": "allow"
-		},
-		{
-		"action": "disallow",
-		"os": {
-			"name": "osx",
-			"version": "^10\\.5\\.\\d$"
-		}
-		}
-	],
-	"incompatibilityReason": "There is a bug in LWJGL which makes it incompatible with OSX
-	10.5.8. Please go to New Profile and use 1.5.2 for now. Sorry!"
-	}
-	*/
-	// QList<Rule> rules;
 private:
 	QList<ProfilePatchPtr> VersionPatches;
 	ProfileStrategy *m_strategy = nullptr;

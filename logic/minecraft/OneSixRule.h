@@ -31,20 +31,15 @@ enum RuleAction
 	Defer
 };
 
-QList<std::shared_ptr<Rule>> rulesFromJsonV4(const QJsonObject &objectWithRules);
-
 class Rule
 {
-protected:
-	RuleAction m_result;
-	virtual bool applies(const RawLibrary *parent) = 0;
-
 public:
+	RuleAction m_result;
 	Rule(RuleAction result) : m_result(result)
 	{
 	}
 	virtual ~Rule() {};
-	virtual QJsonObject toJson() = 0;
+	virtual bool applies(const RawLibrary *parent) = 0;
 	RuleAction apply(const RawLibrary *parent)
 	{
 		if (applies(parent))
@@ -56,46 +51,40 @@ public:
 
 class OsRule : public Rule
 {
-private:
-	// the OS
-	OpSys m_system;
-	// the OS version regexp
-	QString m_version_regexp;
-
-protected:
-	virtual bool applies(const RawLibrary *)
+public:
+	static std::shared_ptr<OsRule> create(RuleAction result, OpSys system, QString version_regexp)
 	{
-		return (m_system == currentSystem);
+		return std::shared_ptr<OsRule>(new OsRule(result, system, version_regexp));
 	}
 	OsRule(RuleAction result, OpSys system, QString version_regexp)
 		: Rule(result), m_system(system), m_version_regexp(version_regexp)
 	{
 	}
-
-public:
-	virtual QJsonObject toJson();
-	static std::shared_ptr<OsRule> create(RuleAction result, OpSys system,
-										  QString version_regexp)
+	virtual ~OsRule(){};
+	virtual bool applies(const RawLibrary *)
 	{
-		return std::shared_ptr<OsRule>(new OsRule(result, system, version_regexp));
+		return (m_system == currentSystem);
 	}
+
+	// the OS
+	OpSys m_system;
+	// the OS version regexp
+	QString m_version_regexp;
 };
 
 class ImplicitRule : public Rule
 {
-protected:
-	virtual bool applies(const RawLibrary *)
+public:
+	static std::shared_ptr<ImplicitRule> create(RuleAction result)
 	{
-		return true;
+		return std::shared_ptr<ImplicitRule>(new ImplicitRule(result));
 	}
 	ImplicitRule(RuleAction result) : Rule(result)
 	{
 	}
-
-public:
-	virtual QJsonObject toJson();
-	static std::shared_ptr<ImplicitRule> create(RuleAction result)
+	virtual ~ImplicitRule() {};
+	virtual bool applies(const RawLibrary *)
 	{
-		return std::shared_ptr<ImplicitRule>(new ImplicitRule(result));
+		return true;
 	}
 };

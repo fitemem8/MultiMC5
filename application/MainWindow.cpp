@@ -360,7 +360,6 @@ namespace Ui {
 #include "pagedialog/PageDialog.h"
 
 #include "InstanceList.h"
-#include "minecraft/MinecraftVersionList.h"
 #include "icons/IconList.h"
 #include "java/JavaVersionList.h"
 
@@ -381,8 +380,6 @@ namespace Ui {
 #include "NagUtils.h"
 #include "InstancePageProvider.h"
 #include "minecraft/SkinUtils.h"
-
-//#include "minecraft/LegacyInstance.h"
 
 #include <updater/UpdateChecker.h>
 #include <notifications/NotificationChecker.h>
@@ -589,12 +586,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	// run the things that load and download other things... FIXME: this is NOT the place
 	// FIXME: invisible actions in the background = NOPE.
 	{
-		if (!MMC->minecraftlist()->isLoaded())
-		{
-			m_versionLoadTask = MMC->minecraftlist()->getLoadTask();
-			startTask(m_versionLoadTask);
-		}
-
 		m_newsChecker->reloadNews();
 		updateNewsLabel();
 
@@ -991,19 +982,6 @@ static QFileInfo findRecursive(const QString &dir, const QString &name)
 	return QFileInfo();
 }
 
-// FIXME: eliminate, should not be needed
-void MainWindow::waitForMinecraftVersions()
-{
-	if (!MMC->minecraftlist()->isLoaded() && m_versionLoadTask &&
-		m_versionLoadTask->isRunning())
-	{
-		QEventLoop waitLoop;
-		waitLoop.connect(m_versionLoadTask, SIGNAL(failed(QString)), SLOT(quit()));
-		waitLoop.connect(m_versionLoadTask, SIGNAL(succeeded()), SLOT(quit()));
-		waitLoop.exec();
-	}
-}
-
 void MainWindow::instanceFromZipPack(QString instName, QString instGroup, QString instIcon, QUrl url)
 {
 	InstancePtr newInstance;
@@ -1147,8 +1125,6 @@ void MainWindow::finalizeInstance(InstancePtr inst)
 
 void MainWindow::on_actionAddInstance_triggered()
 {
-	waitForMinecraftVersions();
-
 	NewInstanceDialog newInstDlg(this);
 	if (!newInstDlg.exec())
 		return;

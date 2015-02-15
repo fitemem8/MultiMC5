@@ -21,27 +21,32 @@
 
 #include "BaseVersionList.h"
 #include "tasks/Task.h"
-#include "minecraft/MinecraftVersion.h"
-#include <net/NetJob.h>
+#include "net/NetJob.h"
 
-class MCVListLoadTask;
-class MCVListVersionUpdateTask;
+class FileStore;
+class CachedListLoadTask;
+class CachedVersionUpdateTask;
 
-class MinecraftVersionList : public BaseVersionList
+class CachedVersionList : public BaseVersionList
 {
 	Q_OBJECT
+public:
+	enum LoadStatus
+	{
+		NotLoaded,
+		LocalLoaded,
+		RemoteLoaded
+	};
 private:
 	void sortInternal();
-	void loadBuiltinList();
-	void loadMojangList(QJsonDocument jsonDoc, VersionSource source);
-	void loadCachedList();
-	void saveCachedList();
+	void loadListFromJSON(QJsonDocument jsonDoc, LoadStatus source);
 	void finalizeUpdate(QString version);
+	void reindex();
 public:
-	friend class MCVListLoadTask;
-	friend class MCVListVersionUpdateTask;
+	friend class CachedListLoadTask;
+	friend class CachedVersionUpdateTask;
 
-	explicit MinecraftVersionList(QObject *parent = 0);
+	explicit CachedVersionList(QString baseUrl, QString uid, QObject *parent = 0);
 
 	std::shared_ptr<Task> createUpdateTask(QString version);
 
@@ -53,14 +58,29 @@ public:
 
 	virtual BaseVersionPtr getLatestStable() const;
 
+	QString uid()
+	{
+		return m_uid;
+	}
+	QString indexUrl()
+	{
+		return QString("%1/%2.json").arg(m_baseUrl).arg(m_uid);
+	}
+	QString fileUrl(QString id)
+	{
+		return QString("%1/%2/%3.json").arg(m_baseUrl).arg(m_uid).arg(id);
+	}
+	QString versionFilePath(QString version);
 protected:
 	QList<BaseVersionPtr> m_vlist;
 	QMap<QString, BaseVersionPtr> m_lookup;
 
-	bool m_loaded = false;
-	bool m_hasLocalIndex = false;
+	LoadStatus m_loaded = NotLoaded;
+
 	QString m_latestReleaseID = "INVALID";
 	QString m_latestSnapshotID = "INVALID";
+	QString m_uid;
+	QString m_baseUrl;
 
 protected
 slots:

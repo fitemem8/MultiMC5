@@ -1,12 +1,4 @@
-#include <QDateTime>
-#include <QString>
 #include "ParseUtils.h"
-#include <MMCJson.h>
-
-QDateTime timeFromS3Time(QString str)
-{
-	return QDateTime::fromString(str, Qt::ISODate);
-}
 
 bool parse_timestamp (const QString & raw, QString & save_here, QDateTime & parse_here)
 {
@@ -15,7 +7,7 @@ bool parse_timestamp (const QString & raw, QString & save_here, QDateTime & pars
 	{
 		return false;
 	}
-	parse_here = timeFromS3Time(save_here);
+	parse_here = QDateTime::fromString(save_here, Qt::ISODate);
 	if (!parse_here.isValid())
 	{
 		return false;

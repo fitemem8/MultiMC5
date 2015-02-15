@@ -11,8 +11,14 @@ SET(LOGIC_SOURCES
 	BaseProcess.cpp
 	BaseInstance.h
 	BaseInstance.cpp
+	FileStore.h
+	FileStore.cpp
 	NullInstance.h
 	MMCError.h
+	CachedVersionList.cpp
+	CachedVersionList.h
+	ParseUtils.cpp
+	ParseUtils.h
 
 	# WARNING: globals live here
 	Env.h
@@ -87,6 +93,12 @@ SET(LOGIC_SOURCES
 	status/StatusChecker.cpp
 
 	# Minecraft support
+	minecraft/onesix/OneSixFormat.h
+	minecraft/onesix/OneSixRead.cpp
+	minecraft/onesix/OneSixWrite.cpp
+	minecraft/onesix/OneSixUtils.cpp
+	minecraft/wonko/WonkoFormat.h
+	minecraft/wonko/WonkoRead.cpp
 	minecraft/OneSixUpdate.h
 	minecraft/OneSixUpdate.cpp
 	minecraft/OneSixInstance.h
@@ -104,10 +116,6 @@ SET(LOGIC_SOURCES
 	minecraft/MinecraftInstance.h
 	minecraft/MinecraftProcess.cpp
 	minecraft/MinecraftProcess.h
-	minecraft/MinecraftVersion.cpp
-	minecraft/MinecraftVersion.h
-	minecraft/MinecraftVersionList.cpp
-	minecraft/MinecraftVersionList.h
 	minecraft/NullProfileStrategy.h
 	minecraft/OneSixLibrary.cpp
 	minecraft/OneSixLibrary.h
@@ -117,8 +125,6 @@ SET(LOGIC_SOURCES
 	minecraft/OneSixRule.h
 	minecraft/OpSys.cpp
 	minecraft/OpSys.h
-	minecraft/ParseUtils.cpp
-	minecraft/ParseUtils.h
 	minecraft/ProfileUtils.cpp
 	minecraft/ProfileUtils.h
 	minecraft/ProfileStrategy.h
@@ -128,15 +134,12 @@ SET(LOGIC_SOURCES
 	minecraft/VersionFile.cpp
 	minecraft/VersionFile.h
 	minecraft/ProfilePatch.h
-	minecraft/VersionSource.h
 	minecraft/VersionFilterData.h
 	minecraft/VersionFilterData.cpp
 	minecraft/Mod.h
 	minecraft/Mod.cpp
 	minecraft/ModList.h
 	minecraft/ModList.cpp
-	minecraft/LegacyForge.h
-	minecraft/LegacyForge.cpp
 	minecraft/AssetsUtils.h
 	minecraft/AssetsUtils.cpp
 

@@ -7,8 +7,3 @@
  * return true/false for success/failure
  */
 bool parse_timestamp (const QString &raw, QString &save_here, QDateTime &parse_here);
-
-/**
- * take the timestamp used by S3 and turn it into QDateTime
- */
-QDateTime timeFromS3Time(QString str);

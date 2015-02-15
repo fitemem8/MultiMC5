@@ -33,7 +33,6 @@
 
 //FIXME: this really doesn't belong *here*
 #include "minecraft/OneSixInstance.h"
-#include "minecraft/MinecraftVersion.h"
 #include "settings/INISettingsObject.h"
 #include "NullInstance.h"
 
@@ -473,17 +472,11 @@ InstanceList::createInstance(InstancePtr &inst, BaseVersionPtr version, const QS
 	auto instanceSettings = std::make_shared<INISettingsObject>(PathCombine(instDir, "instance.cfg"));
 	instanceSettings->registerSetting("InstanceType", "Legacy");
 
-	auto minecraftVersion = std::dynamic_pointer_cast<MinecraftVersion>(version);
-	if(minecraftVersion)
-	{
-		auto mcVer = std::dynamic_pointer_cast<MinecraftVersion>(version);
-		instanceSettings->set("InstanceType", "OneSix");
-		inst.reset(new OneSixInstance(m_globalSettings, instanceSettings, instDir));
-		inst->setIntendedVersionId(version->descriptor());
-		inst->init();
-		return InstanceList::NoCreateError;
-	}
-	return InstanceList::NoSuchVersion;
+	instanceSettings->set("InstanceType", "OneSix");
+	inst.reset(new OneSixInstance(m_globalSettings, instanceSettings, instDir));
+	inst->setIntendedVersionId(version->descriptor());
+	inst->init();
+	return InstanceList::NoCreateError;
 }
 
 InstanceList::InstCreateError

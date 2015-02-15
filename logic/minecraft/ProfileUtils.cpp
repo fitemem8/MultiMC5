@@ -1,5 +1,6 @@
 #include "ProfileUtils.h"
 #include "minecraft/VersionFilterData.h"
+#include "onesix/OneSixFormat.h"
 #include "MMCJson.h"
 #include <QDebug>
 
@@ -103,36 +104,21 @@ VersionFilePtr parseJsonFile(const QFileInfo &fileInfo, const bool requireOrder)
 				.arg(fileInfo.fileName(), error.errorString())
 				.arg(error.offset));
 	}
-	return VersionFile::fromJson(doc, file.fileName(), requireOrder);
-}
-
-VersionFilePtr parseBinaryJsonFile(const QFileInfo &fileInfo)
-{
-	QFile file(fileInfo.absoluteFilePath());
-	if (!file.open(QFile::ReadOnly))
-	{
-		throw JSONValidationError(QObject::tr("Unable to open the version file %1: %2.")
-									  .arg(fileInfo.fileName(), file.errorString()));
-	}
-	QJsonDocument doc = QJsonDocument::fromBinaryData(file.readAll());
-	file.close();
-	if (doc.isNull())
-	{
-		file.remove();
-		throw JSONValidationError(
-			QObject::tr("Unable to process the version file %1.").arg(fileInfo.fileName()));
-	}
-	return VersionFile::fromJson(doc, file.fileName(), false);
+	return OneSixFormat::fromJson(doc, file.fileName(), requireOrder);
 }
 
 void removeLwjglFromPatch(VersionFilePtr patch)
 {
-	auto filter = [](QList<RawLibraryPtr>& libs)
+	const auto lwjglWhitelist =
+		QSet<QString>{"net.java.jinput:jinput",	 "net.java.jinput:jinput-platform",
+					  "net.java.jutils:jutils",	 "org.lwjgl.lwjgl:lwjgl",
+					  "org.lwjgl.lwjgl:lwjgl_util", "org.lwjgl.lwjgl:lwjgl-platform"};
+	auto filter = [&lwjglWhitelist](QList<RawLibraryPtr>& libs)
 	{
 		QList<RawLibraryPtr> filteredLibs;
 		for (auto lib : libs)
 		{
-			if (!g_VersionFilterData.lwjglWhitelist.contains(lib->artifactPrefix()))
+			if (!lwjglWhitelist.contains(lib->artifactPrefix()))
 			{
 				filteredLibs.append(lib);
 			}

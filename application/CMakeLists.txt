@@ -29,6 +29,9 @@ set(MultiMC_UPDATER false CACHE BOOL "Whether or not the update system is enable
 # Notification URL
 set(MultiMC_NOTIFICATION_URL "" CACHE STRING "URL for checking for notifications.")
 
+# Wonko repo url
+set(MultiMC_WONKO_URL "file:///home/peterix/minecraft/src/WonkoTheSane/files" CACHE STRING "URL where the wonko repo is.")
+
 #### Check the current Git commit
 include(GitFunctions)
 git_run(COMMAND rev-parse HEAD DEFAULT "Unknown" OUTPUT_VAR MultiMC_GIT_COMMIT)
@@ -296,7 +299,6 @@ set(MULTIMC_QRCS
 	resources/OSX/OSX.qrc
 	resources/iOS/iOS.qrc
 	resources/instances/instances.qrc
-	resources/versions/versions.qrc
 )
 
 ######## Windows resource files ########

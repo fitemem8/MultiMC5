@@ -19,21 +19,12 @@ class RawLibrary
 {
 	friend class OneSixLibrary;
 public: /* methods */
-	/// read and create a basic library
-	static RawLibraryPtr fromJson(const QJsonObject &libObj, const QString &filename);
-
-	/// read and create a MultiMC '+' library. Those have some extra fields.
-	static RawLibraryPtr fromJsonPlus(const QJsonObject &libObj, const QString &filename);
-
-	/// Convert the library back to an JSON object
-	QJsonObject toJson() const;
-
 	/// Returns the raw name field
 	const GradleSpecifier & rawName() const
 	{
 		return m_name;
 	}
-	
+
 	void setRawName(const GradleSpecifier & spec)
 	{
 		m_name = spec;
@@ -43,7 +34,7 @@ public: /* methods */
 	{
 		m_name.setClassifier(spec);
 	}
-	
+
 	/// returns the full group and artifact prefix
 	QString artifactPrefix() const
 	{
@@ -116,7 +107,8 @@ public: /* methods */
 	QString storagePath() const;
 
 
-protected: /* data */
+public: /* data */
+	// TODO: make all of these protected, clean up semantics of implicit vs. explicit values.
 	/// the basic gradle dependency specifier.
 	GradleSpecifier m_name;
 	/// where to store the lib locally
@@ -124,13 +116,10 @@ protected: /* data */
 	/// is this lib actually active on the current OS?
 	bool m_is_active = false;
 
-
-public: /* data */
-	// TODO: make all of these protected, clean up semantics of implicit vs. explicit values.
 	/// URL where the file can be downloaded
 	QString m_base_url;
 
-	/// DEPRECATED: absolute URL. takes precedence the normal download URL, if defined
+	/// absolute URL. takes precedence the normal download URL, if defined
 	QString m_absolute_url;
 
 	/// type hint - modifies how the library is treated
@@ -160,7 +149,7 @@ public: /* data */
 		Replace
 	} insertType = Append;
 	QString insertData;
-	
+
 	/// determines how can libraries be applied. conflicting dependencies cause errors.
 	enum DependType
 	{

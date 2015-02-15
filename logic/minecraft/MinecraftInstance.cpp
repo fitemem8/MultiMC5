@@ -2,7 +2,7 @@
 #include "settings/SettingsObject.h"
 #include <pathutils.h>
 #include "Env.h"
-#include "minecraft/MinecraftVersionList.h"
+#include "CachedVersionList.h"
 
 MinecraftInstance::MinecraftInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir)
 	: BaseInstance(globalSettings, settings, rootDir)

@@ -15,8 +15,6 @@ using namespace MMCJson;
 
 #include "VersionBuildError.h"
 
-#define CURRENT_MINIMUM_LAUNCHER_VERSION 14
-
 int findLibraryByName(QList<OneSixLibraryPtr> haystack, const GradleSpecifier &needle)
 {
 	int retval = -1;
@@ -33,212 +31,6 @@ int findLibraryByName(QList<OneSixLibraryPtr> haystack, const GradleSpecifier &n
 	return retval;
 }
 
-VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &filename,
-									 const bool requireOrder)
-{
-	VersionFilePtr out(new VersionFile());
-	if (doc.isEmpty() || doc.isNull())
-	{
-		throw JSONValidationError(filename + " is empty or null");
-	}
-	if (!doc.isObject())
-	{
-		throw JSONValidationError(filename + " is not an object");
-	}
-
-	QJsonObject root = doc.object();
-
-	if (requireOrder)
-	{
-		if (root.contains("order"))
-		{
-			out->order = ensureInteger(root.value("order"));
-		}
-		else
-		{
-			// FIXME: evaluate if we don't want to throw exceptions here instead
-			qCritical() << filename << "doesn't contain an order field";
-		}
-	}
-
-	out->name = root.value("name").toString();
-	out->fileId = root.value("fileId").toString();
-	out->version = root.value("version").toString();
-	out->mcVersion = root.value("mcVersion").toString();
-	out->filename = filename;
-
-	auto readString = [root](const QString &key, QString &variable)
-	{
-		if (root.contains(key))
-		{
-			variable = ensureString(root.value(key));
-		}
-	};
-
-	auto readStringRet = [root](const QString &key) -> QString
-	{
-		if (root.contains(key))
-		{
-			return ensureString(root.value(key));
-		}
-		return QString();
-	};
-
-	readString("id", out->id);
-
-	readString("mainClass", out->mainClass);
-	readString("appletClass", out->appletClass);
-	readString("processArguments", out->processArguments);
-	readString("minecraftArguments", out->overwriteMinecraftArguments);
-	readString("+minecraftArguments", out->addMinecraftArguments);
-	readString("-minecraftArguments", out->removeMinecraftArguments);
-	readString("type", out->type);
-
-	parse_timestamp(readStringRet("releaseTime"), out->m_releaseTimeString, out->m_releaseTime);
-	parse_timestamp(readStringRet("time"), out->m_updateTimeString, out->m_updateTime);
-
-	readString("assets", out->assets);
-
-	if (root.contains("minimumLauncherVersion"))
-	{
-		out->minimumLauncherVersion = ensureInteger(root.value("minimumLauncherVersion"));
-	}
-
-	if (root.contains("tweakers"))
-	{
-		out->shouldOverwriteTweakers = true;
-		for (auto tweakerVal : ensureArray(root.value("tweakers")))
-		{
-			out->overwriteTweakers.append(ensureString(tweakerVal));
-		}
-	}
-
-	if (root.contains("+tweakers"))
-	{
-		for (auto tweakerVal : ensureArray(root.value("+tweakers")))
-		{
-			out->addTweakers.append(ensureString(tweakerVal));
-		}
-	}
-
-	if (root.contains("-tweakers"))
-	{
-		for (auto tweakerVal : ensureArray(root.value("-tweakers")))
-		{
-			out->removeTweakers.append(ensureString(tweakerVal));
-		}
-	}
-
-	if (root.contains("+traits"))
-	{
-		for (auto tweakerVal : ensureArray(root.value("+traits")))
-		{
-			out->traits.insert(ensureString(tweakerVal));
-		}
-	}
-
-	if (root.contains("libraries"))
-	{
-		out->shouldOverwriteLibs = true;
-		for (auto libVal : ensureArray(root.value("libraries")))
-		{
-			auto libObj = ensureObject(libVal);
-
-			auto lib = RawLibrary::fromJson(libObj, filename);
-			out->overwriteLibs.append(lib);
-		}
-	}
-
-	if (root.contains("+jarMods"))
-	{
-		for (auto libVal : ensureArray(root.value("+jarMods")))
-		{
-			QJsonObject libObj = ensureObject(libVal);
-			// parse the jarmod
-			auto lib = Jarmod::fromJson(libObj, filename);
-			// and add to jar mods
-			out->jarMods.append(lib);
-		}
-	}
-
-	if (root.contains("+libraries"))
-	{
-		for (auto libVal : ensureArray(root.value("+libraries")))
-		{
-			QJsonObject libObj = ensureObject(libVal);
-			// parse the library
-			auto lib = RawLibrary::fromJsonPlus(libObj, filename);
-			out->addLibs.append(lib);
-		}
-	}
-
-	if (root.contains("-libraries"))
-	{
-		for (auto libVal : ensureArray(root.value("-libraries")))
-		{
-			auto libObj = ensureObject(libVal);
-			out->removeLibs.append(ensureString(libObj.value("name")));
-		}
-	}
-	return out;
-}
-
-QJsonDocument VersionFile::toJson(bool saveOrder)
-{
-	QJsonObject root;
-	if (saveOrder)
-	{
-		root.insert("order", order);
-	}
-	writeString(root, "name", name);
-	writeString(root, "fileId", fileId);
-	writeString(root, "version", version);
-	writeString(root, "mcVersion", mcVersion);
-	writeString(root, "id", id);
-	writeString(root, "mainClass", mainClass);
-	writeString(root, "appletClass", appletClass);
-	writeString(root, "processArguments", processArguments);
-	writeString(root, "minecraftArguments", overwriteMinecraftArguments);
-	writeString(root, "+minecraftArguments", addMinecraftArguments);
-	writeString(root, "-minecraftArguments", removeMinecraftArguments);
-	writeString(root, "type", type);
-	writeString(root, "assets", assets);
-	if (isMinecraftVersion())
-	{
-		writeString(root, "releaseTime", m_releaseTimeString);
-		writeString(root, "time", m_updateTimeString);
-	}
-	if (minimumLauncherVersion != -1)
-	{
-		root.insert("minimumLauncherVersion", minimumLauncherVersion);
-	}
-	writeStringList(root, "tweakers", overwriteTweakers);
-	writeStringList(root, "+tweakers", addTweakers);
-	writeStringList(root, "-tweakers", removeTweakers);
-	writeStringList(root, "+traits", traits.toList());
-	writeObjectList(root, "libraries", overwriteLibs);
-	writeObjectList(root, "+libraries", addLibs);
-	writeObjectList(root, "+jarMods", jarMods);
-	// FIXME: removed libs are special snowflakes.
-	if (removeLibs.size())
-	{
-		QJsonArray array;
-		for (auto lib : removeLibs)
-		{
-			QJsonObject rmlibobj;
-			rmlibobj.insert("name", lib);
-			array.append(rmlibobj);
-		}
-		root.insert("-libraries", array);
-	}
-	// write the contents to a json document.
-	{
-		QJsonDocument out;
-		out.setObject(root);
-		return out;
-	}
-}
-
 bool VersionFile::isMinecraftVersion()
 {
 	return fileId == "net.minecraft";
@@ -251,15 +43,6 @@ bool VersionFile::hasJarMods()
 
 void VersionFile::applyTo(MinecraftProfile *version)
 {
-	if (minimumLauncherVersion != -1)
-	{
-		if (minimumLauncherVersion > CURRENT_MINIMUM_LAUNCHER_VERSION)
-		{
-			throw LauncherVersionError(minimumLauncherVersion,
-									   CURRENT_MINIMUM_LAUNCHER_VERSION);
-		}
-	}
-
 	if (!version->id.isNull() && !mcVersion.isNull())
 	{
 		if (QRegExp(mcVersion, Qt::CaseInsensitive, QRegExp::Wildcard).indexIn(version->id) ==
@@ -281,46 +64,12 @@ void VersionFile::applyTo(MinecraftProfile *version)
 	{
 		version->appletClass = appletClass;
 	}
-	if (!processArguments.isNull())
-	{
-		if (isMinecraftVersion())
-		{
-			version->vanillaProcessArguments = processArguments;
-		}
-		version->processArguments = processArguments;
-	}
-	if (isMinecraftVersion())
-	{
-		if (!type.isNull())
-		{
-			version->type = type;
-		}
-		if (!m_releaseTimeString.isNull())
-		{
-			version->m_releaseTimeString = m_releaseTimeString;
-			version->m_releaseTime = m_releaseTime;
-		}
-		if (!m_updateTimeString.isNull())
-		{
-			version->m_updateTimeString = m_updateTimeString;
-			version->m_updateTime = m_updateTime;
-		}
-	}
 	if (!assets.isNull())
 	{
 		version->assets = assets;
 	}
-	if (minimumLauncherVersion >= 0)
-	{
-		if (version->minimumLauncherVersion < minimumLauncherVersion)
-			version->minimumLauncherVersion = minimumLauncherVersion;
-	}
 	if (!overwriteMinecraftArguments.isNull())
 	{
-		if (isMinecraftVersion())
-		{
-			version->vanillaMinecraftArguments = overwriteMinecraftArguments;
-		}
 		version->minecraftArguments = overwriteMinecraftArguments;
 	}
 	if (!addMinecraftArguments.isNull())
@@ -351,10 +100,6 @@ void VersionFile::applyTo(MinecraftProfile *version)
 		for (auto lib : overwriteLibs)
 		{
 			libs.append(OneSixLibrary::fromRawLibrary(lib));
-		}
-		if (isMinecraftVersion())
-		{
-			version->vanillaLibraries = libs;
 		}
 		version->libraries = libs;
 	}

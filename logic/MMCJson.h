@@ -57,10 +57,10 @@ QUrl ensureUrl(const QJsonValue &val, const QString &what = "value");
 bool ensureBoolean(const QJsonValue val, QString what = "value");
 
 /// make sure the value is converted into an integer. throw otherwise.
-int ensureInteger(const QJsonValue val, QString what = "value");
+qint64 ensureInteger(const QJsonValue val, QString what = "value");
 
 /// make sure the value is converted into an integer. throw otherwise. this version will return the default value if the field is undefined.
-int ensureInteger(const QJsonValue val, QString what, const int def);
+qint64 ensureInteger(const QJsonValue val, QString what, const qint64 def);
 
 /// make sure the value is converted into a double precision floating number. throw otherwise.
 double ensureDouble(const QJsonValue val, QString what = "value");
@@ -71,7 +71,7 @@ void writeString(QJsonObject & to, QString key, QString value);
 
 void writeStringList(QJsonObject & to, QString key, QStringList values);
 
-template <typename T>
+template <typename IO, typename T>
 void writeObjectList(QJsonObject & to, QString key, QList<std::shared_ptr<T>> values)
 {
 	if (!values.isEmpty())
@@ -79,12 +79,12 @@ void writeObjectList(QJsonObject & to, QString key, QList<std::shared_ptr<T>> va
 		QJsonArray array;
 		for (auto value: values)
 		{
-			array.append(value->toJson());
+			array.append(IO::toJson(value));
 		}
 		to.insert(key, array);
 	}
 }
-template <typename T>
+template <typename IO, typename T>
 void writeObjectList(QJsonObject & to, QString key, QList<T> values)
 {
 	if (!values.isEmpty())
@@ -92,10 +92,9 @@ void writeObjectList(QJsonObject & to, QString key, QList<T> values)
 		QJsonArray array;
 		for (auto value: values)
 		{
-			array.append(value.toJson());
+			array.append(IO::toJson(value));
 		}
 		to.insert(key, array);
 	}
 }
 }
-

@@ -8,7 +8,7 @@
 #include <QDateTime>
 
 class QFile;
-class MinecraftVersionList;
+class CachedVersionList;
 class HttpMetaCache;
 class SettingsObject;
 class InstanceList;
@@ -75,9 +75,6 @@ public:
 		return m_updateChecker;
 	}
 
-	std::shared_ptr<MinecraftVersionList> minecraftlist();
-	std::shared_ptr<ForgeVersionList> forgelist();
-	std::shared_ptr<LiteLoaderVersionList> liteloaderlist();
 	std::shared_ptr<JavaVersionList> javalist();
 
 	// APPLICATION ONLY
@@ -123,6 +120,8 @@ private slots:
 	void onExit();
 
 private:
+	void initVersionLists();
+
 	void initLogger();
 
 	void initIcons();
@@ -143,9 +142,7 @@ private:
 	std::shared_ptr<InstanceList> m_instances;
 	std::shared_ptr<UpdateChecker> m_updateChecker;
 	std::shared_ptr<MojangAccountList> m_accounts;
-	std::shared_ptr<ForgeVersionList> m_forgelist;
 	std::shared_ptr<LiteLoaderVersionList> m_liteloaderlist;
-	std::shared_ptr<MinecraftVersionList> m_minecraftlist;
 	std::shared_ptr<JavaVersionList> m_javalist;
 	std::shared_ptr<TranslationDownloader> m_translationChecker;
 

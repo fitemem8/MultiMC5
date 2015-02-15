@@ -22,6 +22,7 @@
 #include "minecraft/MinecraftProfile.h"
 #include "ProfileUtils.h"
 #include "NullProfileStrategy.h"
+#include "onesix/OneSixFormat.h"
 
 MinecraftProfile::MinecraftProfile(ProfileStrategy *strategy)
 	: QAbstractListModel()
@@ -59,15 +60,8 @@ void MinecraftProfile::reload()
 void MinecraftProfile::clear()
 {
 	id.clear();
-	m_updateTimeString.clear();
-	m_updateTime = QDateTime();
-	m_releaseTimeString.clear();
-	m_releaseTime = QDateTime();
-	type.clear();
 	assets.clear();
-	processArguments.clear();
 	minecraftArguments.clear();
-	minimumLauncherVersion = 0xDEADBEAF;
 	mainClass.clear();
 	appletClass.clear();
 	libraries.clear();
@@ -241,7 +235,7 @@ std::shared_ptr<MinecraftProfile> MinecraftProfile::fromJson(const QJsonObject &
 	try
 	{
 		version->clear();
-		auto file = VersionFile::fromJson(QJsonDocument(obj), QString(), false);
+		auto file = OneSixFormat::fromJson(QJsonDocument(obj), QString(), false);
 		file->applyTo(version.get());
 		version->appendPatch(file);
 	}
@@ -389,28 +383,6 @@ void MinecraftProfile::finalize()
 	{
 		assets = "legacy";
 	}
-	auto finalizeArguments = [&]( QString & minecraftArguments, const QString & processArguments ) -> void
-	{
-		if (!minecraftArguments.isEmpty())
-			return;
-		QString toCompare = processArguments.toLower();
-		if (toCompare == "legacy")
-		{
-			minecraftArguments = " ${auth_player_name} ${auth_session}";
-		}
-		else if (toCompare == "username_session")
-		{
-			minecraftArguments = "--username ${auth_player_name} --session ${auth_session}";
-		}
-		else if (toCompare == "username_session_version")
-		{
-			minecraftArguments = "--username ${auth_player_name} "
-								"--session ${auth_session} "
-								"--version ${profile_name}";
-		}
-	};
-	finalizeArguments(vanillaMinecraftArguments, vanillaProcessArguments);
-	finalizeArguments(minecraftArguments, processArguments);
 }
 
 void MinecraftProfile::installJarMods(QStringList selectedFiles)

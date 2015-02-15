@@ -18,10 +18,6 @@ typedef std::shared_ptr<VersionFile> VersionFilePtr;
 class VersionFile : public ProfilePatch
 {
 public: /* methods */
-	static VersionFilePtr fromJson(const QJsonDocument &doc, const QString &filename,
-								   const bool requireOrder);
-	QJsonDocument toJson(bool saveOrder);
-
 	virtual void applyTo(MinecraftProfile *version) override;
 	virtual bool isMinecraftVersion() override;
 	virtual bool hasJarMods() override;
@@ -66,33 +62,24 @@ public: /* data */
 	int order = 0;
 	bool isVanilla = false;
 	QString name;
+	QString type;
 	QString fileId;
 	QString version;
-	// TODO use the mcVersion to determine if a version file should be removed on update
 	QString mcVersion;
 	QString filename;
-	// TODO requirements
-	// QMap<QString, QString> requirements;
 	QString id;
 	QString mainClass;
 	QString appletClass;
 	QString overwriteMinecraftArguments;
 	QString addMinecraftArguments;
 	QString removeMinecraftArguments;
-	QString processArguments;
-	QString type;
 
 	/// the time this version was actually released by Mojang, as string and as QDateTime
 	QString m_releaseTimeString;
 	QDateTime m_releaseTime;
 
-	/// the time this version was last updated by Mojang, as string and as QDateTime
-	QString m_updateTimeString;
-	QDateTime m_updateTime;
-
 	/// asset group used by this ... thing.
 	QString assets;
-	int minimumLauncherVersion = -1;
 
 	bool shouldOverwriteTweakers = false;
 	QStringList overwriteTweakers;

@@ -1,8 +1,12 @@
 #include "minecraft/OneSixProfileStrategy.h"
 #include "minecraft/VersionBuildError.h"
 #include "minecraft/OneSixInstance.h"
-#include "minecraft/MinecraftVersionList.h"
+#include "onesix/OneSixFormat.h"
+#include "wonko/WonkoFormat.h"
+#include "CachedVersionList.h"
 #include "Env.h"
+#include <CachedVersion.h>
+#include <MMCJson.h>
 
 #include <pathutils.h>
 #include <QDir>
@@ -21,34 +25,40 @@ void OneSixProfileStrategy::upgradeDeprecatedFiles()
 	auto customJsonPath = PathCombine(m_instance->instanceRoot(), "custom.json");
 	auto mcJson = PathCombine(m_instance->instanceRoot(), "patches" , "net.minecraft.json");
 
-	// convert old crap.
+	// if custom.json exists
 	if(QFile::exists(customJsonPath))
 	{
+		// can we create the patches folder to move it to?
 		if(!ensureFilePathExists(mcJson))
 		{
-			// WHAT DO???
+			throw VersionBuildError(QObject::tr("Unable to create path for %1").arg(mcJson));
 		}
-		if(!QFile::rename(customJsonPath, mcJson))
-		{
-			// WHAT DO???
-		}
+		// if version.json exists, remove it first
 		if(QFile::exists(versionJsonPath))
 		{
 			if(!QFile::remove(versionJsonPath))
 			{
-				// WHAT DO???
+				throw VersionBuildError(QObject::tr("Unable to remove obsolete %1").arg(versionJsonPath));
 			}
 		}
+		// and then move the custom.json in place
+		if(!QFile::rename(customJsonPath, mcJson))
+		{
+			throw VersionBuildError(QObject::tr("Unable to rename %1 to %2").arg(customJsonPath).arg(mcJson));
+		}
 	}
+	// otherwise if version.json exists
 	else if(QFile::exists(versionJsonPath))
 	{
+		// can we create the patches folder to move it to?
 		if(!ensureFilePathExists(mcJson))
 		{
-			// WHAT DO???
+			throw VersionBuildError(QObject::tr("Unable to create path for %1").arg(mcJson));
 		}
+		// and then move the custom.json in place
 		if(!QFile::rename(versionJsonPath, mcJson))
 		{
-			// WHAT DO???
+			throw VersionBuildError(QObject::tr("Unable to rename %1 to %2").arg(versionJsonPath).arg(mcJson));
 		}
 	}
 }
@@ -72,8 +82,27 @@ void OneSixProfileStrategy::loadDefaultBuiltinPatches()
 	}
 	else
 	{
-		auto mcversion = ENV.getVersion("net.minecraft", m_instance->intendedVersionId());
-		minecraftPatch = std::dynamic_pointer_cast<ProfilePatch>(mcversion);
+		auto mc = std::dynamic_pointer_cast<CachedVersionList>(ENV.getVersionList("net.minecraft"));
+		auto path = mc->versionFilePath(m_instance->intendedVersionId());
+		if(QFile::exists(path))
+		{
+			QFile file(path);
+			if (!file.open(QFile::ReadOnly))
+			{
+				throw JSONValidationError(QObject::tr("Unable to open the version file %1: %2.")
+											.arg(file.fileName(), file.errorString()));
+			}
+			QJsonParseError error;
+			QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &error);
+			if (error.error != QJsonParseError::NoError)
+			{
+				throw JSONValidationError(
+					QObject::tr("Unable to process the version file %1: %2 at %3.")
+						.arg(file.fileName(), error.errorString())
+						.arg(error.offset));
+			}
+			minecraftPatch = WonkoFormat::fromJson(doc, file.fileName());
+		}
 	}
 	if (!minecraftPatch)
 	{
@@ -83,16 +112,17 @@ void OneSixProfileStrategy::loadDefaultBuiltinPatches()
 	profile->appendPatch(minecraftPatch);
 
 
-	// TODO: this is obviously fake.
-	QResource LWJGL(":/versions/LWJGL/2.9.1.json");
-	auto lwjgl = ProfileUtils::parseJsonFile(LWJGL.absoluteFilePath(), false);
-	auto lwjglPatch = std::dynamic_pointer_cast<ProfilePatch>(lwjgl);
+	auto lwjgl = std::dynamic_pointer_cast<CachedVersionList>(ENV.getVersionList("org.lwjgl"));
+	auto path = lwjgl->versionFilePath("2.9.1");
+	QFile file(path);
+	file.open(QFile::ReadOnly);
+	QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+	auto lwjglPatch = WonkoFormat::fromJson(doc, file.fileName());
 	if (!lwjglPatch)
 	{
 		throw VersionIncomplete("org.lwjgl");
 	}
 	lwjglPatch->setOrder(-1);
-	lwjgl->setVanilla(true);
 	profile->appendPatch(lwjglPatch);
 }
 
@@ -257,7 +287,7 @@ bool OneSixProfileStrategy::installJarMods(QStringList filepaths)
 						<< "for reading:" << file.errorString();
 			return false;
 		}
-		file.write(f->toJson(true).toJson());
+		file.write(OneSixFormat::toJson(f, true).toJson());
 		file.close();
 		profile->appendPatch(f);
 	}
