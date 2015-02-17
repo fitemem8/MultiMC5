@@ -236,20 +236,6 @@ void VersionPage::on_changeMCVersionBtn_clicked()
 		return;
 	}
 
-	if (!m_version->isVanilla())
-	{
-		auto result = CustomMessageBox::selectable(
-			this, tr("Are you sure?"),
-			tr("This will remove any library/version customization you did previously. "
-			   "This includes things like Forge install and similar."),
-			QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Abort,
-			QMessageBox::Abort)->exec();
-
-		if (result != QMessageBox::Ok)
-			return;
-		m_version->revertToVanilla();
-		reloadMinecraftProfile();
-	}
 	m_inst->setIntendedVersionId(vselect.selectedVersion()->descriptor());
 
 	auto updateTask = m_inst->doUpdate();

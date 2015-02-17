@@ -150,51 +150,6 @@ ProfilePatchPtr MinecraftProfile::versionPatch(int index)
 	return VersionPatches[index];
 }
 
-bool MinecraftProfile::isVanilla()
-{
-	for(auto patchptr: VersionPatches)
-	{
-		if(patchptr->isCustom())
-			return false;
-	}
-	return true;
-}
-
-bool MinecraftProfile::revertToVanilla()
-{
-	/*
-	beginResetModel();
-	// remove patches, if present
-	auto it = VersionPatches.begin();
-	while (it != VersionPatches.end())
-	{
-		if ((*it)->isMoveable())
-		{
-			if(!preremove(*it))
-			{
-				endResetModel();
-				saveCurrentOrder();
-				return false;
-			}
-			if(!QFile::remove((*it)->getPatchFilename()))
-			{
-				endResetModel();
-				saveCurrentOrder();
-				return false;
-			}
-			it = VersionPatches.erase(it);
-		}
-		else
-			it++;
-	}
-	reapply();
-	endResetModel();
-	saveCurrentOrder();
-	return true;
-	*/
-	return false;
-}
-
 QList<std::shared_ptr<OneSixLibrary> > MinecraftProfile::getActiveNormalLibs()
 {
 	QList<std::shared_ptr<OneSixLibrary> > output;

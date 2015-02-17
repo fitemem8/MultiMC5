@@ -48,12 +48,6 @@ public:
 	virtual int columnCount(const QModelIndex &parent) const;
 	virtual Qt::ItemFlags flags(const QModelIndex &index) const;
 
-	/// is this version unchanged by the user?
-	bool isVanilla();
-
-	/// remove any customizations on top of whatever 'vanilla' means
-	bool revertToVanilla();
-
 	/// install more jar mods
 	void installJarMods(QStringList selectedFiles);
 
@@ -114,7 +108,7 @@ public: /* only use in ProfileStrategy */
 	void appendPatch(ProfilePatchPtr patch);
 
 public: /* data */
-	/// the ID - determines which jar to use!
+	/// the ID - determines which jar to use! FIXME: replace with main lib
 	QString id;
 
 	/// Assets type - "legacy" or a version ID
