@@ -63,67 +63,57 @@ void OneSixProfileStrategy::upgradeDeprecatedFiles()
 	}
 }
 
-
-void OneSixProfileStrategy::loadDefaultBuiltinPatches()
+void OneSixProfileStrategy::loadBuiltinPatch(QString uid, QString name, QString version)
 {
-	auto mcJson = PathCombine(m_instance->instanceRoot(), "patches" , "net.minecraft.json");
+	auto mcJson = PathCombine(m_instance->instanceRoot(), "patches" , QString("%1.json").arg(uid));
 	// load up the base minecraft patch
 	ProfilePatchPtr minecraftPatch;
 	if(QFile::exists(mcJson))
 	{
 		auto file = ProfileUtils::parseJsonFile(QFileInfo(mcJson), false);
-		file->fileId = "net.minecraft";
-		file->name = "Minecraft";
+		file->fileId = uid;
+		file->name = name;
 		if(file->version.isEmpty())
 		{
-			file->version = m_instance->intendedVersionId();
+			file->version = QObject::tr("Custom");
 		}
 		minecraftPatch = std::dynamic_pointer_cast<ProfilePatch>(file);
 	}
-	else
+	else if(!version.isEmpty())
 	{
-		auto mc = std::dynamic_pointer_cast<CachedVersionList>(ENV.getVersionList("net.minecraft"));
-		auto path = mc->versionFilePath(m_instance->intendedVersionId());
-		if(QFile::exists(path))
+		auto mc = std::dynamic_pointer_cast<CachedVersionList>(ENV.getVersionList(uid));
+		auto path = mc->versionFilePath(version);
+		if(!QFile::exists(path))
 		{
-			QFile file(path);
-			if (!file.open(QFile::ReadOnly))
-			{
-				throw JSONValidationError(QObject::tr("Unable to open the version file %1: %2.")
-											.arg(file.fileName(), file.errorString()));
-			}
-			QJsonParseError error;
-			QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &error);
-			if (error.error != QJsonParseError::NoError)
-			{
-				throw JSONValidationError(
-					QObject::tr("Unable to process the version file %1: %2 at %3.")
-						.arg(file.fileName(), error.errorString())
-						.arg(error.offset));
-			}
-			minecraftPatch = WonkoFormat::fromJson(doc, file.fileName());
+			throw VersionIncomplete(uid);
 		}
+		QFile file(path);
+		if (!file.open(QFile::ReadOnly))
+		{
+			throw JSONValidationError(QObject::tr("Unable to open the version file %1: %2.")
+										.arg(file.fileName(), file.errorString()));
+		}
+		QJsonParseError error;
+		QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &error);
+		if (error.error != QJsonParseError::NoError)
+		{
+			throw JSONValidationError(
+				QObject::tr("Unable to process the version file %1: %2 at %3.")
+					.arg(file.fileName(), error.errorString())
+					.arg(error.offset));
+		}
+		minecraftPatch = WonkoFormat::fromJson(doc, file.fileName());
 	}
-	if (!minecraftPatch)
-	{
-		throw VersionIncomplete("net.minecraft");
-	}
-	minecraftPatch->setOrder(-2);
-	profile->appendPatch(minecraftPatch);
+	if(minecraftPatch)
+		profile->appendPatch(minecraftPatch);
+}
 
-
-	auto lwjgl = std::dynamic_pointer_cast<CachedVersionList>(ENV.getVersionList("org.lwjgl"));
-	auto path = lwjgl->versionFilePath("2.9.1");
-	QFile file(path);
-	file.open(QFile::ReadOnly);
-	QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-	auto lwjglPatch = WonkoFormat::fromJson(doc, file.fileName());
-	if (!lwjglPatch)
-	{
-		throw VersionIncomplete("org.lwjgl");
-	}
-	lwjglPatch->setOrder(-1);
-	profile->appendPatch(lwjglPatch);
+void OneSixProfileStrategy::loadDefaultBuiltinPatches()
+{
+	loadBuiltinPatch("net.minecraft", "Minecraft", m_instance->minecraftVersion());
+	loadBuiltinPatch("org.lwjgl", "LWJGL", m_instance->lwjglVersion());
+	loadBuiltinPatch("net.minecraftforge", "Forge", m_instance->forgeVersion());
+	loadBuiltinPatch("com.mumfrey.liteloader", "LiteLoader", m_instance->liteloaderVersion());
 }
 
 void OneSixProfileStrategy::loadUserPatches()
@@ -140,6 +130,10 @@ void OneSixProfileStrategy::loadUserPatches()
 		if (id == "net.minecraft")
 			continue;
 		if (id == "org.lwjgl")
+			continue;
+		if (id == "net.minecraftforge")
+			continue;
+		if (id == "com.mumfrey.liteloader")
 			continue;
 		// parse the file
 		QString filename = patches.absoluteFilePath(id + ".json");
@@ -170,6 +164,10 @@ void OneSixProfileStrategy::loadUserPatches()
 		if (file->fileId == "net.minecraft")
 			continue;
 		if (file->fileId == "org.lwjgl")
+			continue;
+		if (file->fileId == "net.minecraftforge")
+			continue;
+		if (file->fileId == "com.mumfrey.liteloader")
 			continue;
 		// do not load what we already loaded in the first pass
 		if (userOrder.contains(file->fileId))

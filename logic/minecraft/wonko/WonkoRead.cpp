@@ -20,7 +20,7 @@ VersionFilePtr WonkoFormat::fromJson(const QJsonDocument &doc, const QString &fi
 			throw JSONValidationError(QObject::tr("Unknown wonko format version: %1").arg(formatVersion));
 		}
 		file->name = file->fileId = ensureString(json.value("uid"));
-		file->filename;
+		file->filename = filename;
 		file->version = ensureString(json.value("version"));
 		file->type = ensureString(json.value("type"));
 

@@ -291,6 +291,8 @@ void MultiMC::initVersionLists()
 {
 	ENV.registerVersionList("net.minecraft", std::make_shared<CachedVersionList>(BuildConfig.WONKO_URL ,"net.minecraft"));
 	ENV.registerVersionList("org.lwjgl", std::make_shared<CachedVersionList>(BuildConfig.WONKO_URL ,"org.lwjgl"));
+	ENV.registerVersionList("net.minecraftforge", std::make_shared<CachedVersionList>(BuildConfig.WONKO_URL ,"net.minecraftforge"));
+	ENV.registerVersionList("com.mumfrey.liteloader", std::make_shared<CachedVersionList>(BuildConfig.WONKO_URL ,"com.mumfrey.liteloader"));
 }
 
 

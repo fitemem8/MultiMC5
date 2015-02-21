@@ -65,7 +65,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="changeMCVersionBtn">
+          <widget class="QPushButton" name="changeVersionBtn">
            <property name="text">
             <string>Change version</string>
            </property>

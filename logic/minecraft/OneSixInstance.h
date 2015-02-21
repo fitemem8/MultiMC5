@@ -29,12 +29,21 @@ public:
 
 	virtual void init();
 
+	QString minecraftVersion() const;
+	QString lwjglVersion() const;
+	QString forgeVersion() const;
+	QString liteloaderVersion() const;
+
+	void setMinecraftVersion(QString version);
+	void setLwjglVersion(QString version);
+	void setForgeVersion(QString version);
+	void setLiteloaderVersion(QString version);
+
 	//////  Mod Lists  //////
 	std::shared_ptr<ModList> loaderModList() const;
 	std::shared_ptr<ModList> coreModList() const;
 	std::shared_ptr<ModList> resourcePackList() const override;
 	std::shared_ptr<ModList> texturePackList() const override;
-	virtual QList<Mod> getJarMods() const override;
 	virtual void createProfile();
 
 	virtual QSet<QString> traits();
@@ -52,14 +61,6 @@ public:
 	virtual BaseProcess *prepareForLaunch(AuthSessionPtr account) override;
 
 	virtual void cleanupAfterRun() override;
-
-	virtual QString intendedVersionId() const override;
-	virtual bool setIntendedVersionId(QString version) override;
-
-	virtual QString currentVersionId() const override;
-
-	virtual bool shouldUpdate() const override;
-	virtual void setShouldUpdate(bool val) override;
 
 	/**
 	 * reload the profile, including version json files.
@@ -79,7 +80,6 @@ public:
 	virtual QDir jarmodsPath() const;
 	virtual QDir librariesPath() const;
 	virtual QDir versionsPath() const;
-	virtual bool providesVersionFile() const;
 
 	bool reload() override;
 

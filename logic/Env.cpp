@@ -57,63 +57,6 @@ std::shared_ptr<IconList> Env::icons()
 	Q_ASSERT(m_icons != nullptr);
 	return m_icons;
 }
-/*
-class NullVersion : public BaseVersion
-{
-	Q_OBJECT
-public:
-	virtual QString name()
-	{
-		return "null";
-	}
-	virtual QString descriptor()
-	{
-		return "null";
-	}
-	virtual QString typeString() const
-	{
-		return "Null";
-	}
-};
-
-class NullTask: public Task
-{
-	Q_OBJECT
-public:
-	virtual void executeTask()
-	{
-		emitFailed(tr("Nothing to do."));
-	}
-};
-
-class NullVersionList: public BaseVersionList
-{
-	Q_OBJECT
-public:
-	virtual const BaseVersionPtr at(int i) const
-	{
-		return std::make_shared<NullVersion>();
-	}
-	virtual int count() const
-	{
-		return 0;
-	};
-	virtual Task* getLoadTask()
-	{
-		return new NullTask;
-	}
-	virtual bool isLoaded()
-	{
-		return false;
-	}
-	virtual void sort()
-	{
-	}
-	virtual void updateListData(QList< BaseVersionPtr >)
-	{
-	}
-};
-*/
 
 BaseVersionPtr Env::getVersion(QString component, QString version)
 {
@@ -132,7 +75,6 @@ std::shared_ptr< BaseVersionList > Env::getVersionList(QString component)
 	{
 		return *iter;
 	}
-	//return std::make_shared<NullVersionList>();
 	return nullptr;
 }
 

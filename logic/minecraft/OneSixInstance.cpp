@@ -32,7 +32,50 @@
 OneSixInstance::OneSixInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir)
 	: MinecraftInstance(globalSettings, settings, rootDir)
 {
-	m_settings->registerSetting("IntendedVersion", "");
+	m_settings->registerSetting({"MinecraftVersion", "IntendedVersion"}, "");
+	m_settings->registerSetting("LWJGLVersion", "2.9.1");
+	m_settings->registerSetting("ForgeVersion", "");
+	m_settings->registerSetting("LiteLoaderVersion", "");
+}
+
+QString OneSixInstance::minecraftVersion() const
+{
+	return m_settings->get("MinecraftVersion").toString();
+}
+
+QString OneSixInstance::lwjglVersion() const
+{
+	return m_settings->get("LWJGLVersion").toString();
+}
+
+QString OneSixInstance::forgeVersion() const
+{
+	return m_settings->get("ForgeVersion").toString();
+}
+
+QString OneSixInstance::liteloaderVersion() const
+{
+	return m_settings->get("LiteLoaderVersion").toString();
+}
+
+void OneSixInstance::setMinecraftVersion(QString version)
+{
+	m_settings->set("MinecraftVersion", version);
+}
+
+void OneSixInstance::setLwjglVersion(QString version)
+{
+	m_settings->set("LWJGLVersion", version);
+}
+
+void OneSixInstance::setForgeVersion(QString version)
+{
+	m_settings->set("ForgeVersion", version);
+}
+
+void OneSixInstance::setLiteloaderVersion(QString version)
+{
+	m_settings->set("LiteLoaderVersion", version);
 }
 
 void OneSixInstance::init()
@@ -141,8 +184,7 @@ BaseProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 		{
 			launchScript += "cp " + librariesPath().absoluteFilePath(lib->storagePath()) + "\n";
 		}
-		auto jarMods = getJarMods();
-		if (!jarMods.isEmpty())
+		if (!m_version->jarMods.isEmpty())
 		{
 			launchScript += "cp " + QDir(instanceRoot()).absoluteFilePath("temp.jar") + "\n";
 		}
@@ -258,47 +300,6 @@ std::shared_ptr<ModList> OneSixInstance::texturePackList() const
 	return m_texture_pack_list;
 }
 
-bool OneSixInstance::setIntendedVersionId(QString version)
-{
-	settings().set("IntendedVersion", version);
-	if(getMinecraftProfile())
-	{
-		clearProfile();
-	}
-	return true;
-}
-
-QList< Mod > OneSixInstance::getJarMods() const
-{
-	QList<Mod> mods;
-	for (auto jarmod : m_version->jarMods)
-	{
-		QString filePath = jarmodsPath().absoluteFilePath(jarmod->name);
-		mods.push_back(Mod(QFileInfo(filePath)));
-	}
-	return mods;
-}
-
-
-QString OneSixInstance::intendedVersionId() const
-{
-	return settings().get("IntendedVersion").toString();
-}
-
-void OneSixInstance::setShouldUpdate(bool)
-{
-}
-
-bool OneSixInstance::shouldUpdate() const
-{
-	return true;
-}
-
-QString OneSixInstance::currentVersionId() const
-{
-	return intendedVersionId();
-}
-
 void OneSixInstance::reloadProfile()
 {
 	try
@@ -341,11 +342,11 @@ QString OneSixInstance::getStatusbarDescription()
 
 	if (traits.size())
 	{
-		return tr("Minecraft %1 (%2)").arg(intendedVersionId()).arg(traits.join(", "));
+		return tr("Minecraft %1 (%2)").arg(minecraftVersion()).arg(traits.join(", "));
 	}
 	else
 	{
-		return tr("Minecraft %1").arg(intendedVersionId());
+		return tr("Minecraft %1").arg(minecraftVersion());
 	}
 }
 
@@ -362,11 +363,6 @@ QDir OneSixInstance::jarmodsPath() const
 QDir OneSixInstance::versionsPath() const
 {
 	return QDir::current().absoluteFilePath("versions");
-}
-
-bool OneSixInstance::providesVersionFile() const
-{
-	return false;
 }
 
 bool OneSixInstance::reload()
@@ -427,8 +423,7 @@ QStringList OneSixInstance::extraArguments() const
 	auto version = getMinecraftProfile();
 	if (!version)
 		return list;
-	auto jarMods = getJarMods();
-	if (!jarMods.isEmpty())
+	if (!version->jarMods.isEmpty())
 	{
 		list.append({"-Dfml.ignoreInvalidMinecraftCertificates=true",
 					 "-Dfml.ignorePatchDiscrepancies=true"});

@@ -38,7 +38,3 @@ QString MinecraftInstance::minecraftRoot() const
 		return mcDir.filePath();
 }
 
-std::shared_ptr< BaseVersionList > MinecraftInstance::versionList() const
-{
-	return ENV.getVersionList("net.minecraft");
-}

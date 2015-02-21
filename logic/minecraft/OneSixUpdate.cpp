@@ -49,33 +49,26 @@ void OneSixUpdate::executeTask()
 		return;
 	}
 
-	// Get a pointer to the version object that corresponds to the instance's version.
-	auto targetVersion = ENV.getVersion("net.minecraft", m_inst->intendedVersionId());
-	if (targetVersion == nullptr)
-	{
-		// don't do anything if it was invalid
-		emitFailed(tr("The specified Minecraft version is invalid. Choose a different one."));
-		return;
-	}
-	if (m_inst->providesVersionFile())
-	{
-		qDebug() << "Instance provides a version file and doesn't need an update.";
-		jarlibStart();
-		return;
-	}
+	bool updateTask = false;
 	versionUpdateTask = std::make_shared<SequentialTask>();
+
+	auto addTasklet = [&](const QString & uid, const QString & version)
 	{
-		auto list = std::dynamic_pointer_cast<CachedVersionList>(ENV.getVersionList("net.minecraft"));
-		versionUpdateTask->addTask(std::shared_ptr<Task>(list->getLoadTask()));
-		versionUpdateTask->addTask(list->createUpdateTask(m_inst->intendedVersionId()));
-	}
-	// FIXME: fake.
-	{
-		auto list = std::dynamic_pointer_cast<CachedVersionList>(ENV.getVersionList("org.lwjgl"));
-		versionUpdateTask->addTask(std::shared_ptr<Task>(list->getLoadTask()));
-		versionUpdateTask->addTask(list->createUpdateTask("2.9.1"));
-	}
-	if (!versionUpdateTask)
+		if(!version.isEmpty())
+		{
+			auto list = std::dynamic_pointer_cast<CachedVersionList>(ENV.getVersionList(uid));
+			versionUpdateTask->addTask(std::shared_ptr<Task>(list->getLoadTask()));
+			versionUpdateTask->addTask(list->createUpdateTask(version));
+			updateTask = true;
+		}
+	};
+
+	addTasklet("net.minecraft", m_inst->minecraftVersion());
+	addTasklet("org.lwjgl", m_inst->lwjglVersion());
+	addTasklet("com.mumfrey.liteloader", m_inst->liteloaderVersion());
+	addTasklet("net.minecraftforge", m_inst->forgeVersion());
+
+	if (!updateTask)
 	{
 		qDebug() << "Didn't spawn an update task.";
 		jarlibStart();
@@ -304,7 +297,12 @@ void OneSixUpdate::jarlibFinished()
 	}
 
 	// create temporary modded jar, if needed
-	auto jarMods = inst->getJarMods();
+	QList<Mod> jarMods;
+	for (auto jarmod : version->jarMods)
+	{
+		QString filePath = inst->jarmodsPath().absoluteFilePath(jarmod->name);
+		jarMods.push_back(Mod(QFileInfo(filePath)));
+	}
 	if(jarMods.size())
 	{
 		auto sourceJarPath = m_inst->versionsPath().absoluteFilePath(version->id + "/" + version->id + ".jar");
@@ -343,7 +341,7 @@ void OneSixUpdate::fmllibsStart()
 	std::shared_ptr<MinecraftProfile> fullversion = inst->getMinecraftProfile();
 	bool forge_present = false;
 
-	QString version = inst->intendedVersionId();
+	QString version = inst->minecraftVersion();
 	auto &fmlLibsMapping = g_VersionFilterData.fmlLibsMapping;
 	if (!fmlLibsMapping.contains(version))
 	{

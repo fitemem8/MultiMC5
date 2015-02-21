@@ -62,7 +62,7 @@ slots:
 
 	void updateVersionControls();
 	void disableVersionControls();
-	void on_changeMCVersionBtn_clicked();
+	void on_changeVersionBtn_clicked();
 
 protected:
 	/// FIXME: this shouldn't be necessary!

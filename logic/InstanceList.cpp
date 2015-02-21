@@ -469,12 +469,15 @@ InstanceList::createInstance(InstancePtr &inst, BaseVersionPtr version, const QS
 		return InstanceList::NoSuchVersion;
 	}
 
-	auto instanceSettings = std::make_shared<INISettingsObject>(PathCombine(instDir, "instance.cfg"));
-	instanceSettings->registerSetting("InstanceType", "Legacy");
-
-	instanceSettings->set("InstanceType", "OneSix");
-	inst.reset(new OneSixInstance(m_globalSettings, instanceSettings, instDir));
-	inst->setIntendedVersionId(version->descriptor());
+	// ugly old format instances
+	{
+		auto instanceSettings = std::make_shared<INISettingsObject>(PathCombine(instDir, "instance.cfg"));
+		instanceSettings->registerSetting("InstanceType", "Legacy");
+		instanceSettings->set("InstanceType", "OneSix");
+		auto minecraftInst = new OneSixInstance(m_globalSettings, instanceSettings, instDir);
+		minecraftInst->setMinecraftVersion(version->descriptor());
+		inst.reset(minecraftInst);
+	}
 	inst->init();
 	return InstanceList::NoCreateError;
 }
