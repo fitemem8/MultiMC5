@@ -5,7 +5,7 @@
 #include <QDebug>
 
 #include "minecraft/VersionFile.h"
-#include "minecraft/OneSixLibrary.h"
+#include "minecraft/RawLibrary.h"
 #include "minecraft/MinecraftProfile.h"
 #include "minecraft/JarMod.h"
 #include "ParseUtils.h"
@@ -15,7 +15,7 @@ using namespace MMCJson;
 
 #include "VersionBuildError.h"
 
-int findLibraryByName(QList<OneSixLibraryPtr> haystack, const GradleSpecifier &needle)
+int findLibraryByName(QList<RawLibraryPtr> haystack, const GradleSpecifier &needle)
 {
 	int retval = -1;
 	for (int i = 0; i < haystack.size(); ++i)
@@ -29,11 +29,6 @@ int findLibraryByName(QList<OneSixLibraryPtr> haystack, const GradleSpecifier &n
 		}
 	}
 	return retval;
-}
-
-bool VersionFile::isMinecraftVersion()
-{
-	return fileId == "net.minecraft";
 }
 
 bool VersionFile::hasJarMods()
@@ -96,12 +91,7 @@ void VersionFile::applyTo(MinecraftProfile *version)
 	version->traits.unite(traits);
 	if (shouldOverwriteLibs)
 	{
-		QList<OneSixLibraryPtr> libs;
-		for (auto lib : overwriteLibs)
-		{
-			libs.append(OneSixLibrary::fromRawLibrary(lib));
-		}
-		version->libraries = libs;
+		version->libraries = overwriteLibs;
 	}
 	for (auto addedLibrary : addLibs)
 	{
@@ -155,11 +145,11 @@ void VersionFile::applyTo(MinecraftProfile *version)
 			{
 				if (addedLibrary->insertType == RawLibrary::Append)
 				{
-					version->libraries.append(OneSixLibrary::fromRawLibrary(addedLibrary));
+					version->libraries.append(addedLibrary);
 				}
 				else
 				{
-					version->libraries.prepend(OneSixLibrary::fromRawLibrary(addedLibrary));
+					version->libraries.prepend(addedLibrary);
 				}
 				break;
 			}
@@ -170,7 +160,7 @@ void VersionFile::applyTo(MinecraftProfile *version)
 			const Util::Version existingVersion = existingLibrary->version();
 			// if the existing version is a hard dependency we can either use it or
 			// fail, but we can't change it
-			if (existingLibrary->dependType == OneSixLibrary::Hard)
+			if (existingLibrary->dependType == RawLibrary::Hard)
 			{
 				// we need a higher version, or we're hard to and the versions aren't
 				// equal
@@ -187,13 +177,12 @@ void VersionFile::applyTo(MinecraftProfile *version)
 					// the library is already existing, so we don't have to do anything
 				}
 			}
-			else if (existingLibrary->dependType == OneSixLibrary::Soft)
+			else if (existingLibrary->dependType == RawLibrary::Soft)
 			{
 				// if we are higher it means we should update
 				if (addedVersion > existingVersion)
 				{
-					auto library = OneSixLibrary::fromRawLibrary(addedLibrary);
-					version->libraries.replace(index, library);
+					version->libraries.replace(index, addedLibrary);
 				}
 				else
 				{
@@ -225,7 +214,7 @@ void VersionFile::applyTo(MinecraftProfile *version)
 			int index = findLibraryByName(version->libraries, toReplace);
 			if (index >= 0)
 			{
-				version->libraries.replace(index, OneSixLibrary::fromRawLibrary(addedLibrary));
+				version->libraries.replace(index, addedLibrary);
 			}
 			else
 			{

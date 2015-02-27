@@ -1,5 +1,5 @@
 #pragma once
-#include "minecraft/OneSixInstance.h"
+#include "minecraft/onesix/OneSixInstance.h"
 #include "pages/BasePage.h"
 #include "pages/VersionPage.h"
 #include "pages/ModFolderPage.h"

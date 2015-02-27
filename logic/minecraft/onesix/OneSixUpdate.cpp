@@ -28,8 +28,8 @@
 #include "BaseInstance.h"
 #include "CachedVersionList.h"
 #include "minecraft/MinecraftProfile.h"
-#include "minecraft/OneSixLibrary.h"
-#include "minecraft/OneSixInstance.h"
+#include "minecraft/RawLibrary.h"
+#include "minecraft/onesix/OneSixInstance.h"
 #include "net/URLConstants.h"
 #include "minecraft/AssetsUtils.h"
 #include "minecraft/JarUtils.h"
@@ -212,7 +212,7 @@ void OneSixUpdate::jarlibStart()
 	libs.append(version->getActiveNormalLibs());
 
 	auto metacache = ENV.metacache();
-	QList<std::shared_ptr<OneSixLibrary>> brokenLocalLibs;
+	QList<RawLibraryPtr> brokenLocalLibs;
 
 	for (auto lib : libs)
 	{

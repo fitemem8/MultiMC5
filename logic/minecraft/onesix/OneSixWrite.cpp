@@ -109,7 +109,7 @@ QJsonDocument OneSixFormat::toJson(VersionFilePtr file, bool saveOrder)
 	writeString(root, "-minecraftArguments", file->removeMinecraftArguments);
 	writeString(root, "type", file->type);
 	writeString(root, "assets", file->assets);
-	if (file->isMinecraftVersion())
+	if (file->fileId == "net.minecraft")
 	{
 		writeString(root, "releaseTime", file->m_releaseTimeString);
 	}

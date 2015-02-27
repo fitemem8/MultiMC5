@@ -11,7 +11,6 @@ public:
 	virtual ~ProfilePatch(){};
 	virtual void applyTo(MinecraftProfile *version) = 0;
 
-	virtual bool isMinecraftVersion() = 0;
 	virtual bool hasJarMods() = 0;
 	virtual QList<JarmodPtr> getJarMods() = 0;
 
@@ -26,7 +25,6 @@ public:
 	virtual QString getPatchName() = 0;
 	virtual QString getPatchVersion() = 0;
 	virtual QString getPatchFilename() = 0;
-	virtual bool isCustom() = 0;
 };
 
 typedef std::shared_ptr<ProfilePatch> ProfilePatchPtr;

@@ -17,7 +17,6 @@ typedef std::shared_ptr<RawLibrary> RawLibraryPtr;
 
 class RawLibrary
 {
-	friend class OneSixLibrary;
 public: /* methods */
 	/// Returns the raw name field
 	const GradleSpecifier & rawName() const

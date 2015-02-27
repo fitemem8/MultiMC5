@@ -18,13 +18,13 @@
 #include <QDebug>
 #include "MMCError.h"
 
-#include "minecraft/OneSixInstance.h"
+#include "minecraft/onesix/OneSixInstance.h"
+#include "minecraft/onesix/OneSixUpdate.h"
+#include "minecraft/onesix/OneSixProfileStrategy.h"
 
-#include "minecraft/OneSixUpdate.h"
 #include "minecraft/MinecraftProfile.h"
 #include "minecraft/VersionBuildError.h"
 #include "minecraft/MinecraftProcess.h"
-#include "minecraft/OneSixProfileStrategy.h"
 
 #include "minecraft/AssetsUtils.h"
 #include "icons/IconList.h"

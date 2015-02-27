@@ -8,7 +8,7 @@
 #include "minecraft/OneSixRule.h"
 #include "ProfilePatch.h"
 #include "MMCError.h"
-#include "OneSixLibrary.h"
+#include "RawLibrary.h"
 #include "JarMod.h"
 
 class MinecraftProfile;
@@ -19,7 +19,6 @@ class VersionFile : public ProfilePatch
 {
 public: /* methods */
 	virtual void applyTo(MinecraftProfile *version) override;
-	virtual bool isMinecraftVersion() override;
 	virtual bool hasJarMods() override;
 	virtual int getOrder() override
 	{
@@ -48,14 +47,6 @@ public: /* methods */
 	virtual QString getPatchFilename() override
 	{
 		return filename;
-	}
-	virtual bool isCustom()
-	{
-		return !isVanilla;
-	};
-	void setVanilla (bool state)
-	{
-		isVanilla = state;
 	}
 
 public: /* data */

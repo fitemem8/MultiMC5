@@ -1,8 +1,8 @@
-#include "minecraft/OneSixProfileStrategy.h"
+#include "minecraft/onesix/OneSixProfileStrategy.h"
 #include "minecraft/VersionBuildError.h"
-#include "minecraft/OneSixInstance.h"
-#include "onesix/OneSixFormat.h"
-#include "wonko/WonkoFormat.h"
+#include "minecraft/onesix/OneSixInstance.h"
+#include "minecraft/onesix/OneSixFormat.h"
+#include "minecraft/wonko/WonkoFormat.h"
 #include "CachedVersionList.h"
 #include "Env.h"
 #include <CachedVersion.h>

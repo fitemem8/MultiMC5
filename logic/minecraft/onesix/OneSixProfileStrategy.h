@@ -1,5 +1,5 @@
 #pragma once
-#include "ProfileStrategy.h"
+#include "minecraft/ProfileStrategy.h"
 
 class OneSixInstance;
 

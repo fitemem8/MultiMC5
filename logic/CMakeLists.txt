@@ -92,17 +92,22 @@ SET(LOGIC_SOURCES
 	status/StatusChecker.h
 	status/StatusChecker.cpp
 
-	# Minecraft support
+	# Minecraft - OneSix support
 	minecraft/onesix/OneSixFormat.h
 	minecraft/onesix/OneSixRead.cpp
 	minecraft/onesix/OneSixWrite.cpp
 	minecraft/onesix/OneSixUtils.cpp
+	minecraft/onesix/OneSixProfileStrategy.cpp
+	minecraft/onesix/OneSixProfileStrategy.h
+	minecraft/onesix/OneSixUpdate.h
+	minecraft/onesix/OneSixUpdate.cpp
+	minecraft/onesix/OneSixInstance.h
+	minecraft/onesix/OneSixInstance.cpp
+
+	# Minecraft - Wonko
 	minecraft/wonko/WonkoFormat.h
 	minecraft/wonko/WonkoRead.cpp
-	minecraft/OneSixUpdate.h
-	minecraft/OneSixUpdate.cpp
-	minecraft/OneSixInstance.h
-	minecraft/OneSixInstance.cpp
+
 	minecraft/SkinUtils.h
 	minecraft/SkinUtils.cpp
 	minecraft/JarUtils.h
@@ -117,11 +122,6 @@ SET(LOGIC_SOURCES
 	minecraft/MinecraftProcess.cpp
 	minecraft/MinecraftProcess.h
 	minecraft/NullProfileStrategy.h
-	minecraft/OneSixLibrary.cpp
-	minecraft/OneSixLibrary.h
-	minecraft/OneSixProfileStrategy.cpp
-	minecraft/OneSixProfileStrategy.h
-	minecraft/OneSixRule.cpp
 	minecraft/OneSixRule.h
 	minecraft/OpSys.cpp
 	minecraft/OpSys.h

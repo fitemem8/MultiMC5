@@ -32,7 +32,7 @@
 #include "BaseInstance.h"
 
 //FIXME: this really doesn't belong *here*
-#include "minecraft/OneSixInstance.h"
+#include "minecraft/onesix/OneSixInstance.h"
 #include "settings/INISettingsObject.h"
 #include "NullInstance.h"
 
