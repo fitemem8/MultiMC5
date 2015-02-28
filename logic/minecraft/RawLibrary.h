@@ -146,7 +146,7 @@ public: /* data */
 		Append,
 		Prepend,
 		Replace
-	} insertType = Append;
+	} insertType = Prepend;
 	QString insertData;
 
 	/// determines how can libraries be applied. conflicting dependencies cause errors.
