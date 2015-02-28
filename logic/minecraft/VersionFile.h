@@ -58,7 +58,6 @@ public: /* data */
 	QString version;
 	QString mcVersion;
 	QString filename;
-	QString id;
 	QString mainClass;
 	QString appletClass;
 	QString overwriteMinecraftArguments;

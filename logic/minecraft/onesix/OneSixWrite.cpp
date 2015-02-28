@@ -101,7 +101,8 @@ QJsonDocument OneSixFormat::toJson(VersionFilePtr file, bool saveOrder)
 	writeString(root, "fileId", file->fileId);
 	writeString(root, "version", file->version);
 	writeString(root, "mcVersion", file->mcVersion);
-	writeString(root, "id", file->id);
+	// FIXME: write version of library with name 'net.minecraft:minecraft'
+	// writeString(root, "id", file->id);
 	writeString(root, "mainClass", file->mainClass);
 	writeString(root, "appletClass", file->appletClass);
 	writeString(root, "minecraftArguments", file->overwriteMinecraftArguments);

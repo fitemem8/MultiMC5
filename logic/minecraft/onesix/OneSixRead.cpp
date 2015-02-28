@@ -87,6 +87,7 @@ RawLibraryPtr readRawLibrary(const QJsonObject &libObj, const QString &filename)
 	readString("MMC-hint", out->m_hint);
 	readString("MMC-absulute_url", out->m_absolute_url);
 	readString("MMC-absoluteUrl", out->m_absolute_url);
+	readString("absoluteUrl", out->m_absolute_url);
 	if (libObj.contains("extract"))
 	{
 		out->applyExcludes = true;
@@ -243,8 +244,6 @@ VersionFilePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& f
 		return QString();
 	};
 
-	readString("id", out->id);
-
 	readString("mainClass", out->mainClass);
 	readString("appletClass", out->appletClass);
 	{
@@ -336,6 +335,19 @@ VersionFilePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& f
 			auto lib = readRawLibrary(libObj, filename);
 			out->overwriteLibs.append(lib);
 		}
+	}
+
+	QString minecraftVersion;
+	readString("id", minecraftVersion);
+	if(!minecraftVersion.isEmpty())
+	{
+		auto libptr = std::make_shared<RawLibrary>();
+		auto name = QString("net.minecraft:minecraft:%1").arg(minecraftVersion);
+		auto url = QString("http://s3.amazonaws.com/Minecraft.Download/versions/%1/%2.jar")
+			.arg(minecraftVersion)
+			.arg(minecraftVersion);
+		libptr->setRawName(GradleSpecifier(name));
+		libptr->setAbsoluteUrl(url);
 	}
 
 	if (root.contains("+jarMods"))

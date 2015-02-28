@@ -38,19 +38,6 @@ bool VersionFile::hasJarMods()
 
 void VersionFile::applyTo(MinecraftProfile *version)
 {
-	if (!version->id.isNull() && !mcVersion.isNull())
-	{
-		if (QRegExp(mcVersion, Qt::CaseInsensitive, QRegExp::Wildcard).indexIn(version->id) ==
-			-1)
-		{
-			throw MinecraftVersionMismatch(fileId, mcVersion, version->id);
-		}
-	}
-
-	if (!id.isNull())
-	{
-		version->id = id;
-	}
 	if (!mainClass.isNull())
 	{
 		version->mainClass = mainClass;

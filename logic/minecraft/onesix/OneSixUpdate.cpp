@@ -190,23 +190,11 @@ void OneSixUpdate::jarlibStart()
 		return;
 	}
 
+	auto job = new NetJob(tr("Libraries for instance %1").arg(inst->name()));
+	jarlibDownloadJob.reset(job);
+
 	// Build a list of URLs that will need to be downloaded.
 	std::shared_ptr<MinecraftProfile> version = inst->getMinecraftProfile();
-	// minecraft.jar for this version
-	{
-		QString version_id = version->id;
-		QString localPath = version_id + "/" + version_id + ".jar";
-		QString urlstr = "http://" + URLConstants::AWS_DOWNLOAD_VERSIONS + localPath;
-
-		auto job = new NetJob(tr("Libraries for instance %1").arg(inst->name()));
-
-		auto metacache = ENV.metacache();
-		auto entry = metacache->resolveEntry("versions", localPath);
-		job->addNetAction(CacheDownload::make(QUrl(urlstr), entry));
-		jarHashOnEntry = entry->md5sum;
-
-		jarlibDownloadJob.reset(job);
-	}
 
 	auto libs = version->getActiveNativeLibs();
 	libs.append(version->getActiveNormalLibs());
@@ -277,25 +265,6 @@ void OneSixUpdate::jarlibFinished()
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
 	std::shared_ptr<MinecraftProfile> version = inst->getMinecraftProfile();
 
-	// nuke obsolete stripped jar(s) if needed
-	QString version_id = version->id;
-	QString strippedPath = version_id + "/" + version_id + "-stripped.jar";
-	QFile strippedJar(strippedPath);
-	if(strippedJar.exists())
-	{
-		strippedJar.remove();
-	}
-	auto finalJarPath = QDir(m_inst->instanceRoot()).absoluteFilePath("temp.jar");
-	QFile finalJar(finalJarPath);
-	if(finalJar.exists())
-	{
-		if(!finalJar.remove())
-		{
-			emitFailed(tr("Couldn't remove stale jar file: %1").arg(finalJarPath));
-			return;
-		}
-	}
-
 	// create temporary modded jar, if needed
 	QList<Mod> jarMods;
 	for (auto jarmod : version->jarMods)
@@ -305,12 +274,32 @@ void OneSixUpdate::jarlibFinished()
 	}
 	if(jarMods.size())
 	{
-		auto sourceJarPath = m_inst->versionsPath().absoluteFilePath(version->id + "/" + version->id + ".jar");
-		QString localPath = version_id + "/" + version_id + ".jar";
-		auto metacache = ENV.metacache();
-		auto entry = metacache->resolveEntry("versions", localPath);
-		QString fullJarPath = entry->getFullPath();
-		if(!JarUtils::createModdedJar(sourceJarPath, finalJarPath, jarMods))
+		auto finalJarPath = QDir(m_inst->instanceRoot()).absoluteFilePath("temp.jar");
+		QFile finalJar(finalJarPath);
+		if(finalJar.exists())
+		{
+			if(!finalJar.remove())
+			{
+				emitFailed(tr("Couldn't remove stale jar file: %1").arg(finalJarPath));
+				return;
+			}
+		}
+		auto libs = version->getActiveNormalLibs();
+		QString sourceJarPath;
+
+		// find net.minecraft:minecraft
+		for(auto foo:libs)
+		{
+			// FIXME: stupid hardcoded thing
+			if(foo->artifactPrefix() == "net.minecraft:minecraft")
+			{
+				sourceJarPath = m_inst->librariesPath().absoluteFilePath( foo->storagePath());
+				break;
+			}
+		}
+
+		// use it as the source for jar modding
+		if(!sourceJarPath.isNull() && !JarUtils::createModdedJar(sourceJarPath, finalJarPath, jarMods))
 		{
 			emitFailed(tr("Failed to create the custom Minecraft jar file."));
 			return;

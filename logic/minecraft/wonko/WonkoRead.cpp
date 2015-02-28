@@ -97,14 +97,6 @@ VersionFilePtr WonkoFormat::fromJson(const QJsonDocument &doc, const QString &fi
 				file->addTweakers.append(ensureString(tweakerVal));
 			}
 		}
-
-		if (data.contains("java.mainLib"))
-		{
-			// FIXME: a hack for OneSix.
-			QJsonObject libObj = ensureObject(data.value("java.mainLib"));
-			auto lib = OneSixFormat::readRawLibraryPlus(libObj, filename);
-			file->id = lib->version();
-		}
 	}
 
 	return file;

@@ -177,27 +177,26 @@ BaseProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 	if (!m_version)
 		return nullptr;
 
-	// libraries and class path.
+	auto libs = m_version->getActiveNormalLibs();
+	for (auto lib : libs)
 	{
-		auto libs = m_version->getActiveNormalLibs();
-		for (auto lib : libs)
+		// FIXME: stupid hardcoded thing
+		if(lib->artifactPrefix() == "net.minecraft:minecraft")
 		{
-			launchScript += "cp " + librariesPath().absoluteFilePath(lib->storagePath()) + "\n";
+			if(!m_version->jarMods.isEmpty())
+			{
+				launchScript += "cp " + QDir(instanceRoot()).absoluteFilePath("temp.jar") + "\n";
+				continue;
+			}
 		}
-		if (!m_version->jarMods.isEmpty())
-		{
-			launchScript += "cp " + QDir(instanceRoot()).absoluteFilePath("temp.jar") + "\n";
-		}
-		else
-		{
-			QString relpath = m_version->id + "/" + m_version->id + ".jar";
-			launchScript += "cp " + versionsPath().absoluteFilePath(relpath) + "\n";
-		}
+		launchScript += "cp " + librariesPath().absoluteFilePath(lib->storagePath()) + "\n";
 	}
+
 	if (!m_version->mainClass.isEmpty())
 	{
 		launchScript += "mainClass " + m_version->mainClass + "\n";
 	}
+
 	if (!m_version->appletClass.isEmpty())
 	{
 		launchScript += "appletClass " + m_version->appletClass + "\n";

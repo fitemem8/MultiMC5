@@ -59,7 +59,6 @@ void MinecraftProfile::reload()
 
 void MinecraftProfile::clear()
 {
-	id.clear();
 	assets.clear();
 	minecraftArguments.clear();
 	mainClass.clear();

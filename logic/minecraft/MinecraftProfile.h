@@ -103,9 +103,6 @@ public: /* only use in ProfileStrategy */
 	void appendPatch(ProfilePatchPtr patch);
 
 public: /* data */
-	/// the ID - determines which jar to use! FIXME: replace with main lib
-	QString id;
-
 	/// Assets type - "legacy" or a version ID
 	QString assets;
 	/**
