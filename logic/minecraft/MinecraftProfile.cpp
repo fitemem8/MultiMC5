@@ -309,11 +309,6 @@ void MinecraftProfile::move(const int index, const MoveDirection direction)
 	saveCurrentOrder();
 	reapply();
 }
-void MinecraftProfile::resetOrder()
-{
-	m_strategy->resetOrder();
-	reload();
-}
 
 void MinecraftProfile::reapply()
 {
@@ -343,20 +338,4 @@ void MinecraftProfile::finalize()
 void MinecraftProfile::installJarMods(QStringList selectedFiles)
 {
 	m_strategy->installJarMods(selectedFiles);
-}
-
-/*
- * TODO: get rid of this. Get rid of all order numbers.
- */
-int MinecraftProfile::getFreeOrderNumber()
-{
-	int largest = 100;
-	// yes, I do realize this is dumb. The order thing itself is dumb. and to be removed next.
-	for(auto thing: VersionPatches)
-	{
-		int order = thing->getOrder();
-		if(order > largest)
-			largest = order;
-	}
-	return largest + 1;
 }

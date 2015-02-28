@@ -13,10 +13,6 @@ class NullProfileStrategy: public ProfileStrategy
 	{
 		return false;
 	}
-	virtual bool resetOrder()
-	{
-		return false;
-	}
 	virtual bool saveOrder(ProfileUtils::PatchOrder order)
 	{
 		return false;

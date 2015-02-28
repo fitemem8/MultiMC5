@@ -55,7 +55,6 @@ slots:
 	void on_liteloaderBtn_clicked();
 	void on_reloadLibrariesBtn_clicked();
 	void on_removeLibraryBtn_clicked();
-	void on_resetLibraryOrderBtn_clicked();
 	void on_moveLibraryUpBtn_clicked();
 	void on_moveLibraryDownBtn_clicked();
 	void on_jarmodBtn_clicked();

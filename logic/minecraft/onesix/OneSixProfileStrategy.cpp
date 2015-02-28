@@ -204,11 +204,6 @@ bool OneSixProfileStrategy::saveOrder(ProfileUtils::PatchOrder order)
 	return ProfileUtils::writeOverrideOrders(PathCombine(m_instance->instanceRoot(), "order.json"), order);
 }
 
-bool OneSixProfileStrategy::resetOrder()
-{
-	return QDir(m_instance->instanceRoot()).remove("order.json");
-}
-
 bool OneSixProfileStrategy::removePatch(ProfilePatchPtr patch)
 {
 	bool ok = true;
@@ -274,7 +269,6 @@ bool OneSixProfileStrategy::installJarMods(QStringList filepaths)
 		f->jarMods.append(jarMod);
 		f->name = target_name;
 		f->fileId = target_id;
-		f->order = profile->getFreeOrderNumber();
 		QString patchFileName = PathCombine(patchDir, target_id + ".json");
 		f->filename = patchFileName;
 

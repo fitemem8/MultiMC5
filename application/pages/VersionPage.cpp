@@ -173,18 +173,6 @@ void VersionPage::on_jarmodBtn_clicked()
 		m_version->installJarMods(w.selectedFiles());
 }
 
-void VersionPage::on_resetLibraryOrderBtn_clicked()
-{
-	try
-	{
-		m_version->resetOrder();
-	}
-	catch (MMCError &e)
-	{
-		QMessageBox::critical(this, tr("Error"), e.cause());
-	}
-}
-
 void VersionPage::on_moveLibraryUpBtn_clicked()
 {
 	if (ui->libraryTreeView->selectionModel()->selectedRows().isEmpty())

@@ -149,16 +149,6 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="resetLibraryOrderBtn">
-           <property name="toolTip">
-            <string>This isn't implemented yet.</string>
-           </property>
-           <property name="text">
-            <string>Reset order</string>
-           </property>
-          </widget>
-         </item>
-         <item>
           <widget class="QPushButton" name="reloadLibrariesBtn">
            <property name="text">
             <string>Reload</string>

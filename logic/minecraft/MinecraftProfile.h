@@ -51,9 +51,6 @@ public:
 	/// install more jar mods
 	void installJarMods(QStringList selectedFiles);
 
-	/// DEPRECATED, remove ASAP
-	int getFreeOrderNumber();
-
 	/// Can patch file # be removed?
 	bool canRemove(const int index) const;
 
@@ -66,8 +63,6 @@ public:
 
 	/// remove patch file by id - including files/records
 	bool remove(const QString id);
-
-	void resetOrder();
 
 	/// reload all profile patches from storage, clear the profile and apply the patches
 	void reload();

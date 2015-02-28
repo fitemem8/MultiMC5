@@ -13,9 +13,6 @@ public:
 	/// load the patch files into the profile
 	virtual void load() = 0;
 
-	/// reset the order of patches
-	virtual bool resetOrder() = 0;
-
 	/// save the order of patches, given the order
 	virtual bool saveOrder(ProfileUtils::PatchOrder order) = 0;
 
