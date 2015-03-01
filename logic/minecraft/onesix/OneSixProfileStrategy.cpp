@@ -209,7 +209,7 @@ bool OneSixProfileStrategy::removePatch(ProfilePatchPtr patch)
 	bool ok = true;
 	// first, remove the patch file. this ensures it's not used anymore
 	auto fileName = patch->getPatchFilename();
-
+	ok &= QFile::remove(fileName);
 
 	auto preRemoveJarMod = [&](JarmodPtr jarMod) -> bool
 	{

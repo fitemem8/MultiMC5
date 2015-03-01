@@ -26,7 +26,6 @@ VersionFilePtr WonkoFormat::fromJson(const QJsonDocument &doc, const QString &fi
 
 		qint64 unixTimestamp = ensureInteger(json.value("time"));
 		file->m_releaseTime = QDateTime::fromMSecsSinceEpoch(unixTimestamp * 1000);
-		//FIXME: handle better.
 		if(json.contains("requires"))
 		{
 			auto arr = ensureArray(json.value("requires"));
@@ -39,11 +38,7 @@ VersionFilePtr WonkoFormat::fromJson(const QJsonDocument &doc, const QString &fi
 				{
 					version = ensureString(obj.value("version"));
 				}
-				if(uid == "net.minecraft")
-				{
-					file->mcVersion = version;
-					break;
-				}
+				file->dependencies[uid] = version;
 			}
 		}
 	}

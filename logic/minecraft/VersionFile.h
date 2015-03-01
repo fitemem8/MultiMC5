@@ -50,40 +50,45 @@ public: /* methods */
 	}
 
 public: /* data */
-	int order = 0;
-	bool isVanilla = false;
+	// display-only fluff
 	QString name;
+
+	// clutter
+	int order = 0;
+	QString filename;
+
+	// patch metadata
 	QString type;
 	QString fileId;
 	QString version;
-	QString mcVersion;
-	QString filename;
+	QMap<QString, QString> dependencies;
+	QString m_releaseTimeString;
+	QDateTime m_releaseTime;
+
+	// game and java command line params
 	QString mainClass;
 	QString appletClass;
 	QString overwriteMinecraftArguments;
 	QString addMinecraftArguments;
 	QString removeMinecraftArguments;
 
-	/// the time this version was actually released by Mojang, as string and as QDateTime
-	QString m_releaseTimeString;
-	QDateTime m_releaseTime;
-
-	/// asset group used by this ... thing.
+	// a special resource that hides the minecraft asset resource logic
 	QString assets;
 
+	// more game command line params, this time more special
 	bool shouldOverwriteTweakers = false;
 	QStringList overwriteTweakers;
 	QStringList addTweakers;
 	QStringList removeTweakers;
 
+	// files of type - replace all of type, add of type, remove of type
 	bool shouldOverwriteLibs = false;
 	QList<RawLibraryPtr> overwriteLibs;
 	QList<RawLibraryPtr> addLibs;
 	QList<QString> removeLibs;
 
-	QSet<QString> traits;
-
-	QList<JarmodPtr> jarMods;
+	QSet<QString> traits; // tags
+	QList<JarmodPtr> jarMods; // files of type... again.
 };
 
 

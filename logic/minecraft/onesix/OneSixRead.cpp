@@ -224,7 +224,11 @@ VersionFilePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& f
 	out->name = root.value("name").toString();
 	out->fileId = root.value("fileId").toString();
 	out->version = root.value("version").toString();
-	out->mcVersion = root.value("mcVersion").toString();
+	QString mcVersion = root.value("mcVersion").toString();
+	if(!mcVersion.isEmpty())
+	{
+		out->dependencies["net.minecraft"] = mcVersion;
+	}
 	out->filename = filename;
 
 	auto readString = [root](const QString &key, QString &variable)

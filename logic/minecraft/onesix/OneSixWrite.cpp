@@ -100,9 +100,10 @@ QJsonDocument OneSixFormat::toJson(VersionFilePtr file, bool saveOrder)
 	writeString(root, "name", file->name);
 	writeString(root, "fileId", file->fileId);
 	writeString(root, "version", file->version);
-	writeString(root, "mcVersion", file->mcVersion);
-	// FIXME: write version of library with name 'net.minecraft:minecraft'
-	// writeString(root, "id", file->id);
+	if(file->dependencies.contains("net.minecraft"))
+	{
+		writeString(root, "mcVersion", file->dependencies["net.minecraft"]);
+	}
 	writeString(root, "mainClass", file->mainClass);
 	writeString(root, "appletClass", file->appletClass);
 	writeString(root, "minecraftArguments", file->overwriteMinecraftArguments);
@@ -120,9 +121,26 @@ QJsonDocument OneSixFormat::toJson(VersionFilePtr file, bool saveOrder)
 	writeStringList(root, "-tweakers", file->removeTweakers);
 	writeStringList(root, "+traits", file->traits.toList());
 	writeObjectList<OneSixFormat>(root, "libraries", file->overwriteLibs);
-	writeObjectList<OneSixFormat>(root, "+libraries", file->addLibs);
-	writeObjectList<OneSixFormat>(root, "+jarMods", file->jarMods);
-	// FIXME: removed libs are special snowflakes.
+	if (!file->addLibs.isEmpty())
+	{
+		QJsonArray array;
+		for(auto plusLib: file->addLibs)
+		{
+			// filter out the 'minecraft version'
+			if(plusLib->artifactPrefix() == "net.minecraft:minecraft")
+			{
+				// and write it in the old format instead
+				writeString(root, "id", plusLib->version());
+				continue;
+			}
+			array.append(OneSixFormat::toJson(plusLib));
+		}
+		// we could have removed minecraft from the array of libs. Do not write empty array.
+		if(!array.isEmpty())
+		{
+			root.insert("+libraries", array);
+		}
+	}
 	if (file->removeLibs.size())
 	{
 		QJsonArray array;
@@ -134,6 +152,7 @@ QJsonDocument OneSixFormat::toJson(VersionFilePtr file, bool saveOrder)
 		}
 		root.insert("-libraries", array);
 	}
+	writeObjectList<OneSixFormat>(root, "+jarMods", file->jarMods);
 	// write the contents to a json document.
 	{
 		QJsonDocument out;
