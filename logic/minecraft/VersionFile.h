@@ -19,7 +19,6 @@ class VersionFile : public ProfilePatch
 {
 public: /* methods */
 	virtual void applyTo(MinecraftProfile *version) override;
-	virtual bool hasJarMods() override;
 	virtual int getOrder() override
 	{
 		return order;
@@ -48,15 +47,33 @@ public: /* methods */
 	{
 		return filename;
 	}
+	void setPatchFilename(QString _filename)
+	{
+		filename = _filename;
+	}
+	virtual bool isMoveable()
+	{
+		return true;
+	}
 
 public: /* data */
 	// display-only fluff
 	QString name;
 
-	// clutter
+private:
+	/*
+	 * WTF do we do with this?
+	 *    some sort of hidden mixin?
+	 *       OneSix-specific subclass that adds this?
+	 */
 	int order = 0;
+	/*
+	 * FIXME: replace with a generic 'source'.
+	 * Sources should do reference counting and self-destruct when they reach zero.
+	 */
 	QString filename;
 
+public:
 	// patch metadata
 	QString type;
 	QString fileId;

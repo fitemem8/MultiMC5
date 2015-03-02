@@ -172,13 +172,14 @@ void OneSixProfileStrategy::loadUserPatches()
 		// do not load what we already loaded in the first pass
 		if (userOrder.contains(file->fileId))
 			continue;
-		if (files.contains(file->order))
+		int fileOrder = file->getOrder();
+		if (files.contains(fileOrder))
 		{
 			// FIXME: do not throw?
 			throw VersionBuildError(QObject::tr("%1 has the same order as %2")
-										.arg(file->fileId, files[file->order].second->fileId));
+										.arg(file->fileId, files[fileOrder].second->fileId));
 		}
-		files.insert(file->order, qMakePair(info.fileName(), file));
+		files.insert(fileOrder, qMakePair(info.fileName(), file));
 	}
 	for (auto order : files.keys())
 	{
@@ -270,7 +271,7 @@ bool OneSixProfileStrategy::installJarMods(QStringList filepaths)
 		f->name = target_name;
 		f->fileId = target_id;
 		QString patchFileName = PathCombine(patchDir, target_id + ".json");
-		f->filename = patchFileName;
+		f->setPatchFilename(patchFileName);
 
 		QFile file(patchFileName);
 		if (!file.open(QFile::WriteOnly))

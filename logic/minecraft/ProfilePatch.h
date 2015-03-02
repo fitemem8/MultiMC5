@@ -11,13 +11,9 @@ public:
 	virtual ~ProfilePatch(){};
 	virtual void applyTo(MinecraftProfile *version) = 0;
 
-	virtual bool hasJarMods() = 0;
 	virtual QList<JarmodPtr> getJarMods() = 0;
 
-	virtual bool isMoveable()
-	{
-		return getOrder() >= 0;
-	}
+	virtual bool isMoveable() = 0;
 	virtual void setOrder(int order) = 0;
 	virtual int getOrder() = 0;
 

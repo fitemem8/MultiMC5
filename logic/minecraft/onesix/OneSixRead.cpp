@@ -212,7 +212,7 @@ VersionFilePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& f
 	{
 		if (root.contains("order"))
 		{
-			out->order = ensureInteger(root.value("order"));
+			out->setOrder(ensureInteger(root.value("order")));
 		}
 		else
 		{
@@ -229,7 +229,7 @@ VersionFilePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& f
 	{
 		out->dependencies["net.minecraft"] = mcVersion;
 	}
-	out->filename = filename;
+	out->setPatchFilename(filename);
 
 	auto readString = [root](const QString &key, QString &variable)
 	{

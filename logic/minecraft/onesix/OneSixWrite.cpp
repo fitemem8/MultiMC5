@@ -95,7 +95,7 @@ QJsonDocument OneSixFormat::toJson(VersionFilePtr file, bool saveOrder)
 	QJsonObject root;
 	if (saveOrder)
 	{
-		root.insert("order", file->order);
+		root.insert("order", file->getOrder());
 	}
 	writeString(root, "name", file->name);
 	writeString(root, "fileId", file->fileId);

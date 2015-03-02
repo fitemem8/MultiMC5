@@ -31,11 +31,6 @@ int findLibraryByName(QList<RawLibraryPtr> haystack, const GradleSpecifier &need
 	return retval;
 }
 
-bool VersionFile::hasJarMods()
-{
-	return !jarMods.isEmpty();
-}
-
 void VersionFile::applyTo(MinecraftProfile *version)
 {
 	if (!mainClass.isNull())
