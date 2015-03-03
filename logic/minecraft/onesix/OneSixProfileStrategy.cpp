@@ -67,7 +67,7 @@ void OneSixProfileStrategy::loadBuiltinPatch(QString uid, QString name, QString 
 {
 	auto mcJson = PathCombine(m_instance->instanceRoot(), "patches" , QString("%1.json").arg(uid));
 	// load up the base minecraft patch
-	ProfilePatchPtr minecraftPatch;
+	VersionFilePtr minecraftPatch;
 	if(QFile::exists(mcJson))
 	{
 		auto file = ProfileUtils::parseJsonFile(QFileInfo(mcJson), false);
@@ -77,7 +77,7 @@ void OneSixProfileStrategy::loadBuiltinPatch(QString uid, QString name, QString 
 		{
 			file->version = QObject::tr("Custom");
 		}
-		minecraftPatch = std::dynamic_pointer_cast<ProfilePatch>(file);
+		minecraftPatch = file;
 	}
 	else if(!version.isEmpty())
 	{
@@ -205,7 +205,7 @@ bool OneSixProfileStrategy::saveOrder(ProfileUtils::PatchOrder order)
 	return ProfileUtils::writeOverrideOrders(PathCombine(m_instance->instanceRoot(), "order.json"), order);
 }
 
-bool OneSixProfileStrategy::removePatch(ProfilePatchPtr patch)
+bool OneSixProfileStrategy::removePatch(VersionFilePtr patch)
 {
 	bool ok = true;
 	// first, remove the patch file. this ensures it's not used anymore
@@ -223,7 +223,7 @@ bool OneSixProfileStrategy::removePatch(ProfilePatchPtr patch)
 		return true;
 	};
 
-	for(auto &jarmod: patch->getJarMods())
+	for(auto &jarmod: patch->resources.jarMods)
 	{
 		ok &= preRemoveJarMod(jarmod);
 	}
@@ -267,7 +267,7 @@ bool OneSixProfileStrategy::installJarMods(QStringList filepaths)
 		auto f = std::make_shared<VersionFile>();
 		auto jarMod = std::make_shared<Jarmod>();
 		jarMod->name = target_filename;
-		f->jarMods.append(jarMod);
+		f->resources.jarMods.append(jarMod);
 		f->name = target_name;
 		f->fileId = target_id;
 		QString patchFileName = PathCombine(patchDir, target_id + ".json");

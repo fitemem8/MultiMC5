@@ -104,27 +104,29 @@ QJsonDocument OneSixFormat::toJson(VersionFilePtr file, bool saveOrder)
 	{
 		writeString(root, "mcVersion", file->dependencies["net.minecraft"]);
 	}
-	writeString(root, "mainClass", file->mainClass);
-	writeString(root, "appletClass", file->appletClass);
-	writeString(root, "minecraftArguments", file->overwriteMinecraftArguments);
-	writeString(root, "+minecraftArguments", file->addMinecraftArguments);
-	writeString(root, "-minecraftArguments", file->removeMinecraftArguments);
+
+	auto & resourceData = file->resources;
+	writeString(root, "mainClass", resourceData.mainClass);
+	writeString(root, "appletClass", resourceData.appletClass);
+	writeString(root, "minecraftArguments", resourceData.overwriteMinecraftArguments);
+	writeString(root, "+minecraftArguments", resourceData.addMinecraftArguments);
+	writeString(root, "-minecraftArguments", resourceData.removeMinecraftArguments);
 	writeString(root, "type", file->type);
-	writeString(root, "assets", file->assets);
+	writeString(root, "assets", resourceData.assets);
 	if (file->fileId == "net.minecraft")
 	{
 		writeString(root, "releaseTime", file->m_releaseTimeString);
 	}
 	root.insert("minimumLauncherVersion", CURRENT_MINIMUM_LAUNCHER_VERSION);
-	writeStringList(root, "tweakers", file->overwriteTweakers);
-	writeStringList(root, "+tweakers", file->addTweakers);
-	writeStringList(root, "-tweakers", file->removeTweakers);
-	writeStringList(root, "+traits", file->traits.toList());
-	writeObjectList<OneSixFormat>(root, "libraries", file->overwriteLibs);
-	if (!file->addLibs.isEmpty())
+	writeStringList(root, "tweakers", resourceData.overwriteTweakers);
+	writeStringList(root, "+tweakers", resourceData.addTweakers);
+	writeStringList(root, "-tweakers", resourceData.removeTweakers);
+	writeStringList(root, "+traits", resourceData.traits.toList());
+	writeObjectList<OneSixFormat>(root, "libraries", resourceData.overwriteLibs);
+	if (!resourceData.addLibs.isEmpty())
 	{
 		QJsonArray array;
-		for(auto plusLib: file->addLibs)
+		for(auto plusLib: resourceData.addLibs)
 		{
 			// filter out the 'minecraft version'
 			if(plusLib->artifactPrefix() == "net.minecraft:minecraft")
@@ -141,10 +143,10 @@ QJsonDocument OneSixFormat::toJson(VersionFilePtr file, bool saveOrder)
 			root.insert("+libraries", array);
 		}
 	}
-	if (file->removeLibs.size())
+	if (resourceData.removeLibs.size())
 	{
 		QJsonArray array;
-		for (auto lib : file->removeLibs)
+		for (auto lib : resourceData.removeLibs)
 		{
 			QJsonObject rmlibobj;
 			rmlibobj.insert("name", lib);
@@ -152,7 +154,7 @@ QJsonDocument OneSixFormat::toJson(VersionFilePtr file, bool saveOrder)
 		}
 		root.insert("-libraries", array);
 	}
-	writeObjectList<OneSixFormat>(root, "+jarMods", file->jarMods);
+	writeObjectList<OneSixFormat>(root, "+jarMods", resourceData.jarMods);
 	// write the contents to a json document.
 	{
 		QJsonDocument out;

@@ -87,10 +87,10 @@ public:
 	QString versionFileId(const int index) const;
 
 	/// get the profile patch by id
-	ProfilePatchPtr versionPatch(const QString &id);
+	VersionFilePtr versionPatch(const QString &id);
 
 	/// get the profile patch by index
-	ProfilePatchPtr versionPatch(int index);
+	VersionFilePtr versionPatch(int index);
 
 	/// save the current patch order
 	void saveCurrentOrder() const;
@@ -100,7 +100,7 @@ public: /* only use in ProfileStrategy */
 	void clearPatches();
 
 	/// Add the patch object to the internal list of patches
-	void appendPatch(ProfilePatchPtr patch);
+	void appendPatch(VersionFilePtr patch);
 
 public: /* data */
 	/// Assets type - "legacy" or a version ID
@@ -135,6 +135,6 @@ public: /* data */
 	QList<JarmodPtr> jarMods;
 
 private:
-	QList<ProfilePatchPtr> VersionPatches;
+	QList<VersionFilePtr> VersionPatches;
 	ProfileStrategy *m_strategy = nullptr;
 };

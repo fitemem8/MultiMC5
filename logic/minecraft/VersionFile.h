@@ -6,7 +6,7 @@
 #include <memory>
 #include "minecraft/OpSys.h"
 #include "minecraft/OneSixRule.h"
-#include "ProfilePatch.h"
+#include "minecraft/MinecraftResources.h"
 #include "MMCError.h"
 #include "RawLibrary.h"
 #include "JarMod.h"
@@ -15,35 +15,34 @@ class MinecraftProfile;
 class VersionFile;
 
 typedef std::shared_ptr<VersionFile> VersionFilePtr;
-class VersionFile : public ProfilePatch
+class VersionFile
 {
 public: /* methods */
-	virtual void applyTo(MinecraftProfile *version) override;
-	virtual int getOrder() override
+	virtual void applyTo(MinecraftProfile *version)
+	{
+		resources.applyTo(version);
+	}
+	virtual int getOrder()
 	{
 		return order;
 	}
-	virtual void setOrder(int order) override
+	virtual void setOrder(int order)
 	{
 		this->order = order;
 	}
-	virtual QList<JarmodPtr> getJarMods() override
-	{
-		return jarMods;
-	}
-	virtual QString getPatchID() override
+	virtual QString getPatchID()
 	{
 		return fileId;
 	}
-	virtual QString getPatchName() override
+	virtual QString getPatchName()
 	{
 		return name;
 	}
-	virtual QString getPatchVersion() override
+	virtual QString getPatchVersion()
 	{
 		return version;
 	}
-	virtual QString getPatchFilename() override
+	virtual QString getPatchFilename()
 	{
 		return filename;
 	}
@@ -82,30 +81,7 @@ public:
 	QString m_releaseTimeString;
 	QDateTime m_releaseTime;
 
-	// game and java command line params
-	QString mainClass;
-	QString appletClass;
-	QString overwriteMinecraftArguments;
-	QString addMinecraftArguments;
-	QString removeMinecraftArguments;
-
-	// a special resource that hides the minecraft asset resource logic
-	QString assets;
-
-	// more game command line params, this time more special
-	bool shouldOverwriteTweakers = false;
-	QStringList overwriteTweakers;
-	QStringList addTweakers;
-	QStringList removeTweakers;
-
-	// files of type - replace all of type, add of type, remove of type
-	bool shouldOverwriteLibs = false;
-	QList<RawLibraryPtr> overwriteLibs;
-	QList<RawLibraryPtr> addLibs;
-	QList<QString> removeLibs;
-
-	QSet<QString> traits; // tags
-	QList<JarmodPtr> jarMods; // files of type... again.
+	MinecraftResources resources;
 };
 
 

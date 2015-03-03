@@ -43,6 +43,7 @@ VersionFilePtr WonkoFormat::fromJson(const QJsonDocument &doc, const QString &fi
 		}
 	}
 
+	auto & resourceData = file->resources;
 	auto data = json.value("data").toObject();
 	// read actual data
 	{
@@ -50,7 +51,7 @@ VersionFilePtr WonkoFormat::fromJson(const QJsonDocument &doc, const QString &fi
 		{
 			for (auto traitVal : ensureArray(data.value("general.traits")))
 			{
-				file->traits.insert(ensureString(traitVal));
+				resourceData.traits.insert(ensureString(traitVal));
 			}
 		}
 
@@ -61,35 +62,35 @@ VersionFilePtr WonkoFormat::fromJson(const QJsonDocument &doc, const QString &fi
 				QJsonObject libObj = ensureObject(libVal);
 				// NOTE: parsing using the OneSix format here.
 				auto lib = OneSixFormat::readRawLibraryPlus(libObj, filename);
-				file->addLibs.append(lib);
+				resourceData.addLibs.append(lib);
 			}
 		}
 
 		if (data.contains("java.mainClass"))
 		{
-			file->mainClass = ensureString(data.value("java.mainClass"));
+			resourceData.mainClass = ensureString(data.value("java.mainClass"));
 		}
 
 		if (data.contains("mc.appletClass"))
 		{
-			file->appletClass = ensureString(data.value("mc.appletClass"));
+			resourceData.appletClass = ensureString(data.value("mc.appletClass"));
 		}
 
 		if (data.contains("mc.assets"))
 		{
-			file->assets = ensureString(data.value("mc.assets"));
+			resourceData.assets = ensureString(data.value("mc.assets"));
 		}
 
 		if (data.contains("mc.arguments"))
 		{
-			file->addMinecraftArguments = ensureString(data.value("mc.arguments"));
+			resourceData.addMinecraftArguments = ensureString(data.value("mc.arguments"));
 		}
 
 		if (data.contains("mc.tweakers"))
 		{
 			for (auto tweakerVal : ensureArray(data.value("mc.tweakers")))
 			{
-				file->addTweakers.append(ensureString(tweakerVal));
+				resourceData.addTweakers.append(ensureString(tweakerVal));
 			}
 		}
 	}

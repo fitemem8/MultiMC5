@@ -248,8 +248,9 @@ VersionFilePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& f
 		return QString();
 	};
 
-	readString("mainClass", out->mainClass);
-	readString("appletClass", out->appletClass);
+	auto & resourceData = out->resources;
+	readString("mainClass", resourceData.mainClass);
+	readString("appletClass", resourceData.appletClass);
 	{
 		QString minecraftArguments;
 		QString processArguments;
@@ -275,17 +276,17 @@ VersionFilePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& f
 		}
 		if(!minecraftArguments.isEmpty())
 		{
-			out->overwriteMinecraftArguments = minecraftArguments;
+			resourceData.overwriteMinecraftArguments = minecraftArguments;
 		}
 
 	}
-	readString("+minecraftArguments", out->addMinecraftArguments);
-	readString("-minecraftArguments", out->removeMinecraftArguments);
+	readString("+minecraftArguments", resourceData.addMinecraftArguments);
+	readString("-minecraftArguments", resourceData.removeMinecraftArguments);
 	readString("type", out->type);
 
 	parse_timestamp(readStringRet("releaseTime"), out->m_releaseTimeString, out->m_releaseTime);
 
-	readString("assets", out->assets);
+	readString("assets", resourceData.assets);
 
 	if (root.contains("minimumLauncherVersion"))
 	{
@@ -298,10 +299,10 @@ VersionFilePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& f
 
 	if (root.contains("tweakers"))
 	{
-		out->shouldOverwriteTweakers = true;
+		resourceData.shouldOverwriteTweakers = true;
 		for (auto tweakerVal : ensureArray(root.value("tweakers")))
 		{
-			out->overwriteTweakers.append(ensureString(tweakerVal));
+			resourceData.overwriteTweakers.append(ensureString(tweakerVal));
 		}
 	}
 
@@ -309,7 +310,7 @@ VersionFilePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& f
 	{
 		for (auto tweakerVal : ensureArray(root.value("+tweakers")))
 		{
-			out->addTweakers.append(ensureString(tweakerVal));
+			resourceData.addTweakers.append(ensureString(tweakerVal));
 		}
 	}
 
@@ -317,7 +318,7 @@ VersionFilePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& f
 	{
 		for (auto tweakerVal : ensureArray(root.value("-tweakers")))
 		{
-			out->removeTweakers.append(ensureString(tweakerVal));
+			resourceData.removeTweakers.append(ensureString(tweakerVal));
 		}
 	}
 
@@ -325,19 +326,19 @@ VersionFilePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& f
 	{
 		for (auto tweakerVal : ensureArray(root.value("+traits")))
 		{
-			out->traits.insert(ensureString(tweakerVal));
+			resourceData.traits.insert(ensureString(tweakerVal));
 		}
 	}
 
 	if (root.contains("libraries"))
 	{
-		out->shouldOverwriteLibs = true;
+		resourceData.shouldOverwriteLibs = true;
 		for (auto libVal : ensureArray(root.value("libraries")))
 		{
 			auto libObj = ensureObject(libVal);
 
 			auto lib = readRawLibrary(libObj, filename);
-			out->overwriteLibs.append(lib);
+			resourceData.overwriteLibs.append(lib);
 		}
 	}
 
@@ -362,7 +363,7 @@ VersionFilePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& f
 			// parse the jarmod
 			JarmodPtr lib = OneSixFormat::fromJson(libObj, filename);
 			// and add to jar mods
-			out->jarMods.append(lib);
+			resourceData.jarMods.append(lib);
 		}
 	}
 
@@ -373,7 +374,7 @@ VersionFilePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& f
 			QJsonObject libObj = ensureObject(libVal);
 			// parse the library
 			auto lib = readRawLibraryPlus(libObj, filename);
-			out->addLibs.append(lib);
+			resourceData.addLibs.append(lib);
 		}
 	}
 
@@ -382,7 +383,7 @@ VersionFilePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& f
 		for (auto libVal : ensureArray(root.value("-libraries")))
 		{
 			auto libObj = ensureObject(libVal);
-			out->removeLibs.append(ensureString(libObj.value("name")));
+			resourceData.removeLibs.append(ensureString(libObj.value("name")));
 		}
 	}
 	return out;

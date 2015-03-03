@@ -4,7 +4,7 @@
 
 #include <QDebug>
 
-#include "minecraft/VersionFile.h"
+#include "minecraft/MinecraftResources.h"
 #include "minecraft/RawLibrary.h"
 #include "minecraft/MinecraftProfile.h"
 #include "minecraft/JarMod.h"
@@ -31,7 +31,7 @@ int findLibraryByName(QList<RawLibraryPtr> haystack, const GradleSpecifier &need
 	return retval;
 }
 
-void VersionFile::applyTo(MinecraftProfile *version)
+void MinecraftResources::applyTo(MinecraftProfile *version)
 {
 	if (!mainClass.isNull())
 	{
@@ -150,9 +150,9 @@ void VersionFile::applyTo(MinecraftProfile *version)
 					(addedLibrary->dependType == RawLibrary::Hard && addedVersion != existingVersion))
 				{
 					throw VersionBuildError(QObject::tr(
-						"Error resolving library dependencies between %1 and %2 in %3.")
+						"Error resolving library dependencies between %1 and %2.")
 												.arg(existingLibrary->rawName(),
-													 addedLibrary->rawName(), filename));
+													 addedLibrary->rawName()));
 				}
 				else
 				{
@@ -173,9 +173,9 @@ void VersionFile::applyTo(MinecraftProfile *version)
 					if (addedLibrary->dependType == RawLibrary::Hard)
 					{
 						throw VersionBuildError(QObject::tr(
-							"Error resolving library dependencies between %1 and %2 in %3.")
+							"Error resolving library dependencies between %1 and %2.")
 													.arg(existingLibrary->rawName(),
-														 addedLibrary->rawName(), filename));
+														 addedLibrary->rawName()));
 					}
 				}
 			}

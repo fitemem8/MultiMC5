@@ -76,7 +76,7 @@ void MinecraftProfile::clearPatches()
 	endResetModel();
 }
 
-void MinecraftProfile::appendPatch(ProfilePatchPtr patch)
+void MinecraftProfile::appendPatch(VersionFilePtr patch)
 {
 	int index = VersionPatches.size();
 	beginInsertRows(QModelIndex(), index, index);
@@ -130,7 +130,7 @@ QString MinecraftProfile::versionFileId(const int index) const
 	return VersionPatches.at(index)->getPatchID();
 }
 
-ProfilePatchPtr MinecraftProfile::versionPatch(const QString &id)
+VersionFilePtr MinecraftProfile::versionPatch(const QString &id)
 {
 	for (auto file : VersionPatches)
 	{
@@ -142,7 +142,7 @@ ProfilePatchPtr MinecraftProfile::versionPatch(const QString &id)
 	return 0;
 }
 
-ProfilePatchPtr MinecraftProfile::versionPatch(int index)
+VersionFilePtr MinecraftProfile::versionPatch(int index)
 {
 	if(index < 0 || index >= VersionPatches.size())
 		return 0;

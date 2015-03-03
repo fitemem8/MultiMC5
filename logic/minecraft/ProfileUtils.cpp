@@ -119,7 +119,7 @@ VersionFilePtr parseJsonFile(const QFileInfo &fileInfo, const bool requireOrder)
 	return OneSixFormat::fromJson(doc, file.fileName(), requireOrder);
 }
 
-void removeLwjglFromPatch(VersionFilePtr patch)
+void removeLwjglFromPatch(MinecraftResources &resources)
 {
 	const auto lwjglWhitelist =
 		QSet<QString>{"net.java.jinput:jinput",	 "net.java.jinput:jinput-platform",
@@ -137,7 +137,7 @@ void removeLwjglFromPatch(VersionFilePtr patch)
 		}
 		libs = filteredLibs;
 	};
-	filter(patch->addLibs);
-	filter(patch->overwriteLibs);
+	filter(resources.addLibs);
+	filter(resources.overwriteLibs);
 }
 }

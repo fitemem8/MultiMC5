@@ -121,6 +121,8 @@ SET(LOGIC_SOURCES
 	minecraft/MinecraftInstance.h
 	minecraft/MinecraftProcess.cpp
 	minecraft/MinecraftProcess.h
+	minecraft/MinecraftResources.cpp
+	minecraft/MinecraftResources.h
 	minecraft/NullProfileStrategy.h
 	minecraft/OneSixRule.h
 	minecraft/OpSys.cpp
@@ -131,9 +133,7 @@ SET(LOGIC_SOURCES
 	minecraft/RawLibrary.cpp
 	minecraft/RawLibrary.h
 	minecraft/VersionBuildError.h
-	minecraft/VersionFile.cpp
 	minecraft/VersionFile.h
-	minecraft/ProfilePatch.h
 	minecraft/VersionFilterData.h
 	minecraft/VersionFilterData.cpp
 	minecraft/Mod.h
