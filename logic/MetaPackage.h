@@ -1,15 +1,15 @@
 #pragma once
 #include "BaseVersion.h"
 
-class CachedVersionList;
-class CachedVersion;
-typedef std::shared_ptr<CachedVersion> RemoteVersionPtr;
+class MetaPackageList;
+class MetaPackage;
+typedef std::shared_ptr<MetaPackage> MetaPackagePtr;
 
-class CachedVersion: public BaseVersion
+class MetaPackage: public BaseVersion
 {
-	friend class CachedVersionList;
+	friend class MetaPackageList;
 public:
-	virtual ~CachedVersion() {};
+	virtual ~MetaPackage() {};
 	virtual QString descriptor() override
 	{
 		return m_id;

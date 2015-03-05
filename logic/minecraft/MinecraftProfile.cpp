@@ -23,6 +23,7 @@
 #include "ProfileUtils.h"
 #include "NullProfileStrategy.h"
 #include "onesix/OneSixFormat.h"
+#include "MinecraftResources.h"
 
 MinecraftProfile::MinecraftProfile(ProfileStrategy *strategy)
 	: QAbstractListModel()
@@ -59,14 +60,7 @@ void MinecraftProfile::reload()
 
 void MinecraftProfile::clear()
 {
-	assets.clear();
-	minecraftArguments.clear();
-	mainClass.clear();
-	appletClass.clear();
-	libraries.clear();
-	tweakers.clear();
-	jarMods.clear();
-	traits.clear();
+	resources.clear();
 }
 
 void MinecraftProfile::clearPatches()
@@ -76,7 +70,7 @@ void MinecraftProfile::clearPatches()
 	endResetModel();
 }
 
-void MinecraftProfile::appendPatch(VersionFilePtr patch)
+void MinecraftProfile::appendPatch(PackagePtr patch)
 {
 	int index = VersionPatches.size();
 	beginInsertRows(QModelIndex(), index, index);
@@ -130,7 +124,7 @@ QString MinecraftProfile::versionFileId(const int index) const
 	return VersionPatches.at(index)->getPatchID();
 }
 
-VersionFilePtr MinecraftProfile::versionPatch(const QString &id)
+PackagePtr MinecraftProfile::versionPatch(const QString &id)
 {
 	for (auto file : VersionPatches)
 	{
@@ -142,62 +136,11 @@ VersionFilePtr MinecraftProfile::versionPatch(const QString &id)
 	return 0;
 }
 
-VersionFilePtr MinecraftProfile::versionPatch(int index)
+PackagePtr MinecraftProfile::versionPatch(int index)
 {
 	if(index < 0 || index >= VersionPatches.size())
 		return 0;
 	return VersionPatches[index];
-}
-
-QList<RawLibraryPtr> MinecraftProfile::getActiveNormalLibs()
-{
-	QList<RawLibraryPtr> output;
-	for (auto lib : libraries)
-	{
-		if (lib->isActive() && !lib->isNative())
-		{
-			for (auto other : output)
-			{
-				if (other->rawName() == lib->rawName())
-				{
-					qWarning() << "Multiple libraries with name" << lib->rawName() << "in library list!";
-					continue;
-				}
-			}
-			output.append(lib);
-		}
-	}
-	return output;
-}
-
-QList<RawLibraryPtr> MinecraftProfile::getActiveNativeLibs()
-{
-	QList<RawLibraryPtr> output;
-	for (auto lib : libraries)
-	{
-		if (lib->isActive() && lib->isNative())
-		{
-			output.append(lib);
-		}
-	}
-	return output;
-}
-
-std::shared_ptr<MinecraftProfile> MinecraftProfile::fromJson(const QJsonObject &obj)
-{
-	std::shared_ptr<MinecraftProfile> version(new MinecraftProfile(new NullProfileStrategy()));
-	try
-	{
-		version->clear();
-		auto file = OneSixFormat::fromJson(QJsonDocument(obj), QString(), false);
-		file->applyTo(version.get());
-		version->appendPatch(file);
-	}
-	catch(MMCError & err)
-	{
-		return 0;
-	}
-	return version;
 }
 
 QVariant MinecraftProfile::data(const QModelIndex &index, int role) const
@@ -314,24 +257,9 @@ void MinecraftProfile::reapply()
 	clear();
 	for(auto file: VersionPatches)
 	{
-		file->applyTo(this);
+		file->resources.applyTo(&resources);
 	}
-	finalize();
-}
-
-void MinecraftProfile::finalize()
-{
-	// HACK: deny april fools. my head hurts enough already.
-	QDate now = QDate::currentDate();
-	bool isAprilFools = now.month() == 4 && now.day() == 1;
-	if (assets.endsWith("_af") && !isAprilFools)
-	{
-		assets = assets.left(assets.length() - 3);
-	}
-	if (assets.isEmpty())
-	{
-		assets = "legacy";
-	}
+	resources.finalize();
 }
 
 void MinecraftProfile::installJarMods(QStringList selectedFiles)

@@ -22,12 +22,12 @@
 #include <memory>
 
 #include "RawLibrary.h"
-#include "VersionFile.h"
-#include "JarMod.h"
+#include "Package.h"
+#include "MinecraftResources.h"
 
 class ProfileStrategy;
-class OneSixInstance;
 
+// FIXME: needs to be not minecraft, push it up the abstraction ladder.
 class MinecraftProfile : public QAbstractListModel
 {
 	Q_OBJECT
@@ -35,9 +35,6 @@ class MinecraftProfile : public QAbstractListModel
 
 public:
 	explicit MinecraftProfile(ProfileStrategy *strategy);
-
-	/// construct a MinecraftProfile from a single file
-	static std::shared_ptr<MinecraftProfile> fromJson(const QJsonObject &obj);
 
 	void setStrategy(ProfileStrategy * strategy);
 	ProfileStrategy *strategy();
@@ -48,6 +45,7 @@ public:
 	virtual int columnCount(const QModelIndex &parent) const;
 	virtual Qt::ItemFlags flags(const QModelIndex &index) const;
 
+	// FIXME: kill this
 	/// install more jar mods
 	void installJarMods(QStringList selectedFiles);
 
@@ -73,24 +71,15 @@ public:
 	/// apply the patches
 	void reapply();
 
-	/// do a finalization step (should always be done after applying all patches to profile)
-	void finalize();
-
 public:
-	/// get all java libraries that belong to the classpath
-	QList<RawLibraryPtr> getActiveNormalLibs();
-
-	/// get all native libraries that need to be available to the process
-	QList<RawLibraryPtr> getActiveNativeLibs();
-
 	/// get file ID of the patch file at #
 	QString versionFileId(const int index) const;
 
 	/// get the profile patch by id
-	VersionFilePtr versionPatch(const QString &id);
+	PackagePtr versionPatch(const QString &id);
 
 	/// get the profile patch by index
-	VersionFilePtr versionPatch(int index);
+	PackagePtr versionPatch(int index);
 
 	/// save the current patch order
 	void saveCurrentOrder() const;
@@ -100,41 +89,13 @@ public: /* only use in ProfileStrategy */
 	void clearPatches();
 
 	/// Add the patch object to the internal list of patches
-	void appendPatch(VersionFilePtr patch);
+	void appendPatch(PackagePtr patch);
 
 public: /* data */
-	/// Assets type - "legacy" or a version ID
-	QString assets;
-	/**
-	 * arguments that should be used for launching minecraft
-	 *
-	 * ex: "--username ${auth_player_name} --session ${auth_session}
-	 *      --version ${version_name} --gameDir ${game_directory} --assetsDir ${game_assets}"
-	 */
-	QString minecraftArguments;
-	/**
-	 * A list of all tweaker classes
-	 */
-	QStringList tweakers;
-	/**
-	 * The main class to load first
-	 */
-	QString mainClass;
-	/**
-	 * The applet class, for some very old minecraft releases
-	 */
-	QString appletClass;
-
-	/// the list of libs - both active and inactive, native and java
-	QList<RawLibraryPtr> libraries;
-
-	/// traits, collected from all the version files (version files can only add)
-	QSet<QString> traits;
-
-	/// A list of jar mods. version files can add those.
-	QList<JarmodPtr> jarMods;
+	// FIXME: needs to be not minecraft
+	MinecraftResources resources;
 
 private:
-	QList<VersionFilePtr> VersionPatches;
+	QList<PackagePtr> VersionPatches;
 	ProfileStrategy *m_strategy = nullptr;
 };

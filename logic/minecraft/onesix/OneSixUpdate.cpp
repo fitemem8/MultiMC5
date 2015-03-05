@@ -26,7 +26,7 @@
 #include <JlCompress.h>
 
 #include "BaseInstance.h"
-#include "CachedVersionList.h"
+#include "MetaPackageList.h"
 #include "minecraft/MinecraftProfile.h"
 #include "minecraft/RawLibrary.h"
 #include "minecraft/onesix/OneSixInstance.h"
@@ -56,7 +56,7 @@ void OneSixUpdate::executeTask()
 	{
 		if(!version.isEmpty())
 		{
-			auto list = std::dynamic_pointer_cast<CachedVersionList>(ENV.getVersionList(uid));
+			auto list = std::dynamic_pointer_cast<MetaPackageList>(ENV.getVersionList(uid));
 			versionUpdateTask->addTask(std::shared_ptr<Task>(list->getLoadTask()));
 			versionUpdateTask->addTask(list->createUpdateTask(version));
 			updateTask = true;
@@ -92,7 +92,7 @@ void OneSixUpdate::assetIndexStart()
 	setStatus(tr("Updating assets index..."));
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
 	std::shared_ptr<MinecraftProfile> version = inst->getMinecraftProfile();
-	QString assetName = version->assets;
+	QString assetName = version->resources.assets;
 	QUrl indexUrl = "http://" + URLConstants::AWS_DOWNLOAD_INDEXES + assetName + ".json";
 	QString localPath = assetName + ".json";
 	auto job = new NetJob(tr("Asset index for %1").arg(inst->name()));
@@ -116,7 +116,7 @@ void OneSixUpdate::assetIndexFinished()
 
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
 	std::shared_ptr<MinecraftProfile> version = inst->getMinecraftProfile();
-	QString assetName = version->assets;
+	QString assetName = version->resources.assets;
 
 	QString asset_fname = "assets/indexes/" + assetName + ".json";
 	if (!AssetsUtils::loadAssetsIndexJson(asset_fname, &index))
@@ -196,8 +196,8 @@ void OneSixUpdate::jarlibStart()
 	// Build a list of URLs that will need to be downloaded.
 	std::shared_ptr<MinecraftProfile> version = inst->getMinecraftProfile();
 
-	auto libs = version->getActiveNativeLibs();
-	libs.append(version->getActiveNormalLibs());
+	auto libs = version->resources.getActiveNativeLibs();
+	libs.append(version->resources.getActiveNormalLibs());
 
 	auto metacache = ENV.metacache();
 	QList<RawLibraryPtr> brokenLocalLibs;
@@ -267,7 +267,7 @@ void OneSixUpdate::jarlibFinished()
 
 	// create temporary modded jar, if needed
 	QList<Mod> jarMods;
-	for (auto jarmod : version->jarMods)
+	for (auto jarmod : version->resources.jarMods)
 	{
 		QString filePath = inst->jarmodsPath().absoluteFilePath(jarmod->name);
 		jarMods.push_back(Mod(QFileInfo(filePath)));
@@ -284,7 +284,7 @@ void OneSixUpdate::jarlibFinished()
 				return;
 			}
 		}
-		auto libs = version->getActiveNormalLibs();
+		auto libs = version->resources.getActiveNormalLibs();
 		QString sourceJarPath;
 
 		// find net.minecraft:minecraft
@@ -305,7 +305,7 @@ void OneSixUpdate::jarlibFinished()
 			return;
 		}
 	}
-	if (version->traits.contains("legacyFML"))
+	if (version->resources.traits.contains("legacyFML"))
 	{
 		fmllibsStart();
 	}

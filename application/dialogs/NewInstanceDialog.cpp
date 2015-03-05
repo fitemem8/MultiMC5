@@ -19,7 +19,7 @@
 
 #include "BaseVersion.h"
 #include "icons/IconList.h"
-#include "CachedVersionList.h"
+#include "MetaPackageList.h"
 #include "tasks/Task.h"
 #include <InstanceList.h>
 

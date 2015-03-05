@@ -1,40 +1,52 @@
 #pragma once
 
+#include "RawLibrary.h"
+#include "JarMod.h"
 #include <QSet>
+#include <QList>
 #include <QString>
 #include <QStringList>
 
-#include "JarMod.h"
-#include "RawLibrary.h"
-
-class MinecraftProfile;
-
 struct MinecraftResources
 {
-	void applyTo(MinecraftProfile *version);
+	void clear();
 
-	// game and java command line params
-	QString mainClass;
-	QString appletClass;
-	QString overwriteMinecraftArguments;
-	QString addMinecraftArguments;
-	QString removeMinecraftArguments;
+	void finalize();
 
-	// a special resource that hides the minecraft asset resource logic
+	/// get all java libraries that belong to the classpath
+	QList<RawLibraryPtr> getActiveNormalLibs();
+
+	/// get all native libraries that need to be available to the process
+	QList<RawLibraryPtr> getActiveNativeLibs();
+
+	/// Assets type - "legacy" or a version ID
 	QString assets;
+	/**
+	 * arguments that should be used for launching minecraft
+	 *
+	 * ex: "--username ${auth_player_name} --session ${auth_session}
+	 *      --version ${version_name} --gameDir ${game_directory} --assetsDir ${game_assets}"
+	 */
+	QString minecraftArguments;
+	/**
+	 * A list of all tweaker classes
+	 */
+	QStringList tweakers;
+	/**
+	 * The main class to load first
+	 */
+	QString mainClass;
+	/**
+	 * The applet class, for some very old minecraft releases
+	 */
+	QString appletClass;
 
-	// more game command line params, this time more special
-	bool shouldOverwriteTweakers = false;
-	QStringList overwriteTweakers;
-	QStringList addTweakers;
-	QStringList removeTweakers;
+	/// the list of libs - both active and inactive, native and java
+	QList<RawLibraryPtr> libraries;
 
-	// files of type - replace all of type, add of type, remove of type
-	bool shouldOverwriteLibs = false;
-	QList<RawLibraryPtr> overwriteLibs;
-	QList<RawLibraryPtr> addLibs;
-	QList<QString> removeLibs;
+	/// traits, collected from all the version files (version files can only add)
+	QSet<QString> traits;
 
-	QSet<QString> traits; // tags
-	QList<JarmodPtr> jarMods; // files of type... again.
+	/// A list of jar mods. version files can add those.
+	QList<JarmodPtr> jarMods;
 };

@@ -4,28 +4,21 @@
 #include <QStringList>
 #include <QDateTime>
 #include <memory>
-#include "minecraft/OpSys.h"
-#include "minecraft/OneSixRule.h"
-#include "minecraft/MinecraftResources.h"
+#include "minecraft/MinecraftPatch.h"
 #include "MMCError.h"
-#include "RawLibrary.h"
-#include "JarMod.h"
 
-class MinecraftProfile;
-class VersionFile;
+class Package;
 
-typedef std::shared_ptr<VersionFile> VersionFilePtr;
-class VersionFile
+typedef std::shared_ptr<Package> PackagePtr;
+class Package
 {
 public: /* methods */
-	virtual void applyTo(MinecraftProfile *version)
-	{
-		resources.applyTo(version);
-	}
+	// FIXME: nuke? somehow?
 	virtual int getOrder()
 	{
 		return order;
 	}
+	// FIXME: nuke? somehow?
 	virtual void setOrder(int order)
 	{
 		this->order = order;
@@ -42,14 +35,17 @@ public: /* methods */
 	{
 		return version;
 	}
+	// FIXME: replace with generic 'source' attribute?
 	virtual QString getPatchFilename()
 	{
 		return filename;
 	}
+	// FIXME: replace with generic 'source' attribute?
 	void setPatchFilename(QString _filename)
 	{
 		filename = _filename;
 	}
+	// FIXME: decide what to do with this.
 	virtual bool isMoveable()
 	{
 		return true;
@@ -81,7 +77,6 @@ public:
 	QString m_releaseTimeString;
 	QDateTime m_releaseTime;
 
-	MinecraftResources resources;
+	//FIXME: make this not minecraft
+	MinecraftPatch resources;
 };
-
-

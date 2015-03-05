@@ -1,222 +1,64 @@
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <modutils.h>
-
+#include "MinecraftResources.h"
+#include <QDateTime>
 #include <QDebug>
 
-#include "minecraft/MinecraftResources.h"
-#include "minecraft/RawLibrary.h"
-#include "minecraft/MinecraftProfile.h"
-#include "minecraft/JarMod.h"
-#include "ParseUtils.h"
-
-#include "MMCJson.h"
-using namespace MMCJson;
-
-#include "VersionBuildError.h"
-
-int findLibraryByName(QList<RawLibraryPtr> haystack, const GradleSpecifier &needle)
+void MinecraftResources::clear()
 {
-	int retval = -1;
-	for (int i = 0; i < haystack.size(); ++i)
+	assets.clear();
+	minecraftArguments.clear();
+	tweakers.clear();
+	mainClass.clear();
+	appletClass.clear();
+	libraries.clear();
+	traits.clear();
+	jarMods.clear();
+};
+
+void MinecraftResources::finalize()
+{
+	// HACK: deny april fools. my head hurts enough already.
+	QDate now = QDate::currentDate();
+	bool isAprilFools = now.month() == 4 && now.day() == 1;
+	if (assets.endsWith("_af") && !isAprilFools)
 	{
-		if (haystack.at(i)->rawName().matchName(needle))
-		{
-			// only one is allowed.
-			if (retval != -1)
-				return -1;
-			retval = i;
-		}
+		assets = assets.left(assets.length() - 3);
 	}
-	return retval;
+	if (assets.isEmpty())
+	{
+		assets = "legacy";
+	}
 }
 
-void MinecraftResources::applyTo(MinecraftProfile *version)
+QList<RawLibraryPtr> MinecraftResources::getActiveNormalLibs()
 {
-	if (!mainClass.isNull())
+	QList<RawLibraryPtr> output;
+	for (auto lib : libraries)
 	{
-		version->mainClass = mainClass;
-	}
-	if (!appletClass.isNull())
-	{
-		version->appletClass = appletClass;
-	}
-	if (!assets.isNull())
-	{
-		version->assets = assets;
-	}
-	if (!overwriteMinecraftArguments.isNull())
-	{
-		version->minecraftArguments = overwriteMinecraftArguments;
-	}
-	if (!addMinecraftArguments.isNull())
-	{
-		version->minecraftArguments += addMinecraftArguments;
-	}
-	if (!removeMinecraftArguments.isNull())
-	{
-		version->minecraftArguments.remove(removeMinecraftArguments);
-	}
-	if (shouldOverwriteTweakers)
-	{
-		version->tweakers = overwriteTweakers;
-	}
-	for (auto tweaker : addTweakers)
-	{
-		version->tweakers += tweaker;
-	}
-	for (auto tweaker : removeTweakers)
-	{
-		version->tweakers.removeAll(tweaker);
-	}
-	version->jarMods.append(jarMods);
-	version->traits.unite(traits);
-	if (shouldOverwriteLibs)
-	{
-		version->libraries = overwriteLibs;
-	}
-	for (auto addedLibrary : addLibs)
-	{
-		switch (addedLibrary->insertType)
+		if (lib->isActive() && !lib->isNative())
 		{
-		case RawLibrary::Apply:
-		{
-			// qDebug() << "Applying lib " << lib->name;
-			int index = findLibraryByName(version->libraries, addedLibrary->rawName());
-			if (index >= 0)
+			for (auto other : output)
 			{
-				auto existingLibrary = version->libraries[index];
-				if (!addedLibrary->m_base_url.isNull())
+				if (other->rawName() == lib->rawName())
 				{
-					existingLibrary->setBaseUrl(addedLibrary->m_base_url);
-				}
-				if (!addedLibrary->m_hint.isNull())
-				{
-					existingLibrary->setHint(addedLibrary->m_hint);
-				}
-				if (!addedLibrary->m_absolute_url.isNull())
-				{
-					existingLibrary->setAbsoluteUrl(addedLibrary->m_absolute_url);
-				}
-				if (addedLibrary->applyExcludes)
-				{
-					existingLibrary->extract_excludes = addedLibrary->extract_excludes;
-				}
-				if (addedLibrary->isNative())
-				{
-					existingLibrary->m_native_classifiers = addedLibrary->m_native_classifiers;
-				}
-				if (addedLibrary->applyRules)
-				{
-					existingLibrary->setRules(addedLibrary->m_rules);
+					qWarning() << "Multiple libraries with name" << lib->rawName() << "in library list!";
+					continue;
 				}
 			}
-			else
-			{
-				qWarning() << "Couldn't find" << addedLibrary->rawName() << "(skipping)";
-			}
-			break;
+			output.append(lib);
 		}
-		case RawLibrary::Append:
-		case RawLibrary::Prepend:
-		{
-			// find the library by name.
-			const int index = findLibraryByName(version->libraries, addedLibrary->rawName());
-			// library not found? just add it.
-			if (index < 0)
-			{
-				if (addedLibrary->insertType == RawLibrary::Append)
-				{
-					version->libraries.append(addedLibrary);
-				}
-				else
-				{
-					version->libraries.prepend(addedLibrary);
-				}
-				break;
-			}
+	}
+	return output;
+}
 
-			// otherwise apply differences, if allowed
-			auto existingLibrary = version->libraries.at(index);
-			const Util::Version addedVersion = addedLibrary->version();
-			const Util::Version existingVersion = existingLibrary->version();
-			// if the existing version is a hard dependency we can either use it or
-			// fail, but we can't change it
-			if (existingLibrary->dependType == RawLibrary::Hard)
-			{
-				// we need a higher version, or we're hard to and the versions aren't
-				// equal
-				if (addedVersion > existingVersion ||
-					(addedLibrary->dependType == RawLibrary::Hard && addedVersion != existingVersion))
-				{
-					throw VersionBuildError(QObject::tr(
-						"Error resolving library dependencies between %1 and %2.")
-												.arg(existingLibrary->rawName(),
-													 addedLibrary->rawName()));
-				}
-				else
-				{
-					// the library is already existing, so we don't have to do anything
-				}
-			}
-			else if (existingLibrary->dependType == RawLibrary::Soft)
-			{
-				// if we are higher it means we should update
-				if (addedVersion > existingVersion)
-				{
-					version->libraries.replace(index, addedLibrary);
-				}
-				else
-				{
-					// our version is smaller than the existing version, but we require
-					// it: fail
-					if (addedLibrary->dependType == RawLibrary::Hard)
-					{
-						throw VersionBuildError(QObject::tr(
-							"Error resolving library dependencies between %1 and %2.")
-													.arg(existingLibrary->rawName(),
-														 addedLibrary->rawName()));
-					}
-				}
-			}
-			break;
-		}
-		case RawLibrary::Replace:
-		{
-			GradleSpecifier toReplace;
-			if (addedLibrary->insertData.isEmpty())
-			{
-				toReplace = addedLibrary->rawName();
-			}
-			else
-			{
-				toReplace = addedLibrary->insertData;
-			}
-			// qDebug() << "Replacing lib " << toReplace << " with " << lib->name;
-			int index = findLibraryByName(version->libraries, toReplace);
-			if (index >= 0)
-			{
-				version->libraries.replace(index, addedLibrary);
-			}
-			else
-			{
-				qWarning() << "Couldn't find" << toReplace << "(skipping)";
-			}
-			break;
-		}
-		}
-	}
-	for (auto lib : removeLibs)
+QList<RawLibraryPtr> MinecraftResources::getActiveNativeLibs()
+{
+	QList<RawLibraryPtr> output;
+	for (auto lib : libraries)
 	{
-		int index = findLibraryByName(version->libraries, lib);
-		if (index >= 0)
+		if (lib->isActive() && lib->isNative())
 		{
-			// qDebug() << "Removing lib " << lib;
-			version->libraries.removeAt(index);
-		}
-		else
-		{
-			qWarning() << "Couldn't find" << lib << "(skipping)";
+			output.append(lib);
 		}
 	}
+	return output;
 }

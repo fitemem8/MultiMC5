@@ -24,7 +24,7 @@
 
 #include "pathutils.h"
 #include <cmdutils.h>
-#include "CachedVersionList.h"
+#include "MetaPackageList.h"
 #include "icons/IconList.h"
 
 BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir)

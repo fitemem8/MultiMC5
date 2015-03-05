@@ -3,9 +3,9 @@
 #include "minecraft/onesix/OneSixInstance.h"
 #include "minecraft/onesix/OneSixFormat.h"
 #include "minecraft/wonko/WonkoFormat.h"
-#include "CachedVersionList.h"
+#include "MetaPackageList.h"
 #include "Env.h"
-#include <CachedVersion.h>
+#include <MetaPackage.h>
 #include <MMCJson.h>
 
 #include <pathutils.h>
@@ -67,7 +67,7 @@ void OneSixProfileStrategy::loadBuiltinPatch(QString uid, QString name, QString 
 {
 	auto mcJson = PathCombine(m_instance->instanceRoot(), "patches" , QString("%1.json").arg(uid));
 	// load up the base minecraft patch
-	VersionFilePtr minecraftPatch;
+	PackagePtr minecraftPatch;
 	if(QFile::exists(mcJson))
 	{
 		auto file = ProfileUtils::parseJsonFile(QFileInfo(mcJson), false);
@@ -81,7 +81,7 @@ void OneSixProfileStrategy::loadBuiltinPatch(QString uid, QString name, QString 
 	}
 	else if(!version.isEmpty())
 	{
-		auto mc = std::dynamic_pointer_cast<CachedVersionList>(ENV.getVersionList(uid));
+		auto mc = std::dynamic_pointer_cast<MetaPackageList>(ENV.getVersionList(uid));
 		auto path = mc->versionFilePath(version);
 		if(!QFile::exists(path))
 		{
@@ -154,7 +154,7 @@ void OneSixProfileStrategy::loadUserPatches()
 		profile->appendPatch(file);
 	}
 	// now load the rest by internal preference.
-	QMap<int, QPair<QString, VersionFilePtr>> files;
+	QMap<int, QPair<QString, PackagePtr>> files;
 	for (auto info : patches.entryInfoList(QStringList() << "*.json", QDir::Files))
 	{
 		// parse the file
@@ -197,7 +197,7 @@ void OneSixProfileStrategy::load()
 	loadDefaultBuiltinPatches();
 	loadUserPatches();
 
-	profile->finalize();
+	profile->resources.finalize();
 }
 
 bool OneSixProfileStrategy::saveOrder(ProfileUtils::PatchOrder order)
@@ -205,7 +205,7 @@ bool OneSixProfileStrategy::saveOrder(ProfileUtils::PatchOrder order)
 	return ProfileUtils::writeOverrideOrders(PathCombine(m_instance->instanceRoot(), "order.json"), order);
 }
 
-bool OneSixProfileStrategy::removePatch(VersionFilePtr patch)
+bool OneSixProfileStrategy::removePatch(PackagePtr patch)
 {
 	bool ok = true;
 	// first, remove the patch file. this ensures it's not used anymore
@@ -264,7 +264,7 @@ bool OneSixProfileStrategy::installJarMods(QStringList filepaths)
 			return false;
 		}
 
-		auto f = std::make_shared<VersionFile>();
+		auto f = std::make_shared<Package>();
 		auto jarMod = std::make_shared<Jarmod>();
 		jarMod->name = target_filename;
 		f->resources.jarMods.append(jarMod);

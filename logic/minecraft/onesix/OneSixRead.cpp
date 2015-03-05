@@ -1,5 +1,5 @@
 #include "OneSixFormat.h"
-#include "minecraft/VersionFile.h"
+#include "minecraft/Package.h"
 #include "MMCJson.h"
 #include "ParseUtils.h"
 #include <QJsonArray>
@@ -194,9 +194,9 @@ RawLibraryPtr OneSixFormat::readRawLibraryPlus(const QJsonObject &libObj, const 
 	return lib;
 }
 
-VersionFilePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& filename, const bool requireOrder)
+PackagePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& filename, const bool requireOrder)
 {
-	VersionFilePtr out(new VersionFile());
+	PackagePtr out(new Package());
 	if (doc.isEmpty() || doc.isNull())
 	{
 		throw JSONValidationError(filename + " is empty or null");

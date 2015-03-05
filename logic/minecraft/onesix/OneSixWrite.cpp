@@ -1,5 +1,5 @@
 #include "OneSixFormat.h"
-#include "minecraft/VersionFile.h"
+#include "minecraft/Package.h"
 #include "MMCJson.h"
 #include "ParseUtils.h"
 #include <QJsonArray>
@@ -90,7 +90,7 @@ QJsonObject OneSixFormat::toJson(RawLibraryPtr raw)
 	return libRoot;
 }
 
-QJsonDocument OneSixFormat::toJson(VersionFilePtr file, bool saveOrder)
+QJsonDocument OneSixFormat::toJson(PackagePtr file, bool saveOrder)
 {
 	QJsonObject root;
 	if (saveOrder)

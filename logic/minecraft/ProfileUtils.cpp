@@ -99,7 +99,7 @@ bool readOverrideOrders(QString path, PatchOrder &order)
 	return true;
 }
 
-VersionFilePtr parseJsonFile(const QFileInfo &fileInfo, const bool requireOrder)
+PackagePtr parseJsonFile(const QFileInfo &fileInfo, const bool requireOrder)
 {
 	QFile file(fileInfo.absoluteFilePath());
 	if (!file.open(QFile::ReadOnly))
@@ -119,7 +119,7 @@ VersionFilePtr parseJsonFile(const QFileInfo &fileInfo, const bool requireOrder)
 	return OneSixFormat::fromJson(doc, file.fileName(), requireOrder);
 }
 
-void removeLwjglFromPatch(MinecraftResources &resources)
+void removeLwjglFromPatch(MinecraftPatch &resources)
 {
 	const auto lwjglWhitelist =
 		QSet<QString>{"net.java.jinput:jinput",	 "net.java.jinput:jinput-platform",

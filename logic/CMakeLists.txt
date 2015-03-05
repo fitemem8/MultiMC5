@@ -15,8 +15,8 @@ SET(LOGIC_SOURCES
 	FileStore.cpp
 	NullInstance.h
 	MMCError.h
-	CachedVersionList.cpp
-	CachedVersionList.h
+	MetaPackageList.cpp
+	MetaPackageList.h
 	ParseUtils.cpp
 	ParseUtils.h
 
@@ -113,14 +113,16 @@ SET(LOGIC_SOURCES
 	minecraft/JarUtils.h
 	minecraft/JarUtils.cpp
 	minecraft/GradleSpecifier.h
-	minecraft/MinecraftProfile.cpp
-	minecraft/MinecraftProfile.h
 	minecraft/JarMod.cpp
 	minecraft/JarMod.h
 	minecraft/MinecraftInstance.cpp
 	minecraft/MinecraftInstance.h
 	minecraft/MinecraftProcess.cpp
 	minecraft/MinecraftProcess.h
+	minecraft/MinecraftProfile.cpp
+	minecraft/MinecraftProfile.h
+	minecraft/MinecraftPatch.cpp
+	minecraft/MinecraftPatch.h
 	minecraft/MinecraftResources.cpp
 	minecraft/MinecraftResources.h
 	minecraft/NullProfileStrategy.h
@@ -133,7 +135,7 @@ SET(LOGIC_SOURCES
 	minecraft/RawLibrary.cpp
 	minecraft/RawLibrary.h
 	minecraft/VersionBuildError.h
-	minecraft/VersionFile.h
+	minecraft/Package.h
 	minecraft/VersionFilterData.h
 	minecraft/VersionFilterData.cpp
 	minecraft/Mod.h

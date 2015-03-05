@@ -8,7 +8,7 @@
 #include <QDateTime>
 
 class QFile;
-class CachedVersionList;
+class MetaPackageList;
 class HttpMetaCache;
 class SettingsObject;
 class InstanceList;

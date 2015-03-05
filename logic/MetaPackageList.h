@@ -27,7 +27,7 @@ class FileStore;
 class CachedListLoadTask;
 class CachedVersionUpdateTask;
 
-class CachedVersionList : public BaseVersionList
+class MetaPackageList : public BaseVersionList
 {
 	Q_OBJECT
 public:
@@ -46,7 +46,7 @@ public:
 	friend class CachedListLoadTask;
 	friend class CachedVersionUpdateTask;
 
-	explicit CachedVersionList(QString baseUrl, QString uid, QObject *parent = 0);
+	explicit MetaPackageList(QString baseUrl, QString uid, QObject *parent = 0);
 
 	std::shared_ptr<Task> createUpdateTask(QString version);
 

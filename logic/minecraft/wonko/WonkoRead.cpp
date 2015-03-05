@@ -1,16 +1,16 @@
 #include "WonkoFormat.h"
 #include "../onesix/OneSixFormat.h"
 
-#include "minecraft/VersionFile.h"
+#include "minecraft/Package.h"
 #include "MMCJson.h"
 #include "ParseUtils.h"
 #include <QJsonArray>
 
 using namespace MMCJson;
 
-VersionFilePtr WonkoFormat::fromJson(const QJsonDocument &doc, const QString &filename)
+PackagePtr WonkoFormat::fromJson(const QJsonDocument &doc, const QString &filename)
 {
-	auto file = std::make_shared<VersionFile>();
+	auto file = std::make_shared<Package>();
 	// read metadata -- not sure if we need to here.
 	auto json = doc.object();
 	{

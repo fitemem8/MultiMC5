@@ -96,7 +96,7 @@ QSet<QString> OneSixInstance::traits()
 		return {"version-incomplete"};
 	}
 	else
-		return version->traits;
+		return version->resources.traits;
 }
 
 std::shared_ptr<Task> OneSixInstance::doUpdate()
@@ -130,8 +130,8 @@ QString replaceTokensIn(QString text, QMap<QString, QString> with)
 
 QStringList OneSixInstance::processMinecraftArgs(AuthSessionPtr session)
 {
-	QString args_pattern = m_version->minecraftArguments;
-	for (auto tweaker : m_version->tweakers)
+	QString args_pattern = m_version->resources.minecraftArguments;
+	for (auto tweaker : m_version->resources.tweakers)
 	{
 		args_pattern += " --tweakClass " + tweaker;
 	}
@@ -150,13 +150,13 @@ QStringList OneSixInstance::processMinecraftArgs(AuthSessionPtr session)
 	QString absRootDir = QDir(minecraftRoot()).absolutePath();
 	token_mapping["game_directory"] = absRootDir;
 	QString absAssetsDir = QDir("assets/").absolutePath();
-	token_mapping["game_assets"] = AssetsUtils::reconstructAssets(m_version->assets).absolutePath();
+	token_mapping["game_assets"] = AssetsUtils::reconstructAssets(m_version->resources.assets).absolutePath();
 
 	token_mapping["user_properties"] = session->serializeUserProperties();
 	token_mapping["user_type"] = session->user_type;
 	// 1.7.3+ assets tokens
 	token_mapping["assets_root"] = absAssetsDir;
-	token_mapping["assets_index_name"] = m_version->assets;
+	token_mapping["assets_index_name"] = m_version->resources.assets;
 
 	QStringList parts = args_pattern.split(' ', QString::SkipEmptyParts);
 	for (int i = 0; i < parts.length(); i++)
@@ -176,13 +176,13 @@ BaseProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 	if (!m_version)
 		return nullptr;
 
-	auto libs = m_version->getActiveNormalLibs();
+	auto libs = m_version->resources.getActiveNormalLibs();
 	for (auto lib : libs)
 	{
 		// FIXME: stupid hardcoded thing
 		if(lib->artifactPrefix() == "net.minecraft:minecraft")
 		{
-			if(!m_version->jarMods.isEmpty())
+			if(!m_version->resources.jarMods.isEmpty())
 			{
 				launchScript += "cp " + QDir(instanceRoot()).absoluteFilePath("temp.jar") + "\n";
 				continue;
@@ -191,14 +191,14 @@ BaseProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 		launchScript += "cp " + librariesPath().absoluteFilePath(lib->storagePath()) + "\n";
 	}
 
-	if (!m_version->mainClass.isEmpty())
+	if (!m_version->resources.mainClass.isEmpty())
 	{
-		launchScript += "mainClass " + m_version->mainClass + "\n";
+		launchScript += "mainClass " + m_version->resources.mainClass + "\n";
 	}
 
-	if (!m_version->appletClass.isEmpty())
+	if (!m_version->resources.appletClass.isEmpty())
 	{
-		launchScript += "appletClass " + m_version->appletClass + "\n";
+		launchScript += "appletClass " + m_version->resources.appletClass + "\n";
 	}
 
 	// generic minecraft params
@@ -229,7 +229,7 @@ BaseProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 	// native libraries (mostly LWJGL)
 	{
 		QDir natives_dir(PathCombine(instanceRoot(), "natives/"));
-		for (auto native : m_version->getActiveNativeLibs())
+		for (auto native : m_version->resources.getActiveNativeLibs())
 		{
 			QFileInfo finfo(PathCombine("libraries", native->storagePath()));
 			launchScript += "ext " + finfo.absoluteFilePath() + "\n";
@@ -238,7 +238,7 @@ BaseProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 	}
 
 	// traits. including legacyLaunch and others ;)
-	for (auto trait : m_version->traits)
+	for (auto trait : m_version->resources.traits)
 	{
 		launchScript += "traits " + trait + "\n";
 	}
@@ -421,7 +421,7 @@ QStringList OneSixInstance::extraArguments() const
 	auto version = getMinecraftProfile();
 	if (!version)
 		return list;
-	if (!version->jarMods.isEmpty())
+	if (!version->resources.jarMods.isEmpty())
 	{
 		list.append({"-Dfml.ignoreInvalidMinecraftCertificates=true",
 					 "-Dfml.ignorePatchDiscrepancies=true"});

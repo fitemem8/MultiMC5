@@ -21,11 +21,11 @@
 #include "Env.h"
 #include "MMCError.h"
 
-#include "CachedVersionList.h"
+#include "MetaPackageList.h"
 #include "net/URLConstants.h"
 
 #include "ParseUtils.h"
-#include "CachedVersion.h"
+#include "MetaPackage.h"
 #include "FileStore.h"
 
 #include <pathutils.h>
@@ -46,7 +46,7 @@ class CachedListLoadTask : public Task
 	Q_OBJECT
 
 public:
-	explicit CachedListLoadTask(CachedVersionList* vlist)
+	explicit CachedListLoadTask(MetaPackageList* vlist)
 	{
 		m_list = vlist;
 	}
@@ -90,7 +90,7 @@ slots:
 				emitFailed(tr("Error parsing version list JSON: %1").arg(jsonError.errorString()));
 				return;
 			}
-			m_list->loadListFromJSON(jsonDoc, CachedVersionList::RemoteLoaded);
+			m_list->loadListFromJSON(jsonDoc, MetaPackageList::RemoteLoaded);
 		}
 		catch (MMCError &e)
 		{
@@ -103,7 +103,7 @@ slots:
 	}
 
 protected:
-	CachedVersionList *m_list;
+	MetaPackageList *m_list;
 	NetJobPtr m_dlJob;
 	CacheDownloadPtr m_dl;
 };
@@ -113,7 +113,7 @@ class CachedVersionUpdateTask : public Task
 	Q_OBJECT
 
 public:
-	CachedVersionUpdateTask(CachedVersionList *vlist, QString updatedVersion)
+	CachedVersionUpdateTask(MetaPackageList *vlist, QString updatedVersion)
 		: Task()
 	{
 		m_list = vlist;
@@ -163,10 +163,10 @@ protected:
 	NetJobPtr m_dlJob;
 	QString versionToUpdate;
 	CacheDownloadPtr m_dl;
-	CachedVersionList *m_list;
+	MetaPackageList *m_list;
 };
 
-CachedVersionList::CachedVersionList(QString baseUrl, QString uid, QObject *parent) : BaseVersionList(parent)
+MetaPackageList::MetaPackageList(QString baseUrl, QString uid, QObject *parent) : BaseVersionList(parent)
 {
 	m_baseUrl = baseUrl;
 	m_uid = uid;
@@ -181,10 +181,10 @@ CachedVersionList::CachedVersionList(QString baseUrl, QString uid, QObject *pare
 
 	QJsonParseError jsonError;
 	QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
-	loadListFromJSON(jsonDoc, CachedVersionList::LocalLoaded);
+	loadListFromJSON(jsonDoc, MetaPackageList::LocalLoaded);
 }
 
-QString CachedVersionList::versionFilePath(QString version)
+QString MetaPackageList::versionFilePath(QString version)
 {
 	if(m_lookup.contains(version))
 	{
@@ -194,38 +194,38 @@ QString CachedVersionList::versionFilePath(QString version)
 	return QString();
 }
 
-Task *CachedVersionList::getLoadTask()
+Task *MetaPackageList::getLoadTask()
 {
 	return new CachedListLoadTask(this);
 }
 
-bool CachedVersionList::isLoaded()
+bool MetaPackageList::isLoaded()
 {
-	return m_loaded != CachedVersionList::NotLoaded;
+	return m_loaded != MetaPackageList::NotLoaded;
 }
 
-const BaseVersionPtr CachedVersionList::at(int i) const
+const BaseVersionPtr MetaPackageList::at(int i) const
 {
 	return m_vlist.at(i);
 }
 
-int CachedVersionList::count() const
+int MetaPackageList::count() const
 {
 	return m_vlist.count();
 }
 
-void CachedVersionList::sortInternal()
+void MetaPackageList::sortInternal()
 {
 	auto cmpF = [](BaseVersionPtr first, BaseVersionPtr second)
 	{
-		auto left = std::dynamic_pointer_cast<CachedVersion>(first);
-		auto right = std::dynamic_pointer_cast<CachedVersion>(second);
+		auto left = std::dynamic_pointer_cast<MetaPackage>(first);
+		auto right = std::dynamic_pointer_cast<MetaPackage>(second);
 		return left->timestamp() > right->timestamp();
 	};
 	qSort(m_vlist.begin(), m_vlist.end(), cmpF);
 }
 
-void CachedVersionList::loadListFromJSON(QJsonDocument jsonDoc, LoadStatus source)
+void MetaPackageList::loadListFromJSON(QJsonDocument jsonDoc, LoadStatus source)
 {
 	qDebug() << "Loading version list.";
 
@@ -263,7 +263,7 @@ void CachedVersionList::loadListFromJSON(QJsonDocument jsonDoc, LoadStatus sourc
 		}
 
 		// Now, we construct the version object and add it to the list.
-		auto rVersion = std::make_shared <CachedVersion>();
+		auto rVersion = std::make_shared <MetaPackage>();
 		rVersion->m_id = versionID;
 		rVersion->m_time = versionObj.value("time").toDouble();
 		rVersion->m_type = versionObj.value("type").toString("");
@@ -274,21 +274,21 @@ void CachedVersionList::loadListFromJSON(QJsonDocument jsonDoc, LoadStatus sourc
 	updateListData(tempList);
 }
 
-void CachedVersionList::sort()
+void MetaPackageList::sort()
 {
 	beginResetModel();
 	sortInternal();
 	endResetModel();
 }
 
-BaseVersionPtr CachedVersionList::getLatestStable() const
+BaseVersionPtr MetaPackageList::getLatestStable() const
 {
 	if(m_lookup.contains(m_latestReleaseID))
 		return m_lookup[m_latestReleaseID];
 	return BaseVersionPtr();
 }
 
-void CachedVersionList::reindex()
+void MetaPackageList::reindex()
 {
 	m_lookup.clear();
 	for(auto &version: m_vlist)
@@ -298,7 +298,7 @@ void CachedVersionList::reindex()
 	}
 }
 
-void CachedVersionList::updateListData(QList<BaseVersionPtr> versions)
+void MetaPackageList::updateListData(QList<BaseVersionPtr> versions)
 {
 	beginResetModel();
 	m_vlist = versions;
@@ -307,9 +307,9 @@ void CachedVersionList::updateListData(QList<BaseVersionPtr> versions)
 	endResetModel();
 }
 
-std::shared_ptr<Task> CachedVersionList::createUpdateTask(QString version)
+std::shared_ptr<Task> MetaPackageList::createUpdateTask(QString version)
 {
 	return std::shared_ptr<Task>(new CachedVersionUpdateTask(this, version));
 }
 
-#include "CachedVersionList.moc"
+#include "MetaPackageList.moc"
