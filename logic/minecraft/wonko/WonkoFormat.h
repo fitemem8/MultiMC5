@@ -1,7 +1,7 @@
 #pragma once
 #include <QJsonObject>
 #include "minecraft/OneSixRule.h"
-#include "minecraft/RawLibrary.h"
+#include "minecraft/Library.h"
 #include <minecraft/JarMod.h>
 #include <minecraft/Package.h>
 

@@ -23,7 +23,7 @@
 #include "ProfileUtils.h"
 #include "NullProfileStrategy.h"
 #include "onesix/OneSixFormat.h"
-#include "MinecraftResources.h"
+#include "Resources.h"
 
 MinecraftProfile::MinecraftProfile(ProfileStrategy *strategy)
 	: QAbstractListModel()

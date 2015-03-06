@@ -4,8 +4,8 @@
 
 #include <QDebug>
 
-#include "minecraft/MinecraftPatch.h"
-#include "minecraft/RawLibrary.h"
+#include "minecraft/Patch.h"
+#include "minecraft/Library.h"
 #include "minecraft/MinecraftProfile.h"
 #include "minecraft/JarMod.h"
 #include "ParseUtils.h"
@@ -15,7 +15,10 @@ using namespace MMCJson;
 
 #include "VersionBuildError.h"
 
-int findLibraryByName(QList<RawLibraryPtr> haystack, const GradleSpecifier &needle)
+namespace Minecraft
+{
+
+int findLibraryByName(QList<LibraryPtr> haystack, const GradleSpecifier &needle)
 {
 	int retval = -1;
 	for (int i = 0; i < haystack.size(); ++i)
@@ -31,7 +34,7 @@ int findLibraryByName(QList<RawLibraryPtr> haystack, const GradleSpecifier &need
 	return retval;
 }
 
-void MinecraftPatch::applyTo(MinecraftResources *version)
+void Patch::applyTo(Minecraft::Resources *version)
 {
 	if (!mainClass.isNull())
 	{
@@ -41,10 +44,7 @@ void MinecraftPatch::applyTo(MinecraftResources *version)
 	{
 		version->appletClass = appletClass;
 	}
-	if (!assets.isNull())
-	{
-		version->assets = assets;
-	}
+	version->assets.apply(assets);
 	if (!overwriteMinecraftArguments.isNull())
 	{
 		version->minecraftArguments = overwriteMinecraftArguments;
@@ -79,7 +79,7 @@ void MinecraftPatch::applyTo(MinecraftResources *version)
 	{
 		switch (addedLibrary->insertType)
 		{
-		case RawLibrary::Apply:
+		case Library::Apply:
 		{
 			// qDebug() << "Applying lib " << lib->name;
 			int index = findLibraryByName(version->libraries, addedLibrary->rawName());
@@ -117,15 +117,15 @@ void MinecraftPatch::applyTo(MinecraftResources *version)
 			}
 			break;
 		}
-		case RawLibrary::Append:
-		case RawLibrary::Prepend:
+		case Library::Append:
+		case Library::Prepend:
 		{
 			// find the library by name.
 			const int index = findLibraryByName(version->libraries, addedLibrary->rawName());
 			// library not found? just add it.
 			if (index < 0)
 			{
-				if (addedLibrary->insertType == RawLibrary::Append)
+				if (addedLibrary->insertType == Library::Append)
 				{
 					version->libraries.append(addedLibrary);
 				}
@@ -142,12 +142,12 @@ void MinecraftPatch::applyTo(MinecraftResources *version)
 			const Util::Version existingVersion = existingLibrary->version();
 			// if the existing version is a hard dependency we can either use it or
 			// fail, but we can't change it
-			if (existingLibrary->dependType == RawLibrary::Hard)
+			if (existingLibrary->dependType == Library::Hard)
 			{
 				// we need a higher version, or we're hard to and the versions aren't
 				// equal
 				if (addedVersion > existingVersion ||
-					(addedLibrary->dependType == RawLibrary::Hard && addedVersion != existingVersion))
+					(addedLibrary->dependType == Library::Hard && addedVersion != existingVersion))
 				{
 					throw VersionBuildError(QObject::tr(
 						"Error resolving library dependencies between %1 and %2.")
@@ -159,7 +159,7 @@ void MinecraftPatch::applyTo(MinecraftResources *version)
 					// the library is already existing, so we don't have to do anything
 				}
 			}
-			else if (existingLibrary->dependType == RawLibrary::Soft)
+			else if (existingLibrary->dependType == Library::Soft)
 			{
 				// if we are higher it means we should update
 				if (addedVersion > existingVersion)
@@ -170,7 +170,7 @@ void MinecraftPatch::applyTo(MinecraftResources *version)
 				{
 					// our version is smaller than the existing version, but we require
 					// it: fail
-					if (addedLibrary->dependType == RawLibrary::Hard)
+					if (addedLibrary->dependType == Library::Hard)
 					{
 						throw VersionBuildError(QObject::tr(
 							"Error resolving library dependencies between %1 and %2.")
@@ -181,7 +181,7 @@ void MinecraftPatch::applyTo(MinecraftResources *version)
 			}
 			break;
 		}
-		case RawLibrary::Replace:
+		case Library::Replace:
 		{
 			GradleSpecifier toReplace;
 			if (addedLibrary->insertData.isEmpty())
@@ -219,4 +219,5 @@ void MinecraftPatch::applyTo(MinecraftResources *version)
 			qWarning() << "Couldn't find" << lib << "(skipping)";
 		}
 	}
+}
 }

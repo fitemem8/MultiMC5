@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "minecraft/MinecraftProcess.h"
+#include "minecraft/Process.h"
 #include "BaseInstance.h"
 
 #include <QDataStream>
@@ -30,21 +30,23 @@
 #include "cmdutils.h"
 
 #define IBUS "@im=ibus"
+namespace Minecraft
+{
 
 // constructor
-MinecraftProcess::MinecraftProcess(MinecraftInstancePtr inst) : BaseProcess(inst)
+Process::Process(MinecraftInstancePtr inst) : BaseProcess(inst)
 {
 }
 
-MinecraftProcess* MinecraftProcess::create(MinecraftInstancePtr inst)
+Process* Process::create(MinecraftInstancePtr inst)
 {
-	auto proc = new MinecraftProcess(inst);
+	auto proc = new Process(inst);
 	proc->init();
 	return proc;
 }
 
 
-QString MinecraftProcess::censorPrivateInfo(QString in)
+QString Process::censorPrivateInfo(QString in)
 {
 	if (!m_session)
 		return in;
@@ -67,7 +69,7 @@ QString MinecraftProcess::censorPrivateInfo(QString in)
 }
 
 // console window
-MessageLevel::Enum MinecraftProcess::guessLevel(const QString &line, MessageLevel::Enum level)
+MessageLevel::Enum Process::guessLevel(const QString &line, MessageLevel::Enum level)
 {
 	QRegularExpression re("\\[(?<timestamp>[0-9:]+)\\] \\[[^/]+/(?<level>[^\\]]+)\\]");
 	auto match = re.match(line);
@@ -107,7 +109,7 @@ MessageLevel::Enum MinecraftProcess::guessLevel(const QString &line, MessageLeve
 	return level;
 }
 
-QMap<QString, QString> MinecraftProcess::getVariables() const
+QMap<QString, QString> Process::getVariables() const
 {
 	auto mcInstance = std::dynamic_pointer_cast<MinecraftInstance>(m_instance);
 	QMap<QString, QString> out;
@@ -120,7 +122,7 @@ QMap<QString, QString> MinecraftProcess::getVariables() const
 	return out;
 }
 
-QStringList MinecraftProcess::javaArguments() const
+QStringList Process::javaArguments() const
 {
 	QStringList args;
 
@@ -154,7 +156,7 @@ QStringList MinecraftProcess::javaArguments() const
 	return args;
 }
 
-void MinecraftProcess::arm()
+void Process::arm()
 {
 	printHeader();
 	emit log("Minecraft folder is:\n" + workingDirectory() + "\n\n");
@@ -199,16 +201,17 @@ void MinecraftProcess::arm()
 	writeData(bytes.constData(), bytes.length());
 }
 
-void MinecraftProcess::launch()
+void Process::launch()
 {
 	QString launchString("launch\n");
 	QByteArray bytes = launchString.toUtf8();
 	writeData(bytes.constData(), bytes.length());
 }
 
-void MinecraftProcess::abort()
+void Process::abort()
 {
 	QString launchString("abort\n");
 	QByteArray bytes = launchString.toUtf8();
 	writeData(bytes.constData(), bytes.length());
+}
 }

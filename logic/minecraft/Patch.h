@@ -5,13 +5,16 @@
 #include <QStringList>
 
 #include "JarMod.h"
-#include "RawLibrary.h"
+#include "Library.h"
+#include "Assets.h"
 
-class MinecraftResources;
-
-struct MinecraftPatch
+namespace Minecraft
 {
-	void applyTo(MinecraftResources *resoruces);
+class Resources;
+
+struct Patch
+{
+	void applyTo(Resources *resoruces);
 
 	// game and java command line params
 	QString mainClass;
@@ -21,7 +24,7 @@ struct MinecraftPatch
 	QString removeMinecraftArguments;
 
 	// a special resource that hides the minecraft asset resource logic
-	QString assets;
+	Assets assets;
 
 	// more game command line params, this time more special
 	bool shouldOverwriteTweakers = false;
@@ -31,10 +34,11 @@ struct MinecraftPatch
 
 	// files of type - replace all of type, add of type, remove of type
 	bool shouldOverwriteLibs = false;
-	QList<RawLibraryPtr> overwriteLibs;
-	QList<RawLibraryPtr> addLibs;
+	QList<LibraryPtr> overwriteLibs;
+	QList<LibraryPtr> addLibs;
 	QList<QString> removeLibs;
 
 	QSet<QString> traits; // tags
 	QList<JarmodPtr> jarMods; // files of type... again.
 };
+}

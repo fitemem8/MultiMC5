@@ -28,10 +28,9 @@
 #include "BaseInstance.h"
 #include "MetaPackageList.h"
 #include "minecraft/MinecraftProfile.h"
-#include "minecraft/RawLibrary.h"
+#include "minecraft/Library.h"
 #include "minecraft/onesix/OneSixInstance.h"
 #include "net/URLConstants.h"
-#include "minecraft/AssetsUtils.h"
 #include "minecraft/JarUtils.h"
 #include <tasks/SequentialTask.h>
 
@@ -87,89 +86,6 @@ void OneSixUpdate::versionUpdateFailed(QString reason)
 	emitFailed(reason);
 }
 
-void OneSixUpdate::assetIndexStart()
-{
-	setStatus(tr("Updating assets index..."));
-	OneSixInstance *inst = (OneSixInstance *)m_inst;
-	std::shared_ptr<MinecraftProfile> version = inst->getMinecraftProfile();
-	QString assetName = version->resources.assets;
-	QUrl indexUrl = "http://" + URLConstants::AWS_DOWNLOAD_INDEXES + assetName + ".json";
-	QString localPath = assetName + ".json";
-	auto job = new NetJob(tr("Asset index for %1").arg(inst->name()));
-
-	auto metacache = ENV.metacache();
-	auto entry = metacache->resolveEntry("asset_indexes", localPath);
-	job->addNetAction(CacheDownload::make(indexUrl, entry));
-	jarlibDownloadJob.reset(job);
-
-	connect(jarlibDownloadJob.get(), SIGNAL(succeeded()), SLOT(assetIndexFinished()));
-	connect(jarlibDownloadJob.get(), SIGNAL(failed()), SLOT(assetIndexFailed()));
-	connect(jarlibDownloadJob.get(), SIGNAL(progress(qint64, qint64)),
-			SIGNAL(progress(qint64, qint64)));
-
-	jarlibDownloadJob->start();
-}
-
-void OneSixUpdate::assetIndexFinished()
-{
-	AssetsIndex index;
-
-	OneSixInstance *inst = (OneSixInstance *)m_inst;
-	std::shared_ptr<MinecraftProfile> version = inst->getMinecraftProfile();
-	QString assetName = version->resources.assets;
-
-	QString asset_fname = "assets/indexes/" + assetName + ".json";
-	if (!AssetsUtils::loadAssetsIndexJson(asset_fname, &index))
-	{
-		emitFailed(tr("Failed to read the assets index!"));
-	}
-
-	QList<Md5EtagDownloadPtr> dls;
-	for (auto object : index.objects.values())
-	{
-		QString objectName = object.hash.left(2) + "/" + object.hash;
-		QFileInfo objectFile("assets/objects/" + objectName);
-		if ((!objectFile.isFile()) || (objectFile.size() != object.size))
-		{
-			auto objectDL = MD5EtagDownload::make(
-				QUrl("http://" + URLConstants::RESOURCE_BASE + objectName),
-				objectFile.filePath());
-			objectDL->m_total_progress = object.size;
-			dls.append(objectDL);
-		}
-	}
-	if (dls.size())
-	{
-		setStatus(tr("Getting the assets files from Mojang..."));
-		auto job = new NetJob(tr("Assets for %1").arg(inst->name()));
-		for (auto dl : dls)
-			job->addNetAction(dl);
-		jarlibDownloadJob.reset(job);
-		connect(jarlibDownloadJob.get(), SIGNAL(succeeded()), SLOT(assetsFinished()));
-		connect(jarlibDownloadJob.get(), SIGNAL(failed()), SLOT(assetsFailed()));
-		connect(jarlibDownloadJob.get(), SIGNAL(progress(qint64, qint64)),
-				SIGNAL(progress(qint64, qint64)));
-		jarlibDownloadJob->start();
-		return;
-	}
-	assetsFinished();
-}
-
-void OneSixUpdate::assetIndexFailed()
-{
-	emitFailed(tr("Failed to download the assets index!"));
-}
-
-void OneSixUpdate::assetsFinished()
-{
-	emitSucceeded();
-}
-
-void OneSixUpdate::assetsFailed()
-{
-	emitFailed(tr("Failed to download assets!"));
-}
-
 void OneSixUpdate::jarlibStart()
 {
 	setStatus(tr("Getting the library files from Mojang..."));
@@ -200,7 +116,7 @@ void OneSixUpdate::jarlibStart()
 	libs.append(version->resources.getActiveNormalLibs());
 
 	auto metacache = ENV.metacache();
-	QList<RawLibraryPtr> brokenLocalLibs;
+	QList<LibraryPtr> brokenLocalLibs;
 
 	for (auto lib : libs)
 	{

@@ -1,8 +1,8 @@
-#include "MinecraftResources.h"
-#include <QDateTime>
+#include "Resources.h"
 #include <QDebug>
-
-void MinecraftResources::clear()
+namespace Minecraft
+{
+void Resources::clear()
 {
 	assets.clear();
 	minecraftArguments.clear();
@@ -14,24 +14,14 @@ void MinecraftResources::clear()
 	jarMods.clear();
 };
 
-void MinecraftResources::finalize()
+void Resources::finalize()
 {
-	// HACK: deny april fools. my head hurts enough already.
-	QDate now = QDate::currentDate();
-	bool isAprilFools = now.month() == 4 && now.day() == 1;
-	if (assets.endsWith("_af") && !isAprilFools)
-	{
-		assets = assets.left(assets.length() - 3);
-	}
-	if (assets.isEmpty())
-	{
-		assets = "legacy";
-	}
+	assets.finalize();
 }
 
-QList<RawLibraryPtr> MinecraftResources::getActiveNormalLibs()
+QList<LibraryPtr> Resources::getActiveNormalLibs()
 {
-	QList<RawLibraryPtr> output;
+	QList<LibraryPtr> output;
 	for (auto lib : libraries)
 	{
 		if (lib->isActive() && !lib->isNative())
@@ -50,9 +40,9 @@ QList<RawLibraryPtr> MinecraftResources::getActiveNormalLibs()
 	return output;
 }
 
-QList<RawLibraryPtr> MinecraftResources::getActiveNativeLibs()
+QList<LibraryPtr> Resources::getActiveNativeLibs()
 {
-	QList<RawLibraryPtr> output;
+	QList<LibraryPtr> output;
 	for (auto lib : libraries)
 	{
 		if (lib->isActive() && lib->isNative())
@@ -61,4 +51,5 @@ QList<RawLibraryPtr> MinecraftResources::getActiveNativeLibs()
 		}
 	}
 	return output;
+}
 }

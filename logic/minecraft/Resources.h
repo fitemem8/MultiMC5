@@ -1,26 +1,30 @@
 #pragma once
 
-#include "RawLibrary.h"
+#include "Library.h"
 #include "JarMod.h"
+#include "Assets.h"
 #include <QSet>
 #include <QList>
 #include <QString>
 #include <QStringList>
 
-struct MinecraftResources
+namespace Minecraft
+{
+
+struct Resources
 {
 	void clear();
 
 	void finalize();
 
 	/// get all java libraries that belong to the classpath
-	QList<RawLibraryPtr> getActiveNormalLibs();
+	QList<LibraryPtr> getActiveNormalLibs();
 
 	/// get all native libraries that need to be available to the process
-	QList<RawLibraryPtr> getActiveNativeLibs();
+	QList<LibraryPtr> getActiveNativeLibs();
 
 	/// Assets type - "legacy" or a version ID
-	QString assets;
+	Assets assets;
 	/**
 	 * arguments that should be used for launching minecraft
 	 *
@@ -42,7 +46,7 @@ struct MinecraftResources
 	QString appletClass;
 
 	/// the list of libs - both active and inactive, native and java
-	QList<RawLibraryPtr> libraries;
+	QList<LibraryPtr> libraries;
 
 	/// traits, collected from all the version files (version files can only add)
 	QSet<QString> traits;
@@ -50,3 +54,4 @@ struct MinecraftResources
 	/// A list of jar mods. version files can add those.
 	QList<JarmodPtr> jarMods;
 };
+}

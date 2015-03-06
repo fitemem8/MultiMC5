@@ -108,6 +108,8 @@ SET(LOGIC_SOURCES
 	minecraft/wonko/WonkoFormat.h
 	minecraft/wonko/WonkoRead.cpp
 
+	minecraft/Assets.h
+	minecraft/Assets.cpp
 	minecraft/SkinUtils.h
 	minecraft/SkinUtils.cpp
 	minecraft/JarUtils.h
@@ -117,14 +119,14 @@ SET(LOGIC_SOURCES
 	minecraft/JarMod.h
 	minecraft/MinecraftInstance.cpp
 	minecraft/MinecraftInstance.h
-	minecraft/MinecraftProcess.cpp
-	minecraft/MinecraftProcess.h
+	minecraft/Process.cpp
+	minecraft/Process.h
 	minecraft/MinecraftProfile.cpp
 	minecraft/MinecraftProfile.h
-	minecraft/MinecraftPatch.cpp
-	minecraft/MinecraftPatch.h
-	minecraft/MinecraftResources.cpp
-	minecraft/MinecraftResources.h
+	minecraft/Patch.cpp
+	minecraft/Patch.h
+	minecraft/Resources.cpp
+	minecraft/Resources.h
 	minecraft/NullProfileStrategy.h
 	minecraft/OneSixRule.h
 	minecraft/OpSys.cpp
@@ -132,8 +134,8 @@ SET(LOGIC_SOURCES
 	minecraft/ProfileUtils.cpp
 	minecraft/ProfileUtils.h
 	minecraft/ProfileStrategy.h
-	minecraft/RawLibrary.cpp
-	minecraft/RawLibrary.h
+	minecraft/Library.cpp
+	minecraft/Library.h
 	minecraft/VersionBuildError.h
 	minecraft/Package.h
 	minecraft/VersionFilterData.h
@@ -142,8 +144,6 @@ SET(LOGIC_SOURCES
 	minecraft/Mod.cpp
 	minecraft/ModList.h
 	minecraft/ModList.cpp
-	minecraft/AssetsUtils.h
-	minecraft/AssetsUtils.cpp
 
 	# A Recursive file system watcher
 	RecursiveFileSystemWatcher.h

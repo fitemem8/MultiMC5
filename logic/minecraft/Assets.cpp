@@ -1,17 +1,4 @@
-/* Copyright 2013-2015 MultiMC Contributors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+#include "Assets.h"
 
 #include <QDir>
 #include <QDirIterator>
@@ -22,11 +9,25 @@
 #include <QVariant>
 #include <QDebug>
 
-#include "AssetsUtils.h"
 #include <pathutils.h>
+#include "net/NetJob.h"
+#include "net/URLConstants.h"
+#include "tasks/Task.h"
+#include "Env.h"
 
-namespace AssetsUtils
+namespace Minecraft {
+
+struct AssetObject
 {
+	QString hash;
+	qint64 size;
+};
+
+struct AssetsIndex
+{
+	QMap<QString, AssetObject> objects;
+	bool isVirtual = false;
+};
 
 /*
  * Returns true on success, with index populated
@@ -143,7 +144,7 @@ QDir reconstructAssets(QString assetsId)
 				 << objectDir.path() << virtualDir.path() << virtualRoot.path();
 
 	AssetsIndex index;
-	bool loadAssetsIndex = AssetsUtils::loadAssetsIndexJson(indexPath, &index);
+	bool loadAssetsIndex = loadAssetsIndexJson(indexPath, &index);
 
 	if (loadAssetsIndex && index.isVirtual)
 	{
@@ -181,5 +182,124 @@ QDir reconstructAssets(QString assetsId)
 
 	return virtualRoot;
 }
+
+class AssetsUpdate : public Task
+{
+	Q_OBJECT
+public:
+	explicit AssetsUpdate(Assets & assets, QObject *parent = 0) : Task(parent), m_assets(assets) {}
+	virtual void executeTask();
+
+private
+slots:
+	void assetIndexStart();
+	void assetIndexFinished();
+	void assetIndexFailed();
+
+	void assetsFinished();
+	void assetsFailed();
+
+private:
+	NetJobPtr assetDlJob;
+	Assets & m_assets;
+};
+
+void AssetsUpdate::executeTask()
+{
+	if(!m_assets.id().isEmpty())
+	{
+		assetIndexStart();
+	}
+}
+
+void AssetsUpdate::assetIndexStart()
+{
+	setStatus(tr("Updating assets index..."));
+	QUrl indexUrl = "http://" + URLConstants::AWS_DOWNLOAD_INDEXES + m_assets.id() + ".json";
+	QString localPath = m_assets.id() + ".json";
+	auto job = new NetJob(tr("Asset index for %1").arg(m_assets.id()));
+
+	auto metacache = ENV.metacache();
+	auto entry = metacache->resolveEntry("asset_indexes", localPath);
+	job->addNetAction(CacheDownload::make(indexUrl, entry));
+	assetDlJob.reset(job);
+
+	connect(assetDlJob.get(), SIGNAL(succeeded()), SLOT(assetIndexFinished()));
+	connect(assetDlJob.get(), SIGNAL(failed()), SLOT(assetIndexFailed()));
+	connect(assetDlJob.get(), SIGNAL(progress(qint64, qint64)),
+			SIGNAL(progress(qint64, qint64)));
+
+	assetDlJob->start();
+}
+
+void AssetsUpdate::assetIndexFinished()
+{
+	AssetsIndex index;
+
+	QString asset_fname = "assets/indexes/" + m_assets.id() + ".json";
+	if (!loadAssetsIndexJson(asset_fname, &index))
+	{
+		emitFailed(tr("Failed to read the assets index!"));
+	}
+
+	QList<Md5EtagDownloadPtr> dls;
+	for (auto object : index.objects.values())
+	{
+		QString objectName = object.hash.left(2) + "/" + object.hash;
+		QFileInfo objectFile("assets/objects/" + objectName);
+		if ((!objectFile.isFile()) || (objectFile.size() != object.size))
+		{
+			auto objectDL = MD5EtagDownload::make(
+				QUrl("http://" + URLConstants::RESOURCE_BASE + objectName),
+				objectFile.filePath());
+			objectDL->m_total_progress = object.size;
+			dls.append(objectDL);
+		}
+	}
+	if (dls.size())
+	{
+		setStatus(tr("Getting the assets files from Mojang..."));
+		auto job = new NetJob(tr("Assets download task for %1").arg(m_assets.id()));
+		for (auto dl : dls)
+			job->addNetAction(dl);
+		assetDlJob.reset(job);
+		connect(assetDlJob.get(), SIGNAL(succeeded()), SLOT(assetsFinished()));
+		connect(assetDlJob.get(), SIGNAL(failed()), SLOT(assetsFailed()));
+		connect(assetDlJob.get(), SIGNAL(progress(qint64, qint64)),
+				SIGNAL(progress(qint64, qint64)));
+		assetDlJob->start();
+		return;
+	}
+	assetsFinished();
+}
+
+void AssetsUpdate::assetIndexFailed()
+{
+	emitFailed(tr("Failed to download the assets index!"));
+}
+
+void AssetsUpdate::assetsFinished()
+{
+	emitSucceeded();
+}
+
+void AssetsUpdate::assetsFailed()
+{
+	emitFailed(tr("Failed to download assets!"));
+}
+
+Task *Assets::prelaunchTask()
+{
+	return nullptr;
+}
+Task *Assets::updateTask()
+{
+	return nullptr;
+}
+QString Assets::storageFolder()
+{
+	return reconstructAssets(id()).absolutePath();
+}
+#include "Assets.moc"
 
 }

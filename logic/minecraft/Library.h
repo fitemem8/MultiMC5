@@ -12,10 +12,10 @@
 #include "GradleSpecifier.h"
 #include "net/URLConstants.h"
 
-class RawLibrary;
-typedef std::shared_ptr<RawLibrary> RawLibraryPtr;
+class Library;
+typedef std::shared_ptr<Library> LibraryPtr;
 
-class RawLibrary
+class Library
 {
 public: /* methods */
 	/// Returns the raw name field

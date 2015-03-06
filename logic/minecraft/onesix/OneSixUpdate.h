@@ -46,13 +46,6 @@ slots:
 	void fmllibsFinished();
 	void fmllibsFailed();
 
-	void assetIndexStart();
-	void assetIndexFinished();
-	void assetIndexFailed();
-
-	void assetsFinished();
-	void assetsFailed();
-
 private:
 	NetJobPtr jarlibDownloadJob;
 	NetJobPtr legacyDownloadJob;

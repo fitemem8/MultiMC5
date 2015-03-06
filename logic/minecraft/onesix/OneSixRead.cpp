@@ -57,9 +57,9 @@ QList<std::shared_ptr<Rule>> readLibraryRules(const QJsonObject &objectWithRules
 }
 
 
-RawLibraryPtr readRawLibrary(const QJsonObject &libObj, const QString &filename)
+LibraryPtr readRawLibrary(const QJsonObject &libObj, const QString &filename)
 {
-	RawLibraryPtr out(new RawLibrary());
+	LibraryPtr out(new Library());
 	if (!libObj.contains("name"))
 	{
 		throw JSONValidationError(filename +
@@ -121,7 +121,7 @@ RawLibraryPtr readRawLibrary(const QJsonObject &libObj, const QString &filename)
 	return out;
 }
 
-RawLibraryPtr OneSixFormat::readRawLibraryPlus(const QJsonObject &libObj, const QString &filename)
+LibraryPtr OneSixFormat::readRawLibraryPlus(const QJsonObject &libObj, const QString &filename)
 {
 	auto lib = readRawLibrary(libObj, filename);
 	if (libObj.contains("insert"))
@@ -133,19 +133,19 @@ RawLibraryPtr OneSixFormat::readRawLibraryPlus(const QJsonObject &libObj, const 
 			QString insertString = insertVal.toString();
 			if (insertString == "apply")
 			{
-				lib->insertType = RawLibrary::Apply;
+				lib->insertType = Library::Apply;
 			}
 			else if (insertString == "prepend")
 			{
-				lib->insertType = RawLibrary::Prepend;
+				lib->insertType = Library::Prepend;
 			}
 			else if (insertString == "append")
 			{
-				lib->insertType = RawLibrary::Append;
+				lib->insertType = Library::Append;
 			}
 			else if (insertString == "replace")
 			{
-				lib->insertType = RawLibrary::Replace;
+				lib->insertType = Library::Replace;
 			}
 			else
 			{
@@ -180,11 +180,11 @@ RawLibraryPtr OneSixFormat::readRawLibraryPlus(const QJsonObject &libObj, const 
 		const QString dependString = ensureString(libObj.value("MMC-depend"));
 		if (dependString == "hard")
 		{
-			lib->dependType = RawLibrary::Hard;
+			lib->dependType = Library::Hard;
 		}
 		else if (dependString == "soft")
 		{
-			lib->dependType = RawLibrary::Soft;
+			lib->dependType = Library::Soft;
 		}
 		else
 		{
@@ -286,7 +286,9 @@ PackagePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& filen
 
 	parse_timestamp(readStringRet("releaseTime"), out->m_releaseTimeString, out->m_releaseTime);
 
-	readString("assets", resourceData.assets);
+	QString assetsId;
+	readString("assets", assetsId);
+	resourceData.assets.apply(assetsId);
 
 	if (root.contains("minimumLauncherVersion"))
 	{
@@ -346,7 +348,7 @@ PackagePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& filen
 	readString("id", minecraftVersion);
 	if(!minecraftVersion.isEmpty())
 	{
-		auto libptr = std::make_shared<RawLibrary>();
+		auto libptr = std::make_shared<Library>();
 		auto name = QString("net.minecraft:minecraft:%1").arg(minecraftVersion);
 		auto url = QString("http://s3.amazonaws.com/Minecraft.Download/versions/%1/%2.jar")
 			.arg(minecraftVersion)

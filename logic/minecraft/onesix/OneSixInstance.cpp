@@ -24,9 +24,9 @@
 
 #include "minecraft/MinecraftProfile.h"
 #include "minecraft/VersionBuildError.h"
-#include "minecraft/MinecraftProcess.h"
+#include "minecraft/Process.h"
+#include "minecraft/Assets.h"
 
-#include "minecraft/AssetsUtils.h"
 #include "icons/IconList.h"
 
 OneSixInstance::OneSixInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir)
@@ -150,13 +150,13 @@ QStringList OneSixInstance::processMinecraftArgs(AuthSessionPtr session)
 	QString absRootDir = QDir(minecraftRoot()).absolutePath();
 	token_mapping["game_directory"] = absRootDir;
 	QString absAssetsDir = QDir("assets/").absolutePath();
-	token_mapping["game_assets"] = AssetsUtils::reconstructAssets(m_version->resources.assets).absolutePath();
+	token_mapping["game_assets"] = m_version->resources.assets.storageFolder();
 
 	token_mapping["user_properties"] = session->serializeUserProperties();
 	token_mapping["user_type"] = session->user_type;
 	// 1.7.3+ assets tokens
 	token_mapping["assets_root"] = absAssetsDir;
-	token_mapping["assets_index_name"] = m_version->resources.assets;
+	token_mapping["assets_index_name"] = m_version->resources.assets.id();
 
 	QStringList parts = args_pattern.split(' ', QString::SkipEmptyParts);
 	for (int i = 0; i < parts.length(); i++)
@@ -244,7 +244,7 @@ BaseProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 	}
 	launchScript += "launcher onesix\n";
 
-	auto process = MinecraftProcess::create(std::dynamic_pointer_cast<MinecraftInstance>(getSharedPtr()));
+	auto process = Minecraft::Process::create(std::dynamic_pointer_cast<MinecraftInstance>(getSharedPtr()));
 	process->setLaunchScript(launchScript);
 	process->setWorkdir(minecraftRoot());
 	process->setLogin(session);

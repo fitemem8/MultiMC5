@@ -119,15 +119,15 @@ PackagePtr parseJsonFile(const QFileInfo &fileInfo, const bool requireOrder)
 	return OneSixFormat::fromJson(doc, file.fileName(), requireOrder);
 }
 
-void removeLwjglFromPatch(MinecraftPatch &resources)
+void removeLwjglFromPatch(Minecraft::Patch &resources)
 {
 	const auto lwjglWhitelist =
 		QSet<QString>{"net.java.jinput:jinput",	 "net.java.jinput:jinput-platform",
 					  "net.java.jutils:jutils",	 "org.lwjgl.lwjgl:lwjgl",
 					  "org.lwjgl.lwjgl:lwjgl_util", "org.lwjgl.lwjgl:lwjgl-platform"};
-	auto filter = [&lwjglWhitelist](QList<RawLibraryPtr>& libs)
+	auto filter = [&lwjglWhitelist](QList<LibraryPtr>& libs)
 	{
-		QList<RawLibraryPtr> filteredLibs;
+		QList<LibraryPtr> filteredLibs;
 		for (auto lib : libs)
 		{
 			if (!lwjglWhitelist.contains(lib->artifactPrefix()))

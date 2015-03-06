@@ -4,7 +4,7 @@
 #include <QStringList>
 #include <QDateTime>
 #include <memory>
-#include "minecraft/MinecraftPatch.h"
+#include "minecraft/Patch.h"
 #include "MMCError.h"
 
 class Package;
@@ -78,5 +78,5 @@ public:
 	QDateTime m_releaseTime;
 
 	//FIXME: make this not minecraft
-	MinecraftPatch resources;
+	Minecraft::Patch resources;
 };

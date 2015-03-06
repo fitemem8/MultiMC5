@@ -21,18 +21,20 @@
 #include "minecraft/MinecraftInstance.h"
 #include "BaseProcess.h"
 
+namespace Minecraft
+{
 /**
  * The MinecraftProcess class
  */
-class MinecraftProcess : public BaseProcess
+class Process : public BaseProcess
 {
 	Q_OBJECT
 protected:
-	MinecraftProcess(MinecraftInstancePtr inst);
+	Process(MinecraftInstancePtr inst);
 public:
-	static MinecraftProcess *create(MinecraftInstancePtr inst);
+	static Process *create(MinecraftInstancePtr inst);
 
-	virtual ~MinecraftProcess(){};
+	virtual ~Process(){};
 
 	/**
 	 * @brief start the launcher part with the provided launch script
@@ -75,3 +77,4 @@ protected:
 	virtual QString censorPrivateInfo(QString in) override;
 	virtual MessageLevel::Enum guessLevel(const QString &message, MessageLevel::Enum defaultLevel) override;
 };
+}

@@ -21,9 +21,9 @@
 #include <QList>
 #include <memory>
 
-#include "RawLibrary.h"
+#include "Library.h"
 #include "Package.h"
-#include "MinecraftResources.h"
+#include "Resources.h"
 
 class ProfileStrategy;
 
@@ -93,7 +93,7 @@ public: /* only use in ProfileStrategy */
 
 public: /* data */
 	// FIXME: needs to be not minecraft
-	MinecraftResources resources;
+	Minecraft::Resources resources;
 
 private:
 	QList<PackagePtr> VersionPatches;

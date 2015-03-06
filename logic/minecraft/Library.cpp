@@ -1,9 +1,9 @@
 #include "MMCJson.h"
 using namespace MMCJson;
 
-#include "RawLibrary.h"
+#include "Library.h"
 
-QStringList RawLibrary::files() const
+QStringList Library::files() const
 {
 	QStringList retval;
 	QString storage = storagePath();
@@ -21,7 +21,7 @@ QStringList RawLibrary::files() const
 	return retval;
 }
 
-bool RawLibrary::filesExist(const QDir &base) const
+bool Library::filesExist(const QDir &base) const
 {
 	auto libFiles = files();
 	for(auto file: libFiles)
@@ -34,7 +34,7 @@ bool RawLibrary::filesExist(const QDir &base) const
 	return true;
 }
 
-QString RawLibrary::downloadUrl() const
+QString Library::downloadUrl() const
 {
 	if (m_absolute_url.size())
 		return m_absolute_url;
@@ -47,7 +47,7 @@ QString RawLibrary::downloadUrl() const
 	return m_base_url + storagePath();
 }
 
-bool RawLibrary::isActive() const
+bool Library::isActive() const
 {
 	bool result = true;
 	if (m_rules.empty())
@@ -72,7 +72,7 @@ bool RawLibrary::isActive() const
 	return result;
 }
 
-QString RawLibrary::storagePath() const
+QString Library::storagePath() const
 {
 	// non-native? use only the gradle specifier
 	if (!isNative())
