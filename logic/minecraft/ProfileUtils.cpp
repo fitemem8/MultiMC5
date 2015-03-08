@@ -137,7 +137,7 @@ void removeLwjglFromPatch(Minecraft::Patch &resources)
 		}
 		libs = filteredLibs;
 	};
-	filter(resources.addLibs);
-	filter(resources.overwriteLibs);
+	filter(resources.libraries.addLibs);
+	filter(resources.libraries.overwriteLibs);
 }
 }

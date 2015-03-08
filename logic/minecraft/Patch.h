@@ -7,6 +7,7 @@
 #include "JarMod.h"
 #include "Library.h"
 #include "Assets.h"
+#include "Libraries.h"
 
 namespace Minecraft
 {
@@ -32,11 +33,7 @@ struct Patch
 	QStringList addTweakers;
 	QStringList removeTweakers;
 
-	// files of type - replace all of type, add of type, remove of type
-	bool shouldOverwriteLibs = false;
-	QList<LibraryPtr> overwriteLibs;
-	QList<LibraryPtr> addLibs;
-	QList<QString> removeLibs;
+	Libraries libraries;
 
 	QSet<QString> traits; // tags
 	QList<JarmodPtr> jarMods; // files of type... again.

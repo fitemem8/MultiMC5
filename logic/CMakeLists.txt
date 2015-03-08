@@ -108,8 +108,12 @@ SET(LOGIC_SOURCES
 	minecraft/wonko/WonkoFormat.h
 	minecraft/wonko/WonkoRead.cpp
 
+	# Minecrafr resource types
 	minecraft/Assets.h
 	minecraft/Assets.cpp
+	minecraft/Libraries.h
+	minecraft/Libraries.cpp
+
 	minecraft/SkinUtils.h
 	minecraft/SkinUtils.cpp
 	minecraft/JarUtils.h
@@ -125,7 +129,6 @@ SET(LOGIC_SOURCES
 	minecraft/MinecraftProfile.h
 	minecraft/Patch.cpp
 	minecraft/Patch.h
-	minecraft/Resources.cpp
 	minecraft/Resources.h
 	minecraft/NullProfileStrategy.h
 	minecraft/OneSixRule.h

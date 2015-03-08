@@ -37,23 +37,14 @@ public:
 private
 slots:
 	void versionUpdateFailed(QString reason);
-
-	void jarlibStart();
-	void jarlibFinished();
-	void jarlibFailed();
-
-	void fmllibsStart();
-	void fmllibsFinished();
-	void fmllibsFailed();
+	void versionUpdateSucceeded();
 
 private:
-	NetJobPtr jarlibDownloadJob;
-	NetJobPtr legacyDownloadJob;
-
 	/// the task that is spawned for version updates
 	std::shared_ptr<SequentialTask> versionUpdateTask;
 
+	/// the task that is spawned for fetching libraries and assets
+	std::shared_ptr<Task> filesTask;
+
 	OneSixInstance *m_inst = nullptr;
-	QString jarHashOnEntry;
-	QList<FMLlib> fmlLibsToProcess;
 };

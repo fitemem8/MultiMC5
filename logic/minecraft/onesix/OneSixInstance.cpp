@@ -26,6 +26,7 @@
 #include "minecraft/VersionBuildError.h"
 #include "minecraft/Process.h"
 #include "minecraft/Assets.h"
+#include <minecraft/JarUtils.h>
 
 #include "icons/IconList.h"
 
@@ -166,6 +167,7 @@ QStringList OneSixInstance::processMinecraftArgs(AuthSessionPtr session)
 	return parts;
 }
 
+// FIXME: this should be split and turned into a task
 BaseProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 {
 	QString launchScript;
@@ -176,7 +178,7 @@ BaseProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 	if (!m_version)
 		return nullptr;
 
-	auto libs = m_version->resources.getActiveNormalLibs();
+	auto libs = m_version->resources.libraries.getActiveNormalLibs();
 	for (auto lib : libs)
 	{
 		// FIXME: stupid hardcoded thing
@@ -189,6 +191,51 @@ BaseProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 			}
 		}
 		launchScript += "cp " + librariesPath().absoluteFilePath(lib->storagePath()) + "\n";
+	}
+
+	// create temporary modded jar, if needed
+	QList<Mod> jarMods;
+	for (auto jarmod : m_version->resources.jarMods)
+	{
+		QString filePath = jarmodsPath().absoluteFilePath(jarmod->name);
+		jarMods.push_back(Mod(QFileInfo(filePath)));
+	}
+	if(jarMods.size())
+	{
+		auto finalJarPath = QDir(instanceRoot()).absoluteFilePath("temp.jar");
+		QFile finalJar(finalJarPath);
+		if(finalJar.exists())
+		{
+			if(!finalJar.remove())
+			{
+				//FIXME: return errors from here.
+				qCritical() << QString("Couldn't remove stale jar file: %1").arg(finalJarPath);
+				// emitFailed(tr("Couldn't remove stale jar file: %1").arg(finalJarPath));
+				return nullptr;
+			}
+		}
+		auto libs = m_version->resources.libraries.getActiveNormalLibs();
+		QString sourceJarPath;
+
+		// find net.minecraft:minecraft
+		for(auto foo:libs)
+		{
+			// FIXME: stupid hardcoded thing
+			if(foo->artifactPrefix() == "net.minecraft:minecraft")
+			{
+				sourceJarPath = librariesPath().absoluteFilePath( foo->storagePath());
+				break;
+			}
+		}
+
+		// use it as the source for jar modding
+		if(!sourceJarPath.isNull() && !JarUtils::createModdedJar(sourceJarPath, finalJarPath, jarMods))
+		{
+			//FIXME: return errors from here.
+			qCritical() << QString("Failed to create the custom Minecraft jar file.");
+			// emitFailed(tr("Failed to create the custom Minecraft jar file."));
+			return nullptr;
+		}
 	}
 
 	if (!m_version->resources.mainClass.isEmpty())
@@ -229,7 +276,7 @@ BaseProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 	// native libraries (mostly LWJGL)
 	{
 		QDir natives_dir(PathCombine(instanceRoot(), "natives/"));
-		for (auto native : m_version->resources.getActiveNativeLibs())
+		for (auto native : m_version->resources.libraries.getActiveNativeLibs())
 		{
 			QFileInfo finfo(PathCombine("libraries", native->storagePath()));
 			launchScript += "ext " + finfo.absoluteFilePath() + "\n";

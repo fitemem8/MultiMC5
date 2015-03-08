@@ -334,13 +334,13 @@ PackagePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& filen
 
 	if (root.contains("libraries"))
 	{
-		resourceData.shouldOverwriteLibs = true;
+		resourceData.libraries.shouldOverwriteLibs = true;
 		for (auto libVal : ensureArray(root.value("libraries")))
 		{
 			auto libObj = ensureObject(libVal);
 
 			auto lib = readRawLibrary(libObj, filename);
-			resourceData.overwriteLibs.append(lib);
+			resourceData.libraries.overwriteLibs.append(lib);
 		}
 	}
 
@@ -376,7 +376,7 @@ PackagePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& filen
 			QJsonObject libObj = ensureObject(libVal);
 			// parse the library
 			auto lib = readRawLibraryPlus(libObj, filename);
-			resourceData.addLibs.append(lib);
+			resourceData.libraries.addLibs.append(lib);
 		}
 	}
 
@@ -385,7 +385,7 @@ PackagePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& filen
 		for (auto libVal : ensureArray(root.value("-libraries")))
 		{
 			auto libObj = ensureObject(libVal);
-			resourceData.removeLibs.append(ensureString(libObj.value("name")));
+			resourceData.libraries.removeLibs.append(ensureString(libObj.value("name")));
 		}
 	}
 	return out;

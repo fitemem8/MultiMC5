@@ -12,6 +12,7 @@ public:
 	explicit SequentialTask(QObject *parent = 0);
 
 	void addTask(std::shared_ptr<ProgressProvider> task);
+	int size();
 
 protected:
 	void executeTask();

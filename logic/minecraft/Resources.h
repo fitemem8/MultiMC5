@@ -3,6 +3,9 @@
 #include "Library.h"
 #include "JarMod.h"
 #include "Assets.h"
+#include "Libraries.h"
+#include <tasks/SequentialTask.h>
+
 #include <QSet>
 #include <QList>
 #include <QString>
@@ -13,15 +16,41 @@ namespace Minecraft
 
 struct Resources
 {
-	void clear();
+	Task * updateTask()
+	{
+		auto sequence = new SequentialTask();
+		if(auto librariesTask = libraries.updateTask())
+		{
+			sequence->addTask(std::shared_ptr<Task>(librariesTask));
+		}
+		if(auto assetsTask = assets.updateTask())
+		{
+			sequence->addTask(std::shared_ptr<Task>(assetsTask));
+		}
+		if(sequence->size() == 0)
+		{
+			delete sequence;
+			return nullptr;
+		}
+		return sequence;
+	}
 
-	void finalize();
+	void clear()
+	{
+		assets.clear();
+		minecraftArguments.clear();
+		tweakers.clear();
+		mainClass.clear();
+		appletClass.clear();
+		libraries.clear();
+		traits.clear();
+		jarMods.clear();
+	};
 
-	/// get all java libraries that belong to the classpath
-	QList<LibraryPtr> getActiveNormalLibs();
-
-	/// get all native libraries that need to be available to the process
-	QList<LibraryPtr> getActiveNativeLibs();
+	void finalize()
+	{
+		assets.finalize();
+	}
 
 	/// Assets type - "legacy" or a version ID
 	Assets assets;
@@ -46,7 +75,7 @@ struct Resources
 	QString appletClass;
 
 	/// the list of libs - both active and inactive, native and java
-	QList<LibraryPtr> libraries;
+	Libraries libraries;
 
 	/// traits, collected from all the version files (version files can only add)
 	QSet<QString> traits;

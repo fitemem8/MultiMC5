@@ -294,7 +294,7 @@ Task *Assets::prelaunchTask()
 }
 Task *Assets::updateTask()
 {
-	return nullptr;
+	return new AssetsUpdate(*this);
 }
 QString Assets::storageFolder()
 {

@@ -122,11 +122,11 @@ QJsonDocument OneSixFormat::toJson(PackagePtr file, bool saveOrder)
 	writeStringList(root, "+tweakers", resourceData.addTweakers);
 	writeStringList(root, "-tweakers", resourceData.removeTweakers);
 	writeStringList(root, "+traits", resourceData.traits.toList());
-	writeObjectList<OneSixFormat>(root, "libraries", resourceData.overwriteLibs);
-	if (!resourceData.addLibs.isEmpty())
+	writeObjectList<OneSixFormat>(root, "libraries", resourceData.libraries.overwriteLibs);
+	if (!resourceData.libraries.addLibs.isEmpty())
 	{
 		QJsonArray array;
-		for(auto plusLib: resourceData.addLibs)
+		for(auto plusLib: resourceData.libraries.addLibs)
 		{
 			// filter out the 'minecraft version'
 			if(plusLib->artifactPrefix() == "net.minecraft:minecraft")
@@ -143,10 +143,10 @@ QJsonDocument OneSixFormat::toJson(PackagePtr file, bool saveOrder)
 			root.insert("+libraries", array);
 		}
 	}
-	if (resourceData.removeLibs.size())
+	if (resourceData.libraries.removeLibs.size())
 	{
 		QJsonArray array;
-		for (auto lib : resourceData.removeLibs)
+		for (auto lib : resourceData.libraries.removeLibs)
 		{
 			QJsonObject rmlibobj;
 			rmlibobj.insert("name", lib);

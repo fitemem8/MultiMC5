@@ -62,7 +62,7 @@ PackagePtr WonkoFormat::fromJson(const QJsonDocument &doc, const QString &filena
 				QJsonObject libObj = ensureObject(libVal);
 				// NOTE: parsing using the OneSix format here.
 				auto lib = OneSixFormat::readRawLibraryPlus(libObj, filename);
-				resourceData.addLibs.append(lib);
+				resourceData.libraries.addLibs.append(lib);
 			}
 		}
 
