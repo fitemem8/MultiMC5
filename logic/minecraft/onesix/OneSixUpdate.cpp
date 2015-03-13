@@ -26,7 +26,7 @@
 #include <JlCompress.h>
 
 #include "BaseInstance.h"
-#include "MetaPackageList.h"
+#include "WonkoVersionList.h"
 #include "minecraft/MinecraftProfile.h"
 #include "minecraft/Library.h"
 #include "minecraft/onesix/OneSixInstance.h"
@@ -55,7 +55,7 @@ void OneSixUpdate::executeTask()
 	{
 		if(!version.isEmpty())
 		{
-			auto list = std::dynamic_pointer_cast<MetaPackageList>(ENV.getVersionList(uid));
+			auto list = std::dynamic_pointer_cast<WonkoVersionList>(ENV.getVersionList(uid));
 			versionUpdateTask->addTask(std::shared_ptr<Task>(list->getLoadTask()));
 			versionUpdateTask->addTask(list->createUpdateTask(version));
 			updateTask = true;

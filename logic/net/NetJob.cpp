@@ -64,7 +64,7 @@ void NetJob::partProgress(int index, qint64 bytesReceived, qint64 bytesTotal)
 	emit progress(current_progress, total_progress);
 }
 
-void NetJob::start()
+void NetJob::executeTask()
 {
 	qDebug() << m_job_name.toLocal8Bit() << " started.";
 	m_running = true;

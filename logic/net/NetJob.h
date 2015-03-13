@@ -21,17 +21,17 @@
 #include "MD5EtagDownload.h"
 #include "CacheDownload.h"
 #include "HttpMetaCache.h"
-#include "tasks/ProgressProvider.h"
+#include "tasks/Task.h"
 #include "QObjectPtr.h"
 
 class NetJob;
 typedef QObjectPtr<NetJob> NetJobPtr;
 
-class NetJob : public ProgressProvider
+class NetJob : public Task
 {
 	Q_OBJECT
 public:
-	explicit NetJob(QString job_name) : ProgressProvider(), m_job_name(job_name) {}
+	explicit NetJob(QString job_name) : Task(), m_job_name(job_name) {}
 	virtual ~NetJob() {}
 	template <typename T> bool addNetAction(T action)
 	{
@@ -93,7 +93,7 @@ signals:
 	void failed();
 
 public slots:
-	virtual void start();
+	virtual void executeTask();
 	// FIXME: implement
 	virtual void abort() {};
 

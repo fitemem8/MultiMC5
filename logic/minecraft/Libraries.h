@@ -1,14 +1,21 @@
 #pragma once
-#include <minecraft/Library.h>
+
+#include "Library.h"
+#include "net/DownloadableResource.h"
 
 class Task;
 
 namespace Minecraft
 {
 
-struct Libraries
+class Libraries : public DownloadableResource
 {
-	void apply(Libraries &other);
+public:
+	ResourcePtr mergeWith(const ResourcePtr &original, const ResourcePtr &next) override;
+	void load(const QJsonValue &data) override;
+	DownloadPtr createDownload() const override;
+	Task *updateTask() const override;
+
 	void clear()
 	{
 		shouldOverwriteLibs = false;
@@ -16,16 +23,8 @@ struct Libraries
 		addLibs.clear();
 		removeLibs.clear();
 	}
-	void finalize(){}
 
-	Task *updateTask();
-	Task *prelaunchTask();
-
-	/// get all java libraries that belong to the classpath
-	QList<LibraryPtr> getActiveNormalLibs();
-
-	/// get all native libraries that need to be available to the process
-	QList<LibraryPtr> getActiveNativeLibs();
+	QList<LibraryPtr> getActiveLibs() const;
 
 	/* DATA */
 	bool shouldOverwriteLibs = false;

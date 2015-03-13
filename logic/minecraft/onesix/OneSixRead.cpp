@@ -1,10 +1,11 @@
 #include "OneSixFormat.h"
 #include "minecraft/Package.h"
 #include "MMCJson.h"
+#include "Json.h"
 #include "ParseUtils.h"
 #include <QJsonArray>
 
-using namespace MMCJson;
+using namespace Json;
 
 RuleAction RuleAction_fromString(QString name)
 {
@@ -57,9 +58,9 @@ QList<std::shared_ptr<Rule>> readLibraryRules(const QJsonObject &objectWithRules
 }
 
 
-LibraryPtr readRawLibrary(const QJsonObject &libObj, const QString &filename)
+OneSixLibraryPtr readRawLibrary(const QJsonObject &libObj, const QString &filename)
 {
-	LibraryPtr out(new Library());
+	OneSixLibraryPtr out = std::make_shared<OneSixLibrary>();
 	if (!libObj.contains("name"))
 	{
 		throw JSONValidationError(filename +
@@ -67,39 +68,23 @@ LibraryPtr readRawLibrary(const QJsonObject &libObj, const QString &filename)
 	}
 	out->m_name = libObj.value("name").toString();
 
-	auto readString = [libObj, filename](const QString & key, QString & variable) -> bool
-	{
-		if (!libObj.contains(key))
-			return false;
-		QJsonValue val = libObj.value(key);
-
-		if (!val.isString())
-		{
-			qWarning() << key << "is not a string in" << filename << "(skipping)";
-			return false;
-		}
-
-		variable = val.toString();
-		return true;
-	};
-
-	readString("url", out->m_base_url);
-	readString("MMC-hint", out->m_hint);
-	readString("MMC-absulute_url", out->m_absolute_url);
-	readString("MMC-absoluteUrl", out->m_absolute_url);
-	readString("absoluteUrl", out->m_absolute_url);
+	out->m_base_url = ensureUrl(libObj, "url", QUrl());
+	out->m_hint = ensureString(libObj, "MMC-hint", QString());
+	out->m_absolute_url = ensureUrl(libObj, "MMC-absulute_url", QUrl());
+	out->m_absolute_url = ensureUrl(libObj, "MMC-absoluteUrl", out->m_absolute_url);
+	out->m_absolute_url = ensureUrl(libObj, "absoluteUrl", out->m_absolute_url);
 	if (libObj.contains("extract"))
 	{
 		out->applyExcludes = true;
-		auto extractObj = ensureObject(libObj.value("extract"));
-		for (auto excludeVal : ensureArray(extractObj.value("exclude")))
+		auto extractObj = ensureObject(libObj, "extract");
+		for (auto excludeVal : ensureArray(extractObj, "exclude"))
 		{
 			out->extract_excludes.append(ensureString(excludeVal));
 		}
 	}
 	if (libObj.contains("natives"))
 	{
-		QJsonObject nativesObj = ensureObject(libObj.value("natives"));
+		QJsonObject nativesObj = ensureObject(libObj, "natives");
 		for (auto it = nativesObj.begin(); it != nativesObj.end(); ++it)
 		{
 			if (!it.value().isString())
@@ -121,31 +106,31 @@ LibraryPtr readRawLibrary(const QJsonObject &libObj, const QString &filename)
 	return out;
 }
 
-LibraryPtr OneSixFormat::readRawLibraryPlus(const QJsonObject &libObj, const QString &filename)
+OneSixLibraryPtr OneSixFormat::readRawLibraryPlus(const QJsonObject &libObj, const QString &filename)
 {
-	auto lib = readRawLibrary(libObj, filename);
+	OneSixLibraryPtr lib = readRawLibrary(libObj, filename);
 	if (libObj.contains("insert"))
 	{
-		QJsonValue insertVal = ensureExists(libObj.value("insert"), "library insert rule");
+		QJsonValue insertVal = libObj.value("insert");
 		if (insertVal.isString())
 		{
 			// it's just a simple string rule. OK.
 			QString insertString = insertVal.toString();
 			if (insertString == "apply")
 			{
-				lib->insertType = Library::Apply;
+				lib->insertType = OneSixLibrary::Apply;
 			}
 			else if (insertString == "prepend")
 			{
-				lib->insertType = Library::Prepend;
+				lib->insertType = OneSixLibrary::Prepend;
 			}
 			else if (insertString == "append")
 			{
-				lib->insertType = Library::Append;
+				lib->insertType = OneSixLibrary::Append;
 			}
 			else if (insertString == "replace")
 			{
-				lib->insertType = Library::Replace;
+				lib->insertType = OneSixLibrary::Replace;
 			}
 			else
 			{
@@ -177,14 +162,14 @@ LibraryPtr OneSixFormat::readRawLibraryPlus(const QJsonObject &libObj, const QSt
 	}
 	if (libObj.contains("MMC-depend"))
 	{
-		const QString dependString = ensureString(libObj.value("MMC-depend"));
+		const QString dependString = ensureString(libObj, "MMC-depend");
 		if (dependString == "hard")
 		{
-			lib->dependType = Library::Hard;
+			lib->dependType = OneSixLibrary::Hard;
 		}
 		else if (dependString == "soft")
 		{
-			lib->dependType = Library::Soft;
+			lib->dependType = OneSixLibrary::Soft;
 		}
 		else
 		{
@@ -212,7 +197,7 @@ PackagePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& filen
 	{
 		if (root.contains("order"))
 		{
-			out->setOrder(ensureInteger(root.value("order")));
+			out->setOrder(ensureInteger(root, "order"));
 		}
 		else
 		{
@@ -235,7 +220,7 @@ PackagePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& filen
 	{
 		if (root.contains(key))
 		{
-			variable = ensureString(root.value(key));
+			variable = ensureString(root, key);
 		}
 	};
 
@@ -243,7 +228,7 @@ PackagePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& filen
 	{
 		if (root.contains(key))
 		{
-			return ensureString(root.value(key));
+			return ensureString(root, key);
 		}
 		return QString();
 	};
@@ -292,7 +277,7 @@ PackagePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& filen
 
 	if (root.contains("minimumLauncherVersion"))
 	{
-		int minimumLauncherVersion = ensureInteger(root.value("minimumLauncherVersion"));
+		int minimumLauncherVersion = ensureInteger(root, "minimumLauncherVersion");
 		if(minimumLauncherVersion > CURRENT_MINIMUM_LAUNCHER_VERSION)
 		{
 			throw JSONValidationError(QString("patch %1 is in a newer format than MultiMC can handle").arg(filename));
@@ -302,7 +287,7 @@ PackagePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& filen
 	if (root.contains("tweakers"))
 	{
 		resourceData.shouldOverwriteTweakers = true;
-		for (auto tweakerVal : ensureArray(root.value("tweakers")))
+		for (auto tweakerVal : ensureArray(root, "tweakers"))
 		{
 			resourceData.overwriteTweakers.append(ensureString(tweakerVal));
 		}
@@ -310,7 +295,7 @@ PackagePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& filen
 
 	if (root.contains("+tweakers"))
 	{
-		for (auto tweakerVal : ensureArray(root.value("+tweakers")))
+		for (auto tweakerVal : ensureArray(root, "+tweakers"))
 		{
 			resourceData.addTweakers.append(ensureString(tweakerVal));
 		}
@@ -318,7 +303,7 @@ PackagePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& filen
 
 	if (root.contains("-tweakers"))
 	{
-		for (auto tweakerVal : ensureArray(root.value("-tweakers")))
+		for (auto tweakerVal : ensureArray(root, "-tweakers"))
 		{
 			resourceData.removeTweakers.append(ensureString(tweakerVal));
 		}
@@ -326,7 +311,7 @@ PackagePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& filen
 
 	if (root.contains("+traits"))
 	{
-		for (auto tweakerVal : ensureArray(root.value("+traits")))
+		for (auto tweakerVal : ensureArray(root, "+traits"))
 		{
 			resourceData.traits.insert(ensureString(tweakerVal));
 		}
@@ -334,13 +319,20 @@ PackagePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& filen
 
 	if (root.contains("libraries"))
 	{
-		resourceData.libraries.shouldOverwriteLibs = true;
-		for (auto libVal : ensureArray(root.value("libraries")))
+		resourceData.libraries->shouldOverwriteLibs = true;
+		for (auto libVal : ensureArray(root, "libraries"))
 		{
 			auto libObj = ensureObject(libVal);
 
 			auto lib = readRawLibrary(libObj, filename);
-			resourceData.libraries.overwriteLibs.append(lib);
+			if (lib->isNative())
+			{
+				resourceData.natives->overwriteLibs.append(lib);
+			}
+			else
+			{
+				resourceData.libraries->overwriteLibs.append(lib);
+			}
 		}
 	}
 
@@ -348,7 +340,7 @@ PackagePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& filen
 	readString("id", minecraftVersion);
 	if(!minecraftVersion.isEmpty())
 	{
-		auto libptr = std::make_shared<Library>();
+		auto libptr = std::make_shared<OneSixLibrary>();
 		auto name = QString("net.minecraft:minecraft:%1").arg(minecraftVersion);
 		auto url = QString("http://s3.amazonaws.com/Minecraft.Download/versions/%1/%2.jar")
 			.arg(minecraftVersion)
@@ -359,7 +351,7 @@ PackagePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& filen
 
 	if (root.contains("+jarMods"))
 	{
-		for (auto libVal : ensureArray(root.value("+jarMods")))
+		for (auto libVal : ensureArray(root, "+jarMods"))
 		{
 			QJsonObject libObj = ensureObject(libVal);
 			// parse the jarmod
@@ -371,21 +363,29 @@ PackagePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& filen
 
 	if (root.contains("+libraries"))
 	{
-		for (auto libVal : ensureArray(root.value("+libraries")))
+		for (auto libVal : ensureArray(root, "+libraries"))
 		{
 			QJsonObject libObj = ensureObject(libVal);
 			// parse the library
 			auto lib = readRawLibraryPlus(libObj, filename);
-			resourceData.libraries.addLibs.append(lib);
+			if (lib->isNative())
+			{
+				resourceData.natives->addLibs.append(lib);
+			}
+			else
+			{
+				resourceData.libraries->addLibs.append(lib);
+			}
 		}
 	}
 
 	if (root.contains("-libraries"))
 	{
-		for (auto libVal : ensureArray(root.value("-libraries")))
+		for (auto libVal : ensureArray(root, "-libraries"))
 		{
 			auto libObj = ensureObject(libVal);
-			resourceData.libraries.removeLibs.append(ensureString(libObj.value("name")));
+			resourceData.libraries->removeLibs.append(ensureString(libObj, "name"));
+			resourceData.natives->removeLibs.append(ensureString(libObj, "name"));
 		}
 	}
 	return out;

@@ -14,20 +14,21 @@
 namespace Minecraft
 {
 
-struct Resources
+class Resources
 {
-	Task * updateTask()
+public:
+	Task *updateTask()
 	{
 		auto sequence = new SequentialTask();
-		if(auto librariesTask = libraries.updateTask())
+		if (auto librariesTask = libraries->updateTask())
 		{
 			sequence->addTask(std::shared_ptr<Task>(librariesTask));
 		}
-		if(auto assetsTask = assets.updateTask())
+		if (auto assetsTask = assets.updateTask())
 		{
 			sequence->addTask(std::shared_ptr<Task>(assetsTask));
 		}
-		if(sequence->size() == 0)
+		if (sequence->size() == 0)
 		{
 			delete sequence;
 			return nullptr;
@@ -42,10 +43,10 @@ struct Resources
 		tweakers.clear();
 		mainClass.clear();
 		appletClass.clear();
-		libraries.clear();
+		libraries->clear();
 		traits.clear();
 		jarMods.clear();
-	};
+	}
 
 	void finalize()
 	{
@@ -75,7 +76,8 @@ struct Resources
 	QString appletClass;
 
 	/// the list of libs - both active and inactive, native and java
-	Libraries libraries;
+	std::shared_ptr<Libraries> libraries = std::make_shared<Libraries>();
+	std::shared_ptr<Libraries> natives = std::make_shared<Libraries>();
 
 	/// traits, collected from all the version files (version files can only add)
 	QSet<QString> traits;

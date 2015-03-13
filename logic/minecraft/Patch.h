@@ -33,7 +33,8 @@ struct Patch
 	QStringList addTweakers;
 	QStringList removeTweakers;
 
-	Libraries libraries;
+	std::shared_ptr<Libraries> libraries = std::make_shared<Libraries>();
+	std::shared_ptr<Libraries> natives = std::make_shared<Libraries>();
 
 	QSet<QString> traits; // tags
 	QList<JarmodPtr> jarMods; // files of type... again.

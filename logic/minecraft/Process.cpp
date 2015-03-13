@@ -25,11 +25,9 @@
 #include <QStandardPaths>
 #include <QCoreApplication>
 
-#include "osutils.h"
 #include "pathutils.h"
 #include "cmdutils.h"
 
-#define IBUS "@im=ibus"
 namespace Minecraft
 {
 

@@ -15,14 +15,30 @@ SET(LOGIC_SOURCES
 	FileStore.cpp
 	NullInstance.h
 	MMCError.h
-	MetaPackageList.cpp
-	MetaPackageList.h
+	WonkoVersionList.cpp
+	WonkoVersionList.h
+	WonkoPackageVersion.cpp
+	WonkoPackageVersion.h
 	ParseUtils.cpp
 	ParseUtils.h
+
+	# Resources
+	BaseResource.cpp
+	BaseResource.h
+	net/DownloadableResource.cpp
+	net/DownloadableResource.h
 
 	# WARNING: globals live here
 	Env.h
 	Env.cpp
+
+	# Various utility classes
+	Json.h
+	Json.cpp
+	Exception.h
+	FileSystem.h
+	FileSystem.cpp
+	Functional.h
 
 	# JSON parsing helpers
 	MMCJson.h

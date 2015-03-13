@@ -3,9 +3,8 @@
 #include "minecraft/onesix/OneSixInstance.h"
 #include "minecraft/onesix/OneSixFormat.h"
 #include "minecraft/wonko/WonkoFormat.h"
-#include "MetaPackageList.h"
+#include "WonkoVersionList.h"
 #include "Env.h"
-#include <MetaPackage.h>
 #include <MMCJson.h>
 
 #include <pathutils.h>
@@ -81,7 +80,7 @@ void OneSixProfileStrategy::loadBuiltinPatch(QString uid, QString name, QString 
 	}
 	else if(!version.isEmpty())
 	{
-		auto mc = std::dynamic_pointer_cast<MetaPackageList>(ENV.getVersionList(uid));
+		auto mc = std::dynamic_pointer_cast<WonkoVersionList>(ENV.getVersionList(uid));
 		auto path = mc->versionFilePath(version);
 		if(!QFile::exists(path))
 		{

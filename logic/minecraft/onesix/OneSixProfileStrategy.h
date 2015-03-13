@@ -18,6 +18,7 @@ protected:
 	void loadUserPatches();
 	void upgradeDeprecatedFiles();
 	void loadBuiltinPatch(QString uid, QString name, QString version);
+
 protected:
 	OneSixInstance *m_instance;
 };

@@ -54,6 +54,7 @@ void Patch::applyTo(Minecraft::Resources *version)
 	}
 	version->jarMods.append(jarMods);
 	version->traits.unite(traits);
-	version->libraries.apply(libraries);
+	version->libraries->mergeWith(version->libraries, libraries);
+	version->natives->mergeWith(version->natives, natives);
 }
 }

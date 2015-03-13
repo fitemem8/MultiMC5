@@ -5,38 +5,41 @@
 #include <QDateTime>
 #include <memory>
 #include "minecraft/Patch.h"
+#include "WonkoPackageVersion.h"
 #include "MMCError.h"
 
 class Package;
 
 typedef std::shared_ptr<Package> PackagePtr;
-class Package
+
+// FIXME replace methods by those available in WonkoPackageVersion
+class Package : public WonkoPackageVersion
 {
 public: /* methods */
 	// FIXME: nuke? somehow?
-	virtual int getOrder()
+	int getOrder()
 	{
 		return order;
 	}
 	// FIXME: nuke? somehow?
-	virtual void setOrder(int order)
+	void setOrder(int order)
 	{
 		this->order = order;
 	}
-	virtual QString getPatchID()
+	QString getPatchID()
 	{
 		return fileId;
 	}
-	virtual QString getPatchName()
+	QString getPatchName()
 	{
 		return name;
 	}
-	virtual QString getPatchVersion()
+	QString getPatchVersion()
 	{
 		return version;
 	}
 	// FIXME: replace with generic 'source' attribute?
-	virtual QString getPatchFilename()
+	QString getPatchFilename()
 	{
 		return filename;
 	}
@@ -46,7 +49,7 @@ public: /* methods */
 		filename = _filename;
 	}
 	// FIXME: decide what to do with this.
-	virtual bool isMoveable()
+	bool isMoveable()
 	{
 		return true;
 	}

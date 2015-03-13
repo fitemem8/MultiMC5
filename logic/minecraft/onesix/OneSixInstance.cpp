@@ -178,7 +178,7 @@ BaseProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 	if (!m_version)
 		return nullptr;
 
-	auto libs = m_version->resources.libraries.getActiveNormalLibs();
+	auto libs = m_version->resources.libraries->getActiveLibs();
 	for (auto lib : libs)
 	{
 		// FIXME: stupid hardcoded thing
@@ -214,7 +214,7 @@ BaseProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 				return nullptr;
 			}
 		}
-		auto libs = m_version->resources.libraries.getActiveNormalLibs();
+		auto libs = m_version->resources.libraries->getActiveLibs();
 		QString sourceJarPath;
 
 		// find net.minecraft:minecraft
@@ -276,7 +276,7 @@ BaseProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 	// native libraries (mostly LWJGL)
 	{
 		QDir natives_dir(PathCombine(instanceRoot(), "natives/"));
-		for (auto native : m_version->resources.libraries.getActiveNativeLibs())
+		for (auto native : m_version->resources.natives->getActiveLibs())
 		{
 			QFileInfo finfo(PathCombine("libraries", native->storagePath()));
 			launchScript += "ext " + finfo.absoluteFilePath() + "\n";
@@ -291,6 +291,7 @@ BaseProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 	}
 	launchScript += "launcher onesix\n";
 
+	qDebug() << launchScript;
 	auto process = Minecraft::Process::create(std::dynamic_pointer_cast<MinecraftInstance>(getSharedPtr()));
 	process->setLaunchScript(launchScript);
 	process->setWorkdir(minecraftRoot());

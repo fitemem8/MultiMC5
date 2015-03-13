@@ -5,31 +5,39 @@
 #include <QStringList>
 #include <QMap>
 #include <QDir>
+#include <QUrl>
+#include <QSet>
 #include <memory>
 
 #include "minecraft/OneSixRule.h"
 #include "minecraft/OpSys.h"
 #include "GradleSpecifier.h"
 #include "net/URLConstants.h"
+#include "net/DownloadableResource.h"
 
-class Library;
-typedef std::shared_ptr<Library> LibraryPtr;
+using LibraryPtr = std::shared_ptr<class Library>;
+using OneSixLibraryPtr = std::shared_ptr<class OneSixLibrary>;
 
-class Library
+class Library : public BaseDownload
 {
+public:
+	virtual ~Library()
+	{
+	}
+
 public: /* methods */
 	/// Returns the raw name field
-	const GradleSpecifier & rawName() const
+	const GradleSpecifier &rawName() const
 	{
 		return m_name;
 	}
 
-	void setRawName(const GradleSpecifier & spec)
+	void setRawName(const GradleSpecifier &spec)
 	{
 		m_name = spec;
 	}
 
-	void setClassifier(const QString & spec)
+	void setClassifier(const QString &spec)
 	{
 		m_name.setClassifier(spec);
 	}
@@ -52,33 +60,90 @@ public: /* methods */
 		return m_name.version();
 	}
 
+	/// Set the url base for downloads
+	void setBaseUrl(const QUrl &base_url)
+	{
+		m_base_url = base_url;
+	}
+
+	/// List of files this library describes. Required because of platform-specificness of
+	/// native libs
+	virtual QStringList files() const;
+
+	/// List Shortcut for checking if all the above files exist
+	bool filesExist(const QDir &base) const;
+
+	void setAbsoluteUrl(const QUrl &absolute_url)
+	{
+		m_absolute_url = absolute_url;
+	}
+
+	QUrl absoluteUrl() const
+	{
+		return m_absolute_url;
+	}
+
+	/// Returns true if the library should be loaded (or extracted, in case of natives)
+	virtual bool isActive() const = 0;
+
+	/// Get the relative path where the library should be saved
+	virtual QString storagePath() const;
+
+	virtual void applyTo(const LibraryPtr &other);
+
+public: /* data */
+	// TODO: make all of these protected, clean up semantics of implicit vs. explicit values.
+	/// the basic gradle dependency specifier.
+	GradleSpecifier m_name;
+
+	/// URL where the file can be downloaded
+	QUrl m_base_url;
+
+	/// absolute URL. takes precedence the normal download URL, if defined
+	QUrl m_absolute_url;
+
+	/// used for '+' libraries, determines how to add them
+	enum InsertType
+	{
+		Apply,
+		Append,
+		Prepend,
+		Replace
+	} insertType = Prepend;
+	QString insertData;
+
+	/// determines how can libraries be applied. conflicting dependencies cause errors.
+	enum DependType
+	{
+		Soft, //! needs equal or newer version
+		Hard  //! needs equal version (different versions mean version conflict)
+	} dependType = Soft;
+
+	// BaseDownload interface
+public:
+	QUrl url() const override;
+	void load(const QJsonObject &data) override;
+	QList<NetActionPtr> createNetActions() const override
+	{
+		return {};
+	}
+};
+
+class OneSixLibrary : public Library
+{
+public: /* methods */
 	/// Returns true if the library is native
 	bool isNative() const
 	{
 		return m_native_classifiers.size() != 0;
 	}
 
-	/// Set the url base for downloads
-	void setBaseUrl(const QString &base_url)
-	{
-		m_base_url = base_url;
-	}
+	/// Get the relative path where the library should be saved
+	QString storagePath() const override;
 
-	/// List of files this library describes. Required because of platform-specificness of native libs
-	QStringList files() const;
-
-	/// List Shortcut for checking if all the above files exist
-	bool filesExist(const QDir &base) const;
-
-	void setAbsoluteUrl(const QString &absolute_url)
-	{
-		m_absolute_url = absolute_url;
-	}
-
-	QString absoluteUrl() const
-	{
-		return m_absolute_url;
-	}
+	/// List of files this library describes. Required because of platform-specificness of
+	/// native libs
+	QStringList files() const override;
 
 	void setHint(const QString &hint)
 	{
@@ -97,30 +162,12 @@ public: /* methods */
 	}
 
 	/// Returns true if the library should be loaded (or extracted, in case of natives)
-	bool isActive() const;
+	bool isActive() const override;
 
-	/// Get the URL to download the library from
-	QString downloadUrl() const;
-
-	/// Get the relative path where the library should be saved
-	QString storagePath() const;
-
+	void applyTo(const LibraryPtr &other) override;
 
 public: /* data */
 	// TODO: make all of these protected, clean up semantics of implicit vs. explicit values.
-	/// the basic gradle dependency specifier.
-	GradleSpecifier m_name;
-	/// where to store the lib locally
-	QString m_storage_path;
-	/// is this lib actually active on the current OS?
-	bool m_is_active = false;
-
-	/// URL where the file can be downloaded
-	QString m_base_url;
-
-	/// absolute URL. takes precedence the normal download URL, if defined
-	QString m_absolute_url;
-
 	/// type hint - modifies how the library is treated
 	QString m_hint;
 
@@ -139,20 +186,24 @@ public: /* data */
 	/// rules associated with the library
 	QList<std::shared_ptr<Rule>> m_rules;
 
-	/// used for '+' libraries, determines how to add them
-	enum InsertType
-	{
-		Apply,
-		Append,
-		Prepend,
-		Replace
-	} insertType = Prepend;
-	QString insertData;
+	// BaseDownload interface
+public:
+	QList<NetActionPtr> createNetActions() const override;
+};
 
-	/// determines how can libraries be applied. conflicting dependencies cause errors.
-	enum DependType
+class WonkoLibrary : public Library
+{
+public:
+	bool isActive() const override;
+	void load(const QJsonObject &data) override;
+
+	QSet<QString> platforms() const
 	{
-		Soft, //! needs equal or newer version
-		Hard  //! needs equal version (different versions mean version conflict)
-	} dependType = Soft;
+		return m_platforms;
+	}
+
+	static QSet<QString> allPlatforms();
+
+public:
+	QSet<QString> m_platforms;
 };

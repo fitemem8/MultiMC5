@@ -1,10 +1,10 @@
 #include "OneSixFormat.h"
 #include "minecraft/Package.h"
-#include "MMCJson.h"
+#include "Json.h"
 #include "ParseUtils.h"
 #include <QJsonArray>
 
-using namespace MMCJson;
+using namespace Json;
 
 QJsonObject OneSixFormat::toJson(std::shared_ptr<ImplicitRule> rule)
 {
@@ -26,19 +26,19 @@ QJsonObject OneSixFormat::toJson(std::shared_ptr<OsRule> rule)
 	return ruleObj;
 }
 
-QJsonObject OneSixFormat::toJson(LibraryPtr raw)
+QJsonObject OneSixFormat::toJson(OneSixLibraryPtr raw)
 {
 	QJsonObject libRoot;
 	libRoot.insert("name", (QString)raw->m_name);
-	if (raw->m_absolute_url.size())
-		libRoot.insert("MMC-absoluteUrl", raw->m_absolute_url);
-	if (raw->m_hint.size())
+	if (!raw->m_absolute_url.isEmpty())
+		libRoot.insert("MMC-absoluteUrl", Json::toJson(raw->m_absolute_url));
+	if (!raw->m_hint.isEmpty())
 		libRoot.insert("MMC-hint", raw->m_hint);
 	if (raw->m_base_url != "http://" + URLConstants::AWS_DOWNLOAD_LIBRARIES &&
 		raw->m_base_url != "https://" + URLConstants::AWS_DOWNLOAD_LIBRARIES &&
 		raw->m_base_url != "https://" + URLConstants::LIBRARY_BASE && !raw->m_base_url.isEmpty())
 	{
-		libRoot.insert("url", raw->m_base_url);
+		libRoot.insert("url", Json::toJson(raw->m_base_url));
 	}
 	if (raw->isNative())
 	{
@@ -90,6 +90,15 @@ QJsonObject OneSixFormat::toJson(LibraryPtr raw)
 	return libRoot;
 }
 
+static QList<OneSixLibraryPtr> toOneSixLibraries(const QList<LibraryPtr> &libraries)
+{
+	QList<OneSixLibraryPtr> out;
+	for (const LibraryPtr &ptr : libraries)
+	{
+		out.append(std::dynamic_pointer_cast<OneSixLibrary>(ptr));
+	}
+	return out;
+}
 QJsonDocument OneSixFormat::toJson(PackagePtr file, bool saveOrder)
 {
 	QJsonObject root;
@@ -122,11 +131,12 @@ QJsonDocument OneSixFormat::toJson(PackagePtr file, bool saveOrder)
 	writeStringList(root, "+tweakers", resourceData.addTweakers);
 	writeStringList(root, "-tweakers", resourceData.removeTweakers);
 	writeStringList(root, "+traits", resourceData.traits.toList());
-	writeObjectList<OneSixFormat>(root, "libraries", resourceData.libraries.overwriteLibs);
-	if (!resourceData.libraries.addLibs.isEmpty())
+	writeObjectList<OneSixFormat>(root, "libraries", toOneSixLibraries(resourceData.libraries->overwriteLibs +
+																	   resourceData.natives->overwriteLibs));
+	if (!resourceData.libraries->addLibs.isEmpty() || !resourceData.natives->addLibs.isEmpty())
 	{
 		QJsonArray array;
-		for(auto plusLib: resourceData.libraries.addLibs)
+		for(auto plusLib: (resourceData.libraries->addLibs + resourceData.natives->addLibs))
 		{
 			// filter out the 'minecraft version'
 			if(plusLib->artifactPrefix() == "net.minecraft:minecraft")
@@ -135,7 +145,7 @@ QJsonDocument OneSixFormat::toJson(PackagePtr file, bool saveOrder)
 				writeString(root, "id", plusLib->version());
 				continue;
 			}
-			array.append(OneSixFormat::toJson(plusLib));
+			array.append(OneSixFormat::toJson(std::dynamic_pointer_cast<OneSixLibrary>(plusLib)));
 		}
 		// we could have removed minecraft from the array of libs. Do not write empty array.
 		if(!array.isEmpty())
@@ -143,10 +153,10 @@ QJsonDocument OneSixFormat::toJson(PackagePtr file, bool saveOrder)
 			root.insert("+libraries", array);
 		}
 	}
-	if (resourceData.libraries.removeLibs.size())
+	if (!resourceData.libraries->removeLibs.isEmpty() || !resourceData.natives->removeLibs.isEmpty())
 	{
 		QJsonArray array;
-		for (auto lib : resourceData.libraries.removeLibs)
+		for (auto lib : (resourceData.libraries->removeLibs + resourceData.natives->removeLibs))
 		{
 			QJsonObject rmlibobj;
 			rmlibobj.insert("name", lib);

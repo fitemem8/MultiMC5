@@ -8,7 +8,7 @@
 #include <QDateTime>
 
 class QFile;
-class MetaPackageList;
+class WonkoVersionList;
 class HttpMetaCache;
 class SettingsObject;
 class InstanceList;
