@@ -48,15 +48,14 @@ QList<LibraryPtr> Libraries::getActiveLibs() const
 	return out;
 }
 
-ResourcePtr Libraries::mergeWith(const ResourcePtr &original, const ResourcePtr &next)
+void Libraries::applyTo(const ResourcePtr &target) const
 {
-	Q_ASSERT(original.get() == this);
-	std::shared_ptr<Libraries> other = std::dynamic_pointer_cast<Libraries>(next);
-	if (other->shouldOverwriteLibs)
+	std::shared_ptr<Libraries> other = std::dynamic_pointer_cast<Libraries>(target);
+	if (shouldOverwriteLibs)
 	{
-		overwriteLibs = other->overwriteLibs;
+		other->overwriteLibs = overwriteLibs;
 	}
-	for (auto addedLibrary : other->addLibs)
+	for (auto addedLibrary : addLibs)
 	{
 		switch (addedLibrary->insertType)
 		{
@@ -78,23 +77,23 @@ ResourcePtr Libraries::mergeWith(const ResourcePtr &original, const ResourcePtr 
 		case Library::Prepend:
 		{
 			// find the library by name.
-			const int index = findLibraryByName(overwriteLibs, addedLibrary->rawName());
+			const int index = findLibraryByName(other->overwriteLibs, addedLibrary->rawName());
 			// library not found? just add it.
 			if (index < 0)
 			{
 				if (addedLibrary->insertType == Library::Append)
 				{
-					overwriteLibs.append(addedLibrary);
+					other->overwriteLibs.append(addedLibrary);
 				}
 				else
 				{
-					overwriteLibs.prepend(addedLibrary);
+					other->overwriteLibs.prepend(addedLibrary);
 				}
 				break;
 			}
 
 			// otherwise apply differences, if allowed
-			auto existingLibrary = overwriteLibs.at(index);
+			auto existingLibrary = other->overwriteLibs.at(index);
 			const Util::Version addedVersion = addedLibrary->version();
 			const Util::Version existingVersion = existingLibrary->version();
 			// if the existing version is a hard dependency we can either use it or
@@ -120,7 +119,7 @@ ResourcePtr Libraries::mergeWith(const ResourcePtr &original, const ResourcePtr 
 				// if we are higher it means we should update
 				if (addedVersion > existingVersion)
 				{
-					overwriteLibs.replace(index, addedLibrary);
+					other->overwriteLibs.replace(index, addedLibrary);
 				}
 				else
 				{
@@ -152,7 +151,7 @@ ResourcePtr Libraries::mergeWith(const ResourcePtr &original, const ResourcePtr 
 			int index = findLibraryByName(overwriteLibs, toReplace);
 			if (index >= 0)
 			{
-				overwriteLibs.replace(index, addedLibrary);
+				other->overwriteLibs.replace(index, addedLibrary);
 			}
 			else
 			{
@@ -164,29 +163,23 @@ ResourcePtr Libraries::mergeWith(const ResourcePtr &original, const ResourcePtr 
 	}
 	for (auto lib : removeLibs)
 	{
-		int index = findLibraryByName(overwriteLibs, lib);
+		int index = findLibraryByName(other->overwriteLibs, lib);
 		if (index >= 0)
 		{
 			// qDebug() << "Removing lib " << lib;
-			overwriteLibs.removeAt(index);
+			other->overwriteLibs.removeAt(index);
 		}
 		else
 		{
 			qWarning() << "Couldn't find" << lib << "(skipping)";
 		}
 	}
-
-	return original;
 }
 
 void Libraries::load(const QJsonValue &data)
 {
 	DownloadableResource::load(data);
-	addLibs = Functional::map([](DownloadPtr dl)
-							  {
-								  return std::dynamic_pointer_cast<Library>(dl);
-							  },
-							  downloads());
+	addLibs = Functional::map(&std::dynamic_pointer_cast<Library, BaseDownload>, downloads());
 }
 
 class JarlibUpdate : public Task
@@ -270,7 +263,7 @@ private:
 
 DownloadPtr Libraries::createDownload() const
 {
-	return std::make_shared<WonkoLibrary>();
+	return std::make_shared<Library>();
 }
 
 Task *Libraries::updateTask() const

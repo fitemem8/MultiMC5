@@ -3,25 +3,29 @@
 #include <QString>
 #include <QDateTime>
 
+#include "BaseResource.h"
+
 class Task;
 
 namespace Minecraft
 {
-struct Assets
+class Assets : public BaseResource
 {
 public:
-	Assets(QString id = QString())
+	explicit Assets(const QString &id = QString())
 	{
 		m_id = id;
 	}
-	void apply(Assets &other)
+	void applyTo(const ResourcePtr &target) const override
 	{
-		if (!other.m_id.isNull())
+		auto other = std::dynamic_pointer_cast<Assets>(target);
+		if (!other->m_id.isNull())
 		{
-			m_id = other.m_id;
+			other->m_id = m_id;
 		}
 	}
-	void clear()
+	void load(const QJsonValue &data) override;
+	void clear() override
 	{
 		m_id.clear();
 	}
@@ -47,9 +51,9 @@ public:
 		}
 	}
 	QString storageFolder();
-	Task *updateTask();
-	Task *prelaunchTask();
-	QString id()
+	Task *updateTask() const override;
+	Task *prelaunchTask() const override;
+	QString id() const
 	{
 		return m_id;
 	}

@@ -11,7 +11,7 @@ namespace Minecraft
 class Libraries : public DownloadableResource
 {
 public:
-	ResourcePtr mergeWith(const ResourcePtr &original, const ResourcePtr &next) override;
+	void applyTo(const ResourcePtr &target) const override;
 	void load(const QJsonValue &data) override;
 	DownloadPtr createDownload() const override;
 	Task *updateTask() const override;

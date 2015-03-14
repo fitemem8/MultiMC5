@@ -5,7 +5,7 @@
 #include "Env.h"
 #include "Json.h"
 
-QStringList OneSixLibrary::files() const
+QStringList Library::files() const
 {
 	QStringList retval;
 	QString storage = storagePath();
@@ -21,10 +21,6 @@ QStringList OneSixLibrary::files() const
 	else
 		retval.append(storage);
 	return retval;
-}
-QStringList Library::files() const
-{
-	return QStringList() << storagePath();
 }
 
 bool Library::filesExist(const QDir &base) const
@@ -55,7 +51,7 @@ QUrl Library::url() const
 	return m_base_url.resolved(storagePath());
 }
 
-bool OneSixLibrary::isActive() const
+bool Library::isActive() const
 {
 	bool result = true;
 	if (m_rules.empty())
@@ -67,7 +63,7 @@ bool OneSixLibrary::isActive() const
 		RuleAction ruleResult = Disallow;
 		for (auto rule : m_rules)
 		{
-			RuleAction temp = rule->apply(this);
+			RuleAction temp = rule->apply();
 			if (temp != Defer)
 				ruleResult = temp;
 		}
@@ -80,29 +76,35 @@ bool OneSixLibrary::isActive() const
 	return result;
 }
 
-void OneSixLibrary::applyTo(const LibraryPtr &other)
+void Library::applyTo(const LibraryPtr &other)
 {
-	Library::applyTo(other);
-	OneSixLibraryPtr existing = std::dynamic_pointer_cast<OneSixLibrary>(other);
+	if (m_base_url.isValid())
+	{
+		other->setBaseUrl(m_base_url);
+	}
+	if (m_absolute_url.isValid())
+	{
+		other->setAbsoluteUrl(m_absolute_url);
+	}
 	if (!m_hint.isNull())
 	{
-		existing->setHint(m_hint);
+		other->setHint(m_hint);
 	}
 	if (applyExcludes)
 	{
-		existing->extract_excludes = extract_excludes;
+		other->extract_excludes = extract_excludes;
 	}
 	if (isNative())
 	{
-		existing->m_native_classifiers = m_native_classifiers;
+		other->m_native_classifiers = m_native_classifiers;
 	}
 	if (applyRules)
 	{
-		existing->setRules(m_rules);
+		other->setRules(m_rules);
 	}
 }
 
-QList<NetActionPtr> OneSixLibrary::createNetActions() const
+QList<NetActionPtr> Library::createNetActions() const
 {
 	if (hint() == "local")
 	{
@@ -148,7 +150,7 @@ QList<NetActionPtr> OneSixLibrary::createNetActions() const
 	return out;
 }
 
-QString OneSixLibrary::storagePath() const
+QString Library::storagePath() const
 {
 	// non-native? use only the gradle specifier
 	if (!isNative())
@@ -168,22 +170,6 @@ QString OneSixLibrary::storagePath() const
 	}
 	return nativeSpec.toPath();
 }
-QString Library::storagePath() const
-{
-	return m_name.toPath();
-}
-
-void Library::applyTo(const LibraryPtr &other)
-{
-	if (m_base_url.isValid())
-	{
-		other->setBaseUrl(m_base_url);
-	}
-	if (m_absolute_url.isValid())
-	{
-		other->setAbsoluteUrl(m_absolute_url);
-	}
-}
 
 void Library::load(const QJsonObject &data)
 {
@@ -191,41 +177,4 @@ void Library::load(const QJsonObject &data)
 	m_absolute_url = BaseDownload::url();
 	m_base_url = Json::ensureUrl(data, "mavenBaseUrl", QUrl());
 	m_name = GradleSpecifier(Json::ensureString(data, "name"));
-}
-
-bool WonkoLibrary::isActive() const
-{
-	for (const QString &platform : m_platforms)
-	{
-		if (platform.startsWith(
-#if defined(Q_OS_WIN)
-				"win"
-#elif defined(Q_OS_OSX)
-				"osx"
-#elif defined(Q_OS_LINUX)
-				"lin"
-#endif
-				))
-		{
-			return true;
-		}
-	}
-	return false;
-}
-
-void WonkoLibrary::load(const QJsonObject &data)
-{
-	Library::load(data);
-	m_platforms =
-		Json::ensureIsArrayOf<QString>(data, "platforms", allPlatforms().toList()).toSet();
-}
-
-QSet<QString> WonkoLibrary::allPlatforms()
-{
-	return QSet<QString>() << "win32"
-						   << "win64"
-						   << "lin32"
-						   << "lin64"
-						   << "osx32"
-						   << "osx64";
 }

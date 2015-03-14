@@ -38,11 +38,11 @@ public:
 	Rule(RuleAction result) : m_result(result)
 	{
 	}
-	virtual ~Rule() {};
-	virtual bool applies(const Library *parent) = 0;
-	RuleAction apply(const Library *parent)
+	virtual ~Rule() {}
+	virtual bool applies() = 0;
+	RuleAction apply()
 	{
-		if (applies(parent))
+		if (applies())
 			return m_result;
 		else
 			return Defer;
@@ -60,8 +60,8 @@ public:
 		: Rule(result), m_system(system), m_version_regexp(version_regexp)
 	{
 	}
-	virtual ~OsRule(){};
-	virtual bool applies(const Library *)
+	virtual ~OsRule(){}
+	virtual bool applies()
 	{
 		return (m_system == currentSystem);
 	}
@@ -82,8 +82,8 @@ public:
 	ImplicitRule(RuleAction result) : Rule(result)
 	{
 	}
-	virtual ~ImplicitRule() {};
-	virtual bool applies(const Library *)
+	virtual ~ImplicitRule() {}
+	virtual bool applies()
 	{
 		return true;
 	}

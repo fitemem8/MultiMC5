@@ -47,21 +47,18 @@ Task *DownloadableResource::updateTask() const
 	return job;
 }
 
-ResourcePtr DownloadableResource::mergeWith(const ResourcePtr &original,
-											const ResourcePtr &next)
+void DownloadableResource::applyTo(const ResourcePtr &target) const
 {
-	Q_ASSERT(original.get() == this);
 	QHash<QByteArray, DownloadPtr> downloads;
 	for (DownloadPtr dl : m_downloads)
 	{
 		downloads.insert(dl->sha256(), dl);
 	}
 
-	for (DownloadPtr dl : std::dynamic_pointer_cast<DownloadableResource>(next)->m_downloads)
+	for (DownloadPtr dl : std::dynamic_pointer_cast<DownloadableResource>(target)->m_downloads)
 	{
 		downloads.insert(dl->sha256(), dl);
 	}
 
-	m_downloads = downloads.values();
-	return original;
+	std::dynamic_pointer_cast<DownloadableResource>(target)->m_downloads = downloads.values();
 }

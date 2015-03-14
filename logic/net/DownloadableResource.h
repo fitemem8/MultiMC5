@@ -50,8 +50,7 @@ public:
 	}
 	virtual void load(const QJsonValue &data) override;
 	virtual Task *updateTask() const override;
-	virtual ResourcePtr mergeWith(const ResourcePtr &original,
-								  const ResourcePtr &next) override;
+	virtual void applyTo(const ResourcePtr &target) const override;
 
 	QList<DownloadPtr> downloads() const
 	{

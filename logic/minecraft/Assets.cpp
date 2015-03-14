@@ -13,6 +13,7 @@
 #include "net/NetJob.h"
 #include "net/URLConstants.h"
 #include "tasks/Task.h"
+#include "Json.h"
 #include "Env.h"
 
 namespace Minecraft {
@@ -187,7 +188,7 @@ class AssetsUpdate : public Task
 {
 	Q_OBJECT
 public:
-	explicit AssetsUpdate(Assets & assets, QObject *parent = 0) : Task(parent), m_assets(assets) {}
+	explicit AssetsUpdate(const Assets *assets, QObject *parent = 0) : Task(parent), m_assets(assets) {}
 	virtual void executeTask();
 
 private
@@ -201,12 +202,12 @@ slots:
 
 private:
 	NetJobPtr assetDlJob;
-	Assets & m_assets;
+	const Assets *m_assets;
 };
 
 void AssetsUpdate::executeTask()
 {
-	if(!m_assets.id().isEmpty())
+	if(!m_assets->id().isEmpty())
 	{
 		assetIndexStart();
 	}
@@ -215,9 +216,9 @@ void AssetsUpdate::executeTask()
 void AssetsUpdate::assetIndexStart()
 {
 	setStatus(tr("Updating assets index..."));
-	QUrl indexUrl = "http://" + URLConstants::AWS_DOWNLOAD_INDEXES + m_assets.id() + ".json";
-	QString localPath = m_assets.id() + ".json";
-	auto job = new NetJob(tr("Asset index for %1").arg(m_assets.id()));
+	QUrl indexUrl = "http://" + URLConstants::AWS_DOWNLOAD_INDEXES + m_assets->id() + ".json";
+	QString localPath = m_assets->id() + ".json";
+	auto job = new NetJob(tr("Asset index for %1").arg(m_assets->id()));
 
 	auto metacache = ENV.metacache();
 	auto entry = metacache->resolveEntry("asset_indexes", localPath);
@@ -236,7 +237,7 @@ void AssetsUpdate::assetIndexFinished()
 {
 	AssetsIndex index;
 
-	QString asset_fname = "assets/indexes/" + m_assets.id() + ".json";
+	QString asset_fname = "assets/indexes/" + m_assets->id() + ".json";
 	if (!loadAssetsIndexJson(asset_fname, &index))
 	{
 		emitFailed(tr("Failed to read the assets index!"));
@@ -259,7 +260,7 @@ void AssetsUpdate::assetIndexFinished()
 	if (dls.size())
 	{
 		setStatus(tr("Getting the assets files from Mojang..."));
-		auto job = new NetJob(tr("Assets download task for %1").arg(m_assets.id()));
+		auto job = new NetJob(tr("Assets download task for %1").arg(m_assets->id()));
 		for (auto dl : dls)
 			job->addNetAction(dl);
 		assetDlJob.reset(job);
@@ -288,18 +289,24 @@ void AssetsUpdate::assetsFailed()
 	emitFailed(tr("Failed to download assets!"));
 }
 
-Task *Assets::prelaunchTask()
+Task *Assets::prelaunchTask() const
 {
 	return nullptr;
 }
-Task *Assets::updateTask()
+Task *Assets::updateTask() const
 {
-	return new AssetsUpdate(*this);
+	return new AssetsUpdate(this);
 }
 QString Assets::storageFolder()
 {
 	return reconstructAssets(id()).absolutePath();
 }
+
+void Assets::load(const QJsonValue &data)
+{
+	m_id = Json::ensureString(data);
+}
+
 #include "Assets.moc"
 
 }

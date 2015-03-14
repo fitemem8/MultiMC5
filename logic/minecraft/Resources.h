@@ -20,11 +20,15 @@ public:
 	Task *updateTask()
 	{
 		auto sequence = new SequentialTask();
-		if (auto librariesTask = libraries->updateTask())
+		if (Task *librariesTask = libraries->updateTask())
 		{
 			sequence->addTask(std::shared_ptr<Task>(librariesTask));
 		}
-		if (auto assetsTask = assets.updateTask())
+		if (Task *nativesTask = natives->updateTask())
+		{
+			sequence->addTask(std::shared_ptr<Task>(nativesTask));
+		}
+		if (Task *assetsTask = assets->updateTask())
 		{
 			sequence->addTask(std::shared_ptr<Task>(assetsTask));
 		}
@@ -38,7 +42,7 @@ public:
 
 	void clear()
 	{
-		assets.clear();
+		assets->clear();
 		minecraftArguments.clear();
 		tweakers.clear();
 		mainClass.clear();
@@ -50,11 +54,11 @@ public:
 
 	void finalize()
 	{
-		assets.finalize();
+		assets->finalize();
 	}
 
 	/// Assets type - "legacy" or a version ID
-	Assets assets;
+	std::shared_ptr<Assets> assets = std::make_shared<Assets>();
 	/**
 	 * arguments that should be used for launching minecraft
 	 *

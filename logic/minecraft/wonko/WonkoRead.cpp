@@ -18,10 +18,9 @@ public:
 
 using namespace Json;
 
-static OneSixLibraryPtr convertLibrary(LibraryPtr ptr, const bool isNative)
+static LibraryPtr convertLibrary(LibraryPtr lib, const bool isNative)
 {
-	std::shared_ptr<OneSixLibrary> out = std::make_shared<OneSixLibrary>();
-	std::shared_ptr<WonkoLibrary> lib = std::dynamic_pointer_cast<WonkoLibrary>(ptr);
+	std::shared_ptr<Library> out = std::make_shared<Library>();
 
 	out->m_name = lib->m_name;
 	out->m_base_url = lib->m_base_url;
@@ -30,31 +29,6 @@ static OneSixLibraryPtr convertLibrary(LibraryPtr ptr, const bool isNative)
 	out->insertData = lib->insertData;
 	out->dependType = lib->dependType;
 
-	QSet<OpSys> platforms;
-
-	// platforms -> rules
-	if (!lib->platforms().isEmpty() && lib->platforms() != WonkoLibrary::allPlatforms())
-	{
-		QMap<QString, OpSys> mapping;
-		mapping["win32"] = Os_Windows;
-		mapping["win64"] = Os_Windows;
-		mapping["lin32"] = Os_Linux;
-		mapping["lin64"] = Os_Linux;
-		mapping["osx32"] = Os_OSX;
-		mapping["osx64"] = Os_OSX;
-
-		out->applyRules = true;
-		out->m_rules += ImplicitRule::create(Disallow);
-		for (const QString &os : lib->platforms())
-		{
-			platforms += mapping.contains(os) ? mapping[os] : Os_Other;
-		}
-		for (const OpSys system : platforms)
-		{
-			out->m_rules += OsRule::create(Allow, system, QString());
-		}
-	}
-
 	if (isNative && lib->m_absolute_url.isValid())
 	{
 		QString natives = lib->m_absolute_url.toString();
@@ -62,9 +36,17 @@ static OneSixLibraryPtr convertLibrary(LibraryPtr ptr, const bool isNative)
 		natives = natives.replace("32", "${arch}").replace("64", "${arch}");
 		if (!natives.isEmpty())
 		{
-			for (const OpSys system : platforms)
+			if (natives.contains("windows"))
 			{
-				out->m_native_classifiers[system] = natives;
+				out->m_native_classifiers[Os_Windows] = natives;
+			}
+			else if (natives.contains("osx"))
+			{
+				out->m_native_classifiers[Os_OSX] = natives;
+			}
+			else if (natives.contains("linux"))
+			{
+				out->m_native_classifiers[Os_Linux] = natives;
 			}
 
 			out->applyExcludes = true;
@@ -89,13 +71,13 @@ convertLibs(std::shared_ptr<Minecraft::Libraries> libs, const bool isNative)
 
 	auto convertListOfLibraries = [isNative](const QList<LibraryPtr> libs)
 	{
-		QMap<QString, OneSixLibraryPtr> out;
+		QMap<QString, LibraryPtr> out;
 		for (LibraryPtr lib : libs)
 		{
-			OneSixLibraryPtr converted = convertLibrary(lib, isNative);
+			LibraryPtr converted = convertLibrary(lib, isNative);
 			if (out.contains(converted->rawName()))
 			{
-				OneSixLibraryPtr existing = out[converted->rawName()];
+				LibraryPtr existing = out[converted->rawName()];
 				existing->m_native_classifiers.unite(converted->m_native_classifiers);
 				if (!converted->m_rules.isEmpty())
 				{
@@ -109,12 +91,7 @@ convertLibs(std::shared_ptr<Minecraft::Libraries> libs, const bool isNative)
 				out.insert(converted->rawName(), converted);
 			}
 		}
-		QList<LibraryPtr> result;
-		for (LibraryPtr ptr : out.values())
-		{
-			result.append(ptr);
-		}
-		return result;
+		return out.values();
 	};
 
 	out->addLibs = convertListOfLibraries(libs->addLibs);
@@ -186,7 +163,7 @@ PackagePtr WonkoFormat::fromJson(const QJsonDocument &doc, const QString &filena
 		}
 		if (file->resource<StringResource>("mc.assets"))
 		{
-			result->resources.assets = file->resource<StringResource>("mc.assets")->data();
+			result->resources.assets = std::make_shared<Minecraft::Assets>(file->resource<StringResource>("mc.assets")->data());
 		}
 		if (file->resource<StringResource>("mc.arguments"))
 		{

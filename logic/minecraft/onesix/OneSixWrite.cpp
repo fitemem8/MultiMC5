@@ -26,7 +26,7 @@ QJsonObject OneSixFormat::toJson(std::shared_ptr<OsRule> rule)
 	return ruleObj;
 }
 
-QJsonObject OneSixFormat::toJson(OneSixLibraryPtr raw)
+QJsonObject OneSixFormat::toJson(LibraryPtr raw)
 {
 	QJsonObject libRoot;
 	libRoot.insert("name", (QString)raw->m_name);
@@ -90,12 +90,12 @@ QJsonObject OneSixFormat::toJson(OneSixLibraryPtr raw)
 	return libRoot;
 }
 
-static QList<OneSixLibraryPtr> toOneSixLibraries(const QList<LibraryPtr> &libraries)
+static QList<LibraryPtr> toOneSixLibraries(const QList<LibraryPtr> &libraries)
 {
-	QList<OneSixLibraryPtr> out;
+	QList<LibraryPtr> out;
 	for (const LibraryPtr &ptr : libraries)
 	{
-		out.append(std::dynamic_pointer_cast<OneSixLibrary>(ptr));
+		out.append(std::dynamic_pointer_cast<Library>(ptr));
 	}
 	return out;
 }
@@ -121,7 +121,7 @@ QJsonDocument OneSixFormat::toJson(PackagePtr file, bool saveOrder)
 	writeString(root, "+minecraftArguments", resourceData.addMinecraftArguments);
 	writeString(root, "-minecraftArguments", resourceData.removeMinecraftArguments);
 	writeString(root, "type", file->type);
-	writeString(root, "assets", resourceData.assets.id());
+	writeString(root, "assets", resourceData.assets->id());
 	if (file->fileId == "net.minecraft")
 	{
 		writeString(root, "releaseTime", file->m_releaseTimeString);
@@ -145,7 +145,7 @@ QJsonDocument OneSixFormat::toJson(PackagePtr file, bool saveOrder)
 				writeString(root, "id", plusLib->version());
 				continue;
 			}
-			array.append(OneSixFormat::toJson(std::dynamic_pointer_cast<OneSixLibrary>(plusLib)));
+			array.append(OneSixFormat::toJson(std::dynamic_pointer_cast<Library>(plusLib)));
 		}
 		// we could have removed minecraft from the array of libs. Do not write empty array.
 		if(!array.isEmpty())

@@ -27,7 +27,7 @@ void Patch::applyTo(Minecraft::Resources *version)
 	{
 		version->appletClass = appletClass;
 	}
-	version->assets.apply(assets);
+	version->assets->applyTo(assets);
 	if (!overwriteMinecraftArguments.isNull())
 	{
 		version->minecraftArguments = overwriteMinecraftArguments;
@@ -54,7 +54,7 @@ void Patch::applyTo(Minecraft::Resources *version)
 	}
 	version->jarMods.append(jarMods);
 	version->traits.unite(traits);
-	version->libraries->mergeWith(version->libraries, libraries);
-	version->natives->mergeWith(version->natives, natives);
+	libraries->applyTo(version->libraries);
+	natives->applyTo(version->natives);
 }
 }

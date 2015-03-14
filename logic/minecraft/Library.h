@@ -16,7 +16,6 @@
 #include "net/DownloadableResource.h"
 
 using LibraryPtr = std::shared_ptr<class Library>;
-using OneSixLibraryPtr = std::shared_ptr<class OneSixLibrary>;
 
 class Library : public BaseDownload
 {
@@ -68,7 +67,7 @@ public: /* methods */
 
 	/// List of files this library describes. Required because of platform-specificness of
 	/// native libs
-	virtual QStringList files() const;
+	QStringList files() const;
 
 	/// List Shortcut for checking if all the above files exist
 	bool filesExist(const QDir &base) const;
@@ -83,13 +82,35 @@ public: /* methods */
 		return m_absolute_url;
 	}
 
-	/// Returns true if the library should be loaded (or extracted, in case of natives)
-	virtual bool isActive() const = 0;
+	virtual void applyTo(const LibraryPtr &other);
+
+	/// Returns true if the library is native
+	bool isNative() const
+	{
+		return m_native_classifiers.size() != 0;
+	}
 
 	/// Get the relative path where the library should be saved
-	virtual QString storagePath() const;
+	QString storagePath() const;
 
-	virtual void applyTo(const LibraryPtr &other);
+	void setHint(const QString &hint)
+	{
+		m_hint = hint;
+	}
+
+	QString hint() const
+	{
+		return m_hint;
+	}
+
+	/// Set the load rules
+	void setRules(QList<std::shared_ptr<Rule>> rules)
+	{
+		m_rules = rules;
+	}
+
+	/// Returns true if the library should be loaded (or extracted, in case of natives)
+	bool isActive() const;
 
 public: /* data */
 	// TODO: make all of these protected, clean up semantics of implicit vs. explicit values.
@@ -119,55 +140,6 @@ public: /* data */
 		Hard  //! needs equal version (different versions mean version conflict)
 	} dependType = Soft;
 
-	// BaseDownload interface
-public:
-	QUrl url() const override;
-	void load(const QJsonObject &data) override;
-	QList<NetActionPtr> createNetActions() const override
-	{
-		return {};
-	}
-};
-
-class OneSixLibrary : public Library
-{
-public: /* methods */
-	/// Returns true if the library is native
-	bool isNative() const
-	{
-		return m_native_classifiers.size() != 0;
-	}
-
-	/// Get the relative path where the library should be saved
-	QString storagePath() const override;
-
-	/// List of files this library describes. Required because of platform-specificness of
-	/// native libs
-	QStringList files() const override;
-
-	void setHint(const QString &hint)
-	{
-		m_hint = hint;
-	}
-
-	QString hint() const
-	{
-		return m_hint;
-	}
-
-	/// Set the load rules
-	void setRules(QList<std::shared_ptr<Rule>> rules)
-	{
-		m_rules = rules;
-	}
-
-	/// Returns true if the library should be loaded (or extracted, in case of natives)
-	bool isActive() const override;
-
-	void applyTo(const LibraryPtr &other) override;
-
-public: /* data */
-	// TODO: make all of these protected, clean up semantics of implicit vs. explicit values.
 	/// type hint - modifies how the library is treated
 	QString m_hint;
 
@@ -188,22 +160,7 @@ public: /* data */
 
 	// BaseDownload interface
 public:
-	QList<NetActionPtr> createNetActions() const override;
-};
-
-class WonkoLibrary : public Library
-{
-public:
-	bool isActive() const override;
+	QUrl url() const override;
 	void load(const QJsonObject &data) override;
-
-	QSet<QString> platforms() const
-	{
-		return m_platforms;
-	}
-
-	static QSet<QString> allPlatforms();
-
-public:
-	QSet<QString> m_platforms;
+	QList<NetActionPtr> createNetActions() const override;
 };

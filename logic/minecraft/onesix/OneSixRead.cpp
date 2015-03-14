@@ -1,9 +1,11 @@
 #include "OneSixFormat.h"
+#include <QJsonArray>
+
 #include "minecraft/Package.h"
 #include "MMCJson.h"
 #include "Json.h"
 #include "ParseUtils.h"
-#include <QJsonArray>
+#include "minecraft/Assets.h"
 
 using namespace Json;
 
@@ -58,9 +60,9 @@ QList<std::shared_ptr<Rule>> readLibraryRules(const QJsonObject &objectWithRules
 }
 
 
-OneSixLibraryPtr readRawLibrary(const QJsonObject &libObj, const QString &filename)
+LibraryPtr readRawLibrary(const QJsonObject &libObj, const QString &filename)
 {
-	OneSixLibraryPtr out = std::make_shared<OneSixLibrary>();
+	LibraryPtr out = std::make_shared<Library>();
 	if (!libObj.contains("name"))
 	{
 		throw JSONValidationError(filename +
@@ -106,9 +108,9 @@ OneSixLibraryPtr readRawLibrary(const QJsonObject &libObj, const QString &filena
 	return out;
 }
 
-OneSixLibraryPtr OneSixFormat::readRawLibraryPlus(const QJsonObject &libObj, const QString &filename)
+LibraryPtr OneSixFormat::readRawLibraryPlus(const QJsonObject &libObj, const QString &filename)
 {
-	OneSixLibraryPtr lib = readRawLibrary(libObj, filename);
+	LibraryPtr lib = readRawLibrary(libObj, filename);
 	if (libObj.contains("insert"))
 	{
 		QJsonValue insertVal = libObj.value("insert");
@@ -118,19 +120,19 @@ OneSixLibraryPtr OneSixFormat::readRawLibraryPlus(const QJsonObject &libObj, con
 			QString insertString = insertVal.toString();
 			if (insertString == "apply")
 			{
-				lib->insertType = OneSixLibrary::Apply;
+				lib->insertType = Library::Apply;
 			}
 			else if (insertString == "prepend")
 			{
-				lib->insertType = OneSixLibrary::Prepend;
+				lib->insertType = Library::Prepend;
 			}
 			else if (insertString == "append")
 			{
-				lib->insertType = OneSixLibrary::Append;
+				lib->insertType = Library::Append;
 			}
 			else if (insertString == "replace")
 			{
-				lib->insertType = OneSixLibrary::Replace;
+				lib->insertType = Library::Replace;
 			}
 			else
 			{
@@ -165,11 +167,11 @@ OneSixLibraryPtr OneSixFormat::readRawLibraryPlus(const QJsonObject &libObj, con
 		const QString dependString = ensureString(libObj, "MMC-depend");
 		if (dependString == "hard")
 		{
-			lib->dependType = OneSixLibrary::Hard;
+			lib->dependType = Library::Hard;
 		}
 		else if (dependString == "soft")
 		{
-			lib->dependType = OneSixLibrary::Soft;
+			lib->dependType = Library::Soft;
 		}
 		else
 		{
@@ -273,7 +275,7 @@ PackagePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& filen
 
 	QString assetsId;
 	readString("assets", assetsId);
-	resourceData.assets.apply(assetsId);
+	resourceData.assets = std::make_shared<Minecraft::Assets>(assetsId);
 
 	if (root.contains("minimumLauncherVersion"))
 	{
@@ -340,7 +342,7 @@ PackagePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& filen
 	readString("id", minecraftVersion);
 	if(!minecraftVersion.isEmpty())
 	{
-		auto libptr = std::make_shared<OneSixLibrary>();
+		auto libptr = std::make_shared<Library>();
 		auto name = QString("net.minecraft:minecraft:%1").arg(minecraftVersion);
 		auto url = QString("http://s3.amazonaws.com/Minecraft.Download/versions/%1/%2.jar")
 			.arg(minecraftVersion)

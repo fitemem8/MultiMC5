@@ -49,7 +49,7 @@ public:
 	void executeTask() override
 	{
 		setStatus(tr("Loading version list..."));
-		m_dlJob = std::make_shared<NetJob>("Version index");
+		m_dlJob = new NetJob("Version index");
 		auto entry = ENV.metacache()->resolveEntry(
 			"cache", QString("versions/%1.json").arg(m_list->uid()));
 		entry->stale = true;
@@ -103,7 +103,7 @@ public:
 
 	void executeTask()
 	{
-		m_dlJob = std::make_shared<NetJob>("Specific version download");
+		m_dlJob = new NetJob("Specific version download");
 		auto entry = ENV.metacache()->resolveEntry(
 			"cache", QString("versions/%1/%2.json").arg(m_list->uid(), m_versionToUpdate));
 		entry->stale = true;

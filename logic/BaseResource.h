@@ -16,17 +16,19 @@ public:
 	{
 	}
 
+	virtual void clear() {}
 	virtual void load(const QJsonValue &data) = 0;
 	virtual Task *updateTask() const
 	{
 		return nullptr;
 	}
-	/** Merge next into original, and return the result. The default overwrites the original.
-	 * original.get() == this
-	 */
-	virtual ResourcePtr mergeWith(const ResourcePtr &original, const ResourcePtr &next)
+	virtual Task *prelaunchTask() const
 	{
-		return next;
+		return nullptr;
+	}
+
+	virtual void applyTo(const ResourcePtr &target) const
+	{
 	}
 };
 

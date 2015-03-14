@@ -15,10 +15,6 @@ public:
 	{
 		reset(wrap);
 	}
-	QObjectPtr(const std::shared_ptr<T> &other)
-		: m_ptr(other)
-	{
-	}
 	QObjectPtr(const QObjectPtr<T> &other)
 		: m_ptr(other.m_ptr)
 	{
