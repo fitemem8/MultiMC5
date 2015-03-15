@@ -9,12 +9,12 @@
 #include <QSet>
 #include <memory>
 
-#include "minecraft/OneSixRule.h"
-#include "minecraft/OpSys.h"
+#include "wonko/OpSys.h"
 #include "GradleSpecifier.h"
 #include "net/URLConstants.h"
-#include "net/DownloadableResource.h"
+#include "wonko/DownloadableResource.h"
 
+using RulesPtr = std::shared_ptr<class Rules>;
 using LibraryPtr = std::shared_ptr<class Library>;
 
 class Library : public BaseDownload
@@ -26,37 +26,14 @@ public:
 
 public: /* methods */
 	/// Returns the raw name field
-	const GradleSpecifier &rawName() const
+	const GradleSpecifier &name() const
 	{
 		return m_name;
 	}
 
-	void setRawName(const GradleSpecifier &spec)
+	void setName(const GradleSpecifier &spec)
 	{
 		m_name = spec;
-	}
-
-	void setClassifier(const QString &spec)
-	{
-		m_name.setClassifier(spec);
-	}
-
-	/// returns the full group and artifact prefix
-	QString artifactPrefix() const
-	{
-		return m_name.artifactPrefix();
-	}
-
-	/// get the artifact ID
-	QString artifactId() const
-	{
-		return m_name.artifactId();
-	}
-
-	/// get the artifact version
-	QString version() const
-	{
-		return m_name.version();
 	}
 
 	/// Set the url base for downloads
@@ -82,7 +59,7 @@ public: /* methods */
 		return m_absolute_url;
 	}
 
-	virtual void applyTo(const LibraryPtr &other);
+	void applyTo(const LibraryPtr &other);
 
 	/// Returns true if the library is native
 	bool isNative() const
@@ -104,7 +81,7 @@ public: /* methods */
 	}
 
 	/// Set the load rules
-	void setRules(QList<std::shared_ptr<Rule>> rules)
+	void setRules(const RulesPtr rules)
 	{
 		m_rules = rules;
 	}
@@ -156,7 +133,7 @@ public: /* data */
 	bool applyRules = false;
 
 	/// rules associated with the library
-	QList<std::shared_ptr<Rule>> m_rules;
+	RulesPtr m_rules;
 
 	// BaseDownload interface
 public:

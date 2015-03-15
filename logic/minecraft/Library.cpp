@@ -2,6 +2,7 @@
 
 #include "net/HttpMetaCache.h"
 #include "net/CacheDownload.h"
+#include "wonko/Rules.h"
 #include "Env.h"
 #include "Json.h"
 
@@ -54,24 +55,18 @@ QUrl Library::url() const
 bool Library::isActive() const
 {
 	bool result = true;
-	if (m_rules.empty())
+	if (!m_rules)
 	{
 		result = true;
 	}
 	else
 	{
-		RuleAction ruleResult = Disallow;
-		for (auto rule : m_rules)
-		{
-			RuleAction temp = rule->apply();
-			if (temp != Defer)
-				ruleResult = temp;
-		}
-		result = result && (ruleResult == Allow);
+		BaseRule::RuleAction ruleResult = m_rules->result();
+		result = result && (ruleResult == BaseRule::Allow);
 	}
 	if (isNative())
 	{
-		result = result && m_native_classifiers.contains(currentSystem);
+		result = result && m_native_classifiers.contains(OpSys::currentSystem());
 	}
 	return result;
 }
@@ -160,9 +155,9 @@ QString Library::storagePath() const
 
 	// otherwise native, override classifiers. Mojang HACK!
 	GradleSpecifier nativeSpec = m_name;
-	if (m_native_classifiers.contains(currentSystem))
+	if (m_native_classifiers.contains(OpSys::currentSystem()))
 	{
-		nativeSpec.setClassifier(m_native_classifiers[currentSystem]);
+		nativeSpec.setClassifier(m_native_classifiers[OpSys::currentSystem()]);
 	}
 	else
 	{

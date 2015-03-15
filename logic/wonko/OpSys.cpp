@@ -15,26 +15,47 @@
 
 #include "OpSys.h"
 
-OpSys OpSys_fromString(QString name)
+#include <QString>
+
+OpSys OpSys::fromString(const QString &string)
 {
-	if (name == "linux")
-		return Os_Linux;
-	if (name == "windows")
-		return Os_Windows;
-	if (name == "osx")
-		return Os_OSX;
-	return Os_Other;
+	if (string == "linux")
+	{
+		return Linux;
+	}
+	if (string == "windows")
+	{
+		return Windows;
+	}
+	if (string == "osx")
+	{
+		return OSX;
+	}
+	return Other;
 }
 
-QString OpSys_toString(OpSys name)
+OpSys OpSys::currentSystem()
 {
-	switch (name)
+	return
+#if defined(Q_OS_WIN)
+		Windows
+#elif defined(Q_OS_MAC)
+		OSX
+#elif defined(Q_OS_LINUX)
+		Linux
+#endif
+		;
+}
+
+QString OpSys::toString() const
+{
+	switch (m_system)
 	{
-	case Os_Linux:
+	case Linux:
 		return "linux";
-	case Os_OSX:
+	case OSX:
 		return "osx";
-	case Os_Windows:
+	case Windows:
 		return "windows";
 	default:
 		return "other";

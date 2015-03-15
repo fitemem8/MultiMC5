@@ -1,6 +1,6 @@
 #include "WonkoPackageVersion.h"
 
-#include "net/DownloadableResource.h"
+#include "wonko/DownloadableResource.h"
 #include "minecraft/Libraries.h"
 #include "Json.h"
 

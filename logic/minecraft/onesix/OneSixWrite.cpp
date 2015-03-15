@@ -1,25 +1,25 @@
 #include "OneSixFormat.h"
+
 #include "minecraft/Package.h"
+#include "wonko/Rules.h"
 #include "Json.h"
-#include "ParseUtils.h"
-#include <QJsonArray>
 
 using namespace Json;
 
 QJsonObject OneSixFormat::toJson(std::shared_ptr<ImplicitRule> rule)
 {
 	QJsonObject ruleObj;
-	ruleObj.insert("action", rule->m_result == Allow ? QString("allow") : QString("disallow"));
+	ruleObj.insert("action", rule->resultToString());
 	return ruleObj;
 }
 
 QJsonObject OneSixFormat::toJson(std::shared_ptr<OsRule> rule)
 {
 	QJsonObject ruleObj;
-	ruleObj.insert("action", rule->m_result == Allow ? QString("allow") : QString("disallow"));
+	ruleObj.insert("action", rule->resultToString());
 	QJsonObject osObj;
 	{
-		osObj.insert("name", OpSys_toString(rule->m_system));
+		osObj.insert("name", rule->m_system.toString());
 		osObj.insert("version", rule->m_version_regexp);
 	}
 	ruleObj.insert("os", osObj);
@@ -46,7 +46,7 @@ QJsonObject OneSixFormat::toJson(LibraryPtr raw)
 		auto iter = raw->m_native_classifiers.begin();
 		while (iter != raw->m_native_classifiers.end())
 		{
-			nativeList.insert(OpSys_toString(iter.key()), iter.value());
+			nativeList.insert(iter.key().toString(), iter.value());
 			iter++;
 		}
 		libRoot.insert("natives", nativeList);
@@ -62,10 +62,10 @@ QJsonObject OneSixFormat::toJson(LibraryPtr raw)
 			libRoot.insert("extract", extract);
 		}
 	}
-	if (raw->m_rules.size())
+	if (raw->m_rules)
 	{
 		QJsonArray allRules;
-		for (auto &rule : raw->m_rules)
+		for (auto &rule : raw->m_rules->rules())
 		{
 			QJsonObject ruleObj;
 			auto implicitRule = std::dynamic_pointer_cast<ImplicitRule>(rule);
@@ -139,10 +139,10 @@ QJsonDocument OneSixFormat::toJson(PackagePtr file, bool saveOrder)
 		for(auto plusLib: (resourceData.libraries->addLibs + resourceData.natives->addLibs))
 		{
 			// filter out the 'minecraft version'
-			if(plusLib->artifactPrefix() == "net.minecraft:minecraft")
+			if(plusLib->name().artifactPrefix() == "net.minecraft:minecraft")
 			{
 				// and write it in the old format instead
-				writeString(root, "id", plusLib->version());
+				writeString(root, "id", plusLib->name().version());
 				continue;
 			}
 			array.append(OneSixFormat::toJson(std::dynamic_pointer_cast<Library>(plusLib)));

@@ -130,7 +130,7 @@ void removeLwjglFromPatch(Minecraft::Patch &resources)
 		QList<LibraryPtr> filteredLibs;
 		for (auto lib : libs)
 		{
-			if (!lwjglWhitelist.contains(lib->artifactPrefix()))
+			if (!lwjglWhitelist.contains(lib->name().artifactPrefix()))
 			{
 				filteredLibs.append(lib);
 			}

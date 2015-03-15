@@ -8,7 +8,6 @@
 #include "minecraft/Library.h"
 #include "minecraft/MinecraftProfile.h"
 #include "minecraft/JarMod.h"
-#include "ParseUtils.h"
 
 #include "MMCJson.h"
 using namespace MMCJson;

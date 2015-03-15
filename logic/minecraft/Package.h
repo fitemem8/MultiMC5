@@ -5,7 +5,7 @@
 #include <QDateTime>
 #include <memory>
 #include "minecraft/Patch.h"
-#include "WonkoPackageVersion.h"
+#include "wonko/WonkoPackageVersion.h"
 #include "MMCError.h"
 
 class Package;

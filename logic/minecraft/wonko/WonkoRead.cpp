@@ -4,7 +4,8 @@
 
 #include "../onesix/OneSixFormat.h"
 #include "minecraft/Package.h"
-#include "WonkoPackageVersion.h"
+#include "wonko/WonkoPackageVersion.h"
+#include "wonko/Rules.h"
 #include "Json.h"
 #include "minecraft/Libraries.h"
 
@@ -38,15 +39,15 @@ static LibraryPtr convertLibrary(LibraryPtr lib, const bool isNative)
 		{
 			if (natives.contains("windows"))
 			{
-				out->m_native_classifiers[Os_Windows] = natives;
+				out->m_native_classifiers[OpSys::Windows] = natives;
 			}
 			else if (natives.contains("osx"))
 			{
-				out->m_native_classifiers[Os_OSX] = natives;
+				out->m_native_classifiers[OpSys::OSX] = natives;
 			}
 			else if (natives.contains("linux"))
 			{
-				out->m_native_classifiers[Os_Linux] = natives;
+				out->m_native_classifiers[OpSys::Linux] = natives;
 			}
 
 			out->applyExcludes = true;
@@ -75,20 +76,22 @@ convertLibs(std::shared_ptr<Minecraft::Libraries> libs, const bool isNative)
 		for (LibraryPtr lib : libs)
 		{
 			LibraryPtr converted = convertLibrary(lib, isNative);
-			if (out.contains(converted->rawName()))
+			if (out.contains(converted->name()))
 			{
-				LibraryPtr existing = out[converted->rawName()];
+				LibraryPtr existing = out[converted->name()];
 				existing->m_native_classifiers.unite(converted->m_native_classifiers);
-				if (!converted->m_rules.isEmpty())
+				if (existing->m_rules && converted->m_rules)
 				{
-					// remove the implicit disallow
-					converted->m_rules.removeFirst();
+					existing->m_rules->merge(converted->m_rules);
 				}
-				existing->m_rules.append(converted->m_rules);
+				else if (converted->m_rules)
+				{
+					existing->m_rules = converted->m_rules;
+				}
 			}
 			else
 			{
-				out.insert(converted->rawName(), converted);
+				out.insert(converted->name(), converted);
 			}
 		}
 		return out.values();

@@ -15,18 +15,6 @@ SET(LOGIC_SOURCES
 	FileStore.cpp
 	NullInstance.h
 	MMCError.h
-	WonkoVersionList.cpp
-	WonkoVersionList.h
-	WonkoPackageVersion.cpp
-	WonkoPackageVersion.h
-	ParseUtils.cpp
-	ParseUtils.h
-
-	# Resources
-	BaseResource.cpp
-	BaseResource.h
-	net/DownloadableResource.cpp
-	net/DownloadableResource.h
 
 	# WARNING: globals live here
 	Env.h
@@ -52,6 +40,20 @@ SET(LOGIC_SOURCES
 
 	# a smart pointer wrapper intended for safer use with Qt signal/slot mechanisms
 	QObjectPtr.h
+
+	# Wonko stuff
+	wonko/BaseResource.h
+	wonko/BaseResource.cpp
+	wonko/DownloadableResource.cpp
+	wonko/DownloadableResource.h
+	wonko/WonkoVersionList.h
+	wonko/WonkoVersionList.cpp
+	wonko/WonkoPackageVersion.h
+	wonko/WonkoPackageVersion.cpp
+	wonko/Rules.h
+	wonko/Rules.cpp
+	wonko/OpSys.h
+	wonko/OpSys.cpp
 
 	# network stuffs
 	net/NetAction.h
@@ -147,9 +149,6 @@ SET(LOGIC_SOURCES
 	minecraft/Patch.h
 	minecraft/Resources.h
 	minecraft/NullProfileStrategy.h
-	minecraft/OneSixRule.h
-	minecraft/OpSys.cpp
-	minecraft/OpSys.h
 	minecraft/ProfileUtils.cpp
 	minecraft/ProfileUtils.h
 	minecraft/ProfileStrategy.h

@@ -4,46 +4,53 @@
 #include "minecraft/Package.h"
 #include "MMCJson.h"
 #include "Json.h"
-#include "ParseUtils.h"
 #include "minecraft/Assets.h"
+#include "wonko/Rules.h"
 
 using namespace Json;
 
-RuleAction RuleAction_fromString(QString name)
+static bool parse_timestamp(const QString &raw, QString &save_here, QDateTime &parse_here)
 {
-	if (name == "allow")
-		return Allow;
-	if (name == "disallow")
-		return Disallow;
-	return Defer;
+	save_here = raw;
+	if (save_here.isEmpty())
+	{
+		return false;
+	}
+	parse_here = QDateTime::fromString(save_here, Qt::ISODate);
+	if (!parse_here.isValid())
+	{
+		return false;
+	}
+	return true;
 }
 
-QList<std::shared_ptr<Rule>> readLibraryRules(const QJsonObject &objectWithRules)
+
+RulesPtr readLibraryRules(const QJsonObject &objectWithRules)
 {
-	QList<std::shared_ptr<Rule>> rules;
+	QList<std::shared_ptr<BaseRule>> rules;
 	auto rulesVal = objectWithRules.value("rules");
 	if (!rulesVal.isArray())
-		return rules;
+		return std::make_shared<Rules>(rules);
 
 	QJsonArray ruleList = rulesVal.toArray();
 	for (auto ruleVal : ruleList)
 	{
-		std::shared_ptr<Rule> rule;
+		std::shared_ptr<BaseRule> rule;
 		if (!ruleVal.isObject())
 			continue;
 		auto ruleObj = ruleVal.toObject();
 		auto actionVal = ruleObj.value("action");
 		if (!actionVal.isString())
 			continue;
-		auto action = RuleAction_fromString(actionVal.toString());
-		if (action == Defer)
+		auto action = BaseRule::actionFromString(actionVal.toString());
+		if (action == BaseRule::Defer)
 			continue;
 
 		auto osVal = ruleObj.value("os");
 		if (!osVal.isObject())
 		{
 			// add a new implicit action rule
-			rules.append(ImplicitRule::create(action));
+			rules.append(std::make_shared<ImplicitRule>(action));
 			continue;
 		}
 
@@ -51,12 +58,12 @@ QList<std::shared_ptr<Rule>> readLibraryRules(const QJsonObject &objectWithRules
 		auto osNameVal = osObj.value("name");
 		if (!osNameVal.isString())
 			continue;
-		OpSys requiredOs = OpSys_fromString(osNameVal.toString());
+		OpSys requiredOs = OpSys::fromString(osNameVal.toString());
 		QString versionRegex = osObj.value("version").toString();
 		// add a new OS rule
-		rules.append(OsRule::create(action, requiredOs, versionRegex));
+		rules.append(std::make_shared<OsRule>(action, requiredOs, versionRegex));
 	}
-    return rules;
+	return std::make_shared<Rules>(rules);
 }
 
 
@@ -93,8 +100,8 @@ LibraryPtr readRawLibrary(const QJsonObject &libObj, const QString &filename)
 			{
 				qWarning() << filename << "contains an invalid native (skipping)";
 			}
-			OpSys opSys = OpSys_fromString(it.key());
-			if (opSys != Os_Other)
+			OpSys opSys = OpSys::fromString(it.key());
+			if (opSys != OpSys::Other)
 			{
 				out->m_native_classifiers[opSys] = it.value().toString();
 			}
@@ -103,7 +110,8 @@ LibraryPtr readRawLibrary(const QJsonObject &libObj, const QString &filename)
 	if (libObj.contains("rules"))
 	{
 		out->applyRules = true;
-		out->m_rules = readLibraryRules(libObj);
+		out->m_rules = std::make_shared<Rules>();
+		out->m_rules->load(ensureObject(libObj, "rules"));
 	}
 	return out;
 }
@@ -347,7 +355,7 @@ PackagePtr OneSixFormat::fromJson(const QJsonDocument& doc, const QString& filen
 		auto url = QString("http://s3.amazonaws.com/Minecraft.Download/versions/%1/%2.jar")
 			.arg(minecraftVersion)
 			.arg(minecraftVersion);
-		libptr->setRawName(GradleSpecifier(name));
+		libptr->setName(GradleSpecifier(name));
 		libptr->setAbsoluteUrl(url);
 	}
 

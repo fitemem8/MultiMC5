@@ -182,7 +182,7 @@ BaseProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 	for (auto lib : libs)
 	{
 		// FIXME: stupid hardcoded thing
-		if(lib->artifactPrefix() == "net.minecraft:minecraft")
+		if(lib->name().artifactPrefix() == "net.minecraft:minecraft")
 		{
 			if(!m_version->resources.jarMods.isEmpty())
 			{
@@ -221,7 +221,7 @@ BaseProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 		for(auto foo:libs)
 		{
 			// FIXME: stupid hardcoded thing
-			if(foo->artifactPrefix() == "net.minecraft:minecraft")
+			if(foo->name().artifactPrefix() == "net.minecraft:minecraft")
 			{
 				sourceJarPath = librariesPath().absoluteFilePath( foo->storagePath());
 				break;

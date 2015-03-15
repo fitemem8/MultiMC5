@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Library.h"
-#include "net/DownloadableResource.h"
+#include "wonko/DownloadableResource.h"
 
 class Task;
 

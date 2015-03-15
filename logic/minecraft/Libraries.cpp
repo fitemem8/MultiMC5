@@ -15,7 +15,7 @@ int findLibraryByName(QList<LibraryPtr> haystack, const GradleSpecifier &needle)
 	int retval = -1;
 	for (int i = 0; i < haystack.size(); ++i)
 	{
-		if (haystack.at(i)->rawName().matchName(needle))
+		if (haystack.at(i)->name().matchName(needle))
 		{
 			// only one is allowed.
 			if (retval != -1)
@@ -35,9 +35,9 @@ QList<LibraryPtr> Libraries::getActiveLibs() const
 		{
 			for (const LibraryPtr &other : out)
 			{
-				if (other->rawName() == ptr->rawName())
+				if (other->name() == ptr->name())
 				{
-					qWarning() << "Multiple libraries with name" << ptr->rawName()
+					qWarning() << "Multiple libraries with name" << ptr->name()
 							   << "in library list!";
 					continue;
 				}
@@ -62,14 +62,14 @@ void Libraries::applyTo(const ResourcePtr &target) const
 		case Library::Apply:
 		{
 			// qDebug() << "Applying lib " << lib->name;
-			int index = findLibraryByName(overwriteLibs, addedLibrary->rawName());
+			int index = findLibraryByName(overwriteLibs, addedLibrary->name());
 			if (index >= 0)
 			{
 				addedLibrary->applyTo(overwriteLibs[index]);
 			}
 			else
 			{
-				qWarning() << "Couldn't find" << addedLibrary->rawName() << "(skipping)";
+				qWarning() << "Couldn't find" << addedLibrary->name() << "(skipping)";
 			}
 			break;
 		}
@@ -77,7 +77,7 @@ void Libraries::applyTo(const ResourcePtr &target) const
 		case Library::Prepend:
 		{
 			// find the library by name.
-			const int index = findLibraryByName(other->overwriteLibs, addedLibrary->rawName());
+			const int index = findLibraryByName(other->overwriteLibs, addedLibrary->name());
 			// library not found? just add it.
 			if (index < 0)
 			{
@@ -94,8 +94,8 @@ void Libraries::applyTo(const ResourcePtr &target) const
 
 			// otherwise apply differences, if allowed
 			auto existingLibrary = other->overwriteLibs.at(index);
-			const Util::Version addedVersion = addedLibrary->version();
-			const Util::Version existingVersion = existingLibrary->version();
+			const Util::Version addedVersion = addedLibrary->name().version();
+			const Util::Version existingVersion = existingLibrary->name().version();
 			// if the existing version is a hard dependency we can either use it or
 			// fail, but we can't change it
 			if (existingLibrary->dependType == Library::Hard)
@@ -107,7 +107,7 @@ void Libraries::applyTo(const ResourcePtr &target) const
 				{
 					throw VersionBuildError(
 						QObject::tr("Error resolving library dependencies between %1 and %2.")
-							.arg(existingLibrary->rawName(), addedLibrary->rawName()));
+							.arg(existingLibrary->name(), addedLibrary->name()));
 				}
 				else
 				{
@@ -130,7 +130,7 @@ void Libraries::applyTo(const ResourcePtr &target) const
 						throw VersionBuildError(
 							QObject::tr(
 								"Error resolving library dependencies between %1 and %2.")
-								.arg(existingLibrary->rawName(), addedLibrary->rawName()));
+								.arg(existingLibrary->name(), addedLibrary->name()));
 					}
 				}
 			}
@@ -141,7 +141,7 @@ void Libraries::applyTo(const ResourcePtr &target) const
 			GradleSpecifier toReplace;
 			if (addedLibrary->insertData.isEmpty())
 			{
-				toReplace = addedLibrary->rawName();
+				toReplace = addedLibrary->name();
 			}
 			else
 			{

@@ -3,7 +3,7 @@
 #include "minecraft/onesix/OneSixInstance.h"
 #include "minecraft/onesix/OneSixFormat.h"
 #include "minecraft/wonko/WonkoFormat.h"
-#include "WonkoVersionList.h"
+#include "wonko/WonkoVersionList.h"
 #include "Env.h"
 #include <MMCJson.h>
 

@@ -3,7 +3,7 @@
 #include <QString>
 #include <QDateTime>
 
-#include "BaseResource.h"
+#include "wonko/BaseResource.h"
 
 class Task;
 

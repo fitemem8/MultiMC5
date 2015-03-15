@@ -26,7 +26,7 @@
 #include <JlCompress.h>
 
 #include "BaseInstance.h"
-#include "WonkoVersionList.h"
+#include "wonko/WonkoVersionList.h"
 #include "minecraft/MinecraftProfile.h"
 #include "minecraft/Library.h"
 #include "minecraft/onesix/OneSixInstance.h"

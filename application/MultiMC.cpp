@@ -16,7 +16,7 @@
 #include "InstanceList.h"
 #include "auth/MojangAccountList.h"
 #include "icons/IconList.h"
-#include "WonkoVersionList.h"
+#include "wonko/WonkoVersionList.h"
 
 #include "net/HttpMetaCache.h"
 #include "net/URLConstants.h"
