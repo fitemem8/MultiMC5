@@ -58,6 +58,9 @@ endif()
 
 message(STATUS "MultiMC 5 Version: ${MultiMC_VERSION_STRING}")
 
+#### Custom target to just print the version.
+add_custom_target(version echo "Version: ${MultiMC_VERSION_STRING}")
+
 # If the update system is enabled, make sure MultiMC_CHANLIST_URL and MultiMC_VERSION_CHANNEL are set.
 if(MultiMC_UPDATER)
 	if(MultiMC_VERSION_CHANNEL STREQUAL "")
