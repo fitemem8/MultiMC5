@@ -6,6 +6,7 @@
 #include <QSaveFile>
 
 #include "FileSystem.h"
+#include <math.h>
 
 namespace Json
 {
