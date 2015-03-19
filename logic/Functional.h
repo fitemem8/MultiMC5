@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <numeric>
 
 // http://yapb-soc.blogspot.se/2012/12/quick-and-easy-manipulating-c.html
 
