@@ -128,7 +128,7 @@ QStringList Process::javaArguments() const
 	args.append(m_instance->extraArguments());
 
 	// OSX dock icon and name
-#ifdef OSX
+#ifdef Q_OS_MAC
 	args << "-Xdock:icon=icon.png";
 	args << QString("-Xdock:name=\"%1\"").arg(m_instance->windowTitle());
 #endif

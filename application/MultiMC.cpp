@@ -485,13 +485,13 @@ void MultiMC::installUpdates(const QString updateFilesDir, UpdateFlags flags)
 		m_updateOnExitPath.clear();
 	}
 	qDebug() << "Installing updates.";
-#ifdef WINDOWS
+#if defined(Q_OS_WIN32)
 	QString finishCmd = applicationFilePath();
 	QString updaterBinary = PathCombine(applicationDirPath(), "updater.exe");
-#elif LINUX
+#elif defined (Q_OS_LINUX)
 	QString finishCmd = PathCombine(root(), "MultiMC");
 	QString updaterBinary = PathCombine(applicationDirPath(), "updater");
-#elif OSX
+#elif defined (Q_OS_MAC)
 	QString finishCmd = applicationFilePath();
 	QString updaterBinary = PathCombine(applicationDirPath(), "updater");
 #else

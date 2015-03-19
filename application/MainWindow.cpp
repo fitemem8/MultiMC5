@@ -325,7 +325,6 @@ namespace Ui {
 
 #include <JlCompress.h>
 
-#include "osutils.h"
 #include "userutils.h"
 #include "pathutils.h"
 
@@ -1810,8 +1809,7 @@ void MainWindow::checkSetDefaultJava()
 				   "You can change this in the settings dialog."),
 				QMessageBox::Warning)->show();
 
-			JavaUtils ju;
-			java = ju.GetDefaultJava();
+			java = JavaUtils::GetDefaultJava();
 		}
 		if (java)
 		{
