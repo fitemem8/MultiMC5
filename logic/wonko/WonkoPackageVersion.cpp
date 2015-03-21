@@ -3,6 +3,7 @@
 #include "wonko/DownloadableResource.h"
 #include "minecraft/Libraries.h"
 #include "Json.h"
+#include "Rules.h"
 
 void WonkoPackageVersion::load(const QJsonObject &obj, const QString &uid)
 {
@@ -39,17 +40,47 @@ void WonkoPackageVersion::load(const QJsonObject &obj, const QString &uid)
 	resourceFactories["mc.arguments"] = FACTORY_FOR(StringResource);
 	resourceFactories["mc.tweakers"] = FACTORY_FOR(StringListResource);
 
-	const QJsonObject resources = obj.contains("client") ? ensureObject(obj, "client")
-														 : ensureObject(obj, "common", QJsonObject());
-	QMap<QString, ResourcePtr> result;
-	for (const QString &key : resources.keys())
+	if (obj.contains("data"))
 	{
-		if (resourceFactories.contains(key))
+		QJsonObject commonObj;
+		QJsonObject clientObj;
+		for (const QJsonObject &group : ensureIsArrayOf<QJsonObject>(obj, "data"))
 		{
-			ResourcePtr ptr = resourceFactories[key]();
-			ptr->load(ensureJsonValue(resources, key));
-			result.insert(key, ptr);
+			Rules rules;
+			rules.load(group.contains("rules") ? group.value("rules") : QJsonArray());
+			if (rules.result(RuleContext{"client"}) == BaseRule::Allow)
+			{
+				clientObj = group;
+			}
+			else if (rules.result(RuleContext{""}) == BaseRule::Allow)
+			{
+				commonObj = group;
+			}
 		}
+
+		QMap<QString, ResourcePtr> result;
+		auto loadGroup = [&result, resourceFactories](const QJsonObject &resources)
+		{
+			qDebug() << resources;
+			for (const QString &key : resources.keys())
+			{
+				if (resourceFactories.contains(key))
+				{
+					ResourcePtr ptr = resourceFactories[key]();
+					ptr->load(ensureJsonValue(resources, key));
+					if (result.contains(key))
+					{
+						ptr->applyTo(result.value(key));
+					}
+					else
+					{
+						result.insert(key, ptr);
+					}
+				}
+			}
+		};
+		loadGroup(commonObj);
+		loadGroup(clientObj);
+		m_resources = result;
 	}
-	m_resources = result;
 }

@@ -40,6 +40,10 @@ public:
 	{
 		return m_data;
 	}
+	void applyTo(const ResourcePtr &target) const override
+	{
+		std::dynamic_pointer_cast<StringResource>(target)->m_data = m_data;
+	}
 
 private:
 	QString m_data;
@@ -51,6 +55,10 @@ public:
 	QStringList data() const
 	{
 		return m_data;
+	}
+	void applyTo(const ResourcePtr &target) const override
+	{
+		std::dynamic_pointer_cast<StringListResource>(target)->m_data = m_data;
 	}
 
 private:
@@ -69,6 +77,11 @@ public:
 	QStringList folderPathTypes(const QString &path) const
 	{
 		return m_folders[path];
+	}
+
+	void applyTo(const ResourcePtr &target) const override
+	{
+		std::dynamic_pointer_cast<FoldersResource>(target)->m_folders.unite(m_folders);
 	}
 
 private:

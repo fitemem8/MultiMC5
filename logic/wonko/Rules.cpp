@@ -32,6 +32,10 @@ void Rules::load(const QJsonValue &val)
 												   ensureString(osObj, "version", ""),
 												   ensureString(osObj, "arch", "-1").toInt()));
 		}
+		else if (ruleObj.contains("side"))
+		{
+			result.append(std::make_shared<SidedRule>(action, ensureString(ruleObj, "side")));
+		}
 		else
 		{
 			result.append(std::make_shared<ImplicitRule>(action));
@@ -52,12 +56,12 @@ void Rules::merge(RulesPtr &other)
 	}
 }
 
-BaseRule::RuleAction Rules::result() const
+BaseRule::RuleAction Rules::result(const RuleContext &ctxt) const
 {
 	BaseRule::RuleAction out = BaseRule::Defer;
 	for (std::shared_ptr<BaseRule> rule : m_rules)
 	{
-		if (rule->applies() && rule->result() != BaseRule::Defer)
+		if (rule->applies(ctxt) && rule->result() != BaseRule::Defer)
 		{
 			out = rule->result();
 		}

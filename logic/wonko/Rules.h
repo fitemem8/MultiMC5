@@ -23,6 +23,11 @@
 class QJsonValue;
 using RulesPtr = std::shared_ptr<class Rules>;
 
+struct RuleContext
+{
+	QString side;
+};
+
 class BaseRule
 {
 public:
@@ -38,7 +43,7 @@ public:
 	}
 	virtual ~BaseRule() {}
 
-	virtual bool applies() const = 0;
+	virtual bool applies(const RuleContext &ctxt) const = 0;
 
 	QString resultToString() const;
 	RuleAction result() const { return m_result; }
@@ -52,12 +57,12 @@ private:
 class OsRule : public BaseRule
 {
 public:
-	OsRule(const RuleAction result, const OpSys system, const QString &version_regexp, const int arch = -1)
+	explicit OsRule(const RuleAction result, const OpSys system, const QString &version_regexp, const int arch = -1)
 		: BaseRule(result), m_system(system), m_version_regexp(version_regexp), m_arch(arch)
 	{
 	}
 
-	bool applies() const override
+	bool applies(const RuleContext &) const override
 	{
 		return m_system == OpSys::currentSystem();
 	}
@@ -73,13 +78,28 @@ public:
 class ImplicitRule : public BaseRule
 {
 public:
-	ImplicitRule(const RuleAction result) : BaseRule(result)
+	explicit ImplicitRule(const RuleAction result) : BaseRule(result)
 	{
 	}
-	bool applies() const override
+	bool applies(const RuleContext &) const override
 	{
 		return true;
 	}
+};
+class SidedRule : public BaseRule
+{
+public:
+	explicit SidedRule(const RuleAction result, const QString &side)
+		: BaseRule(result), m_side(side)
+	{
+	}
+	bool applies(const RuleContext &ctxt) const override
+	{
+		return !ctxt.side.isNull() && m_side == ctxt.side;
+	}
+
+private:
+	QString m_side;
 };
 
 class Rules
@@ -93,7 +113,7 @@ public:
 	/// merge the rules from other into this
 	void merge(RulesPtr &other);
 
-	BaseRule::RuleAction result() const;
+	BaseRule::RuleAction result(const RuleContext &ctxt = RuleContext()) const;
 
 	QList<std::shared_ptr<BaseRule>> rules() const
 	{

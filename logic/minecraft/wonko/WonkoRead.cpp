@@ -170,7 +170,7 @@ PackagePtr WonkoFormat::fromJson(const QJsonDocument &doc, const QString &filena
 		}
 		if (file->resource<StringResource>("mc.arguments"))
 		{
-			result->resources.addMinecraftArguments =
+			result->resources.overwriteMinecraftArguments =
 				file->resource<StringResource>("mc.arguments")->data();
 		}
 		if (file->resource<StringListResource>("mc.tweakers"))
