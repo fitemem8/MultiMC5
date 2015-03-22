@@ -25,7 +25,7 @@ struct Patch
 	QString removeMinecraftArguments;
 
 	// a special resource that hides the minecraft asset resource logic
-	std::shared_ptr<Assets> assets = std::make_shared<Assets>();
+	std::shared_ptr<Assets> assets;
 
 	// more game command line params, this time more special
 	bool shouldOverwriteTweakers = false;

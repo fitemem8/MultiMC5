@@ -26,7 +26,10 @@ void Patch::applyTo(Minecraft::Resources *version)
 	{
 		version->appletClass = appletClass;
 	}
-	version->assets->applyTo(assets);
+	if (assets)
+	{
+		assets->applyTo(version->assets);
+	}
 	if (!overwriteMinecraftArguments.isNull())
 	{
 		version->minecraftArguments = overwriteMinecraftArguments;

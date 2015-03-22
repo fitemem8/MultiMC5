@@ -19,7 +19,7 @@ public:
 	void applyTo(const ResourcePtr &target) const override
 	{
 		auto other = std::dynamic_pointer_cast<Assets>(target);
-		if (!other->m_id.isNull())
+		if (!m_id.isNull())
 		{
 			other->m_id = m_id;
 		}
@@ -39,7 +39,7 @@ public:
 	void finalize()
 	{
 		// HACK: deny april fools. my head hurts enough already.
-		QDate now = QDate::currentDate();
+		const QDate now = QDate::currentDate();
 		bool isAprilFools = now.month() == 4 && now.day() == 1;
 		if (m_id.endsWith("_af") && !isAprilFools)
 		{
