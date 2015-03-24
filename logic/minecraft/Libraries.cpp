@@ -148,7 +148,7 @@ void Libraries::applyTo(const ResourcePtr &target) const
 				toReplace = addedLibrary->insertData;
 			}
 			// qDebug() << "Replacing lib " << toReplace << " with " << lib->name;
-			int index = findLibraryByName(overwriteLibs, toReplace);
+			int index = findLibraryByName(other->overwriteLibs, toReplace);
 			if (index >= 0)
 			{
 				other->overwriteLibs.replace(index, addedLibrary);
